@@ -5,10 +5,8 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,11 +15,20 @@ import javax.persistence.Id;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class Tags extends BaseEntity {
-
+public class QuestionCategories extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private Long id;
 
     private String name;
+
+    @Column(columnDefinition = "BIGINT DEFAULT 0")
+    private Long questions;
+
+    @OneToMany(mappedBy = "questionCategories", cascade = CascadeType.ALL)
+    private List<Questions> questionsList;
+
+    @OneToMany(mappedBy = "questionCategories", cascade = CascadeType.ALL)
+    private List<FAQ> faqList;
 }

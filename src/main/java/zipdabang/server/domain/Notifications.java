@@ -1,26 +1,27 @@
-package zipdabang.server.domain.mapping;
+package zipdabang.server.domain;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import zipdabang.server.domain.Products;
+import zipdabang.server.domain.common.BaseEntity;
 
 import javax.persistence.*;
 
 @Entity
-@Builder
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class RecommendProducts {
-
+public class Notifications extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Products product;
+    private String name;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 }

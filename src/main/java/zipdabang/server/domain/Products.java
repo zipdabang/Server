@@ -1,5 +1,7 @@
 package zipdabang.server.domain;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
 import lombok.*;
 
@@ -10,6 +12,8 @@ import javax.persistence.*;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicInsert
+@DynamicUpdate
 public class Products extends BaseEntity {
 
     @Id
@@ -20,14 +24,14 @@ public class Products extends BaseEntity {
 
     private String thumbnailUrl;
 
-    private int price;
+    private Integer price;
 
     @Column(length=500)
     private String intro;
 
     private String description;
 
-    private boolean is_kit;
+    private Boolean is_kit;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="category_id")
