@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
+@Entity
 public class InfoAgree extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
