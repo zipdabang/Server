@@ -1,4 +1,5 @@
 package zipdabang.server.domain;
+import javax.persistence.*;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -24,7 +25,6 @@ public class Events extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String thumbnailUrl;
-
     @Column(columnDefinition = "TEXT")
     private String description;
 }

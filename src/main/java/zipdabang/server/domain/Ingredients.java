@@ -1,5 +1,8 @@
 package zipdabang.server.domain;
 
+import javax.persistence.*;
+
+
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -21,6 +24,8 @@ public class Ingredients extends BaseEntity {
     private Long id;
 
     private String name;
+
+    private Integer step_num;
 
     @Column(columnDefinition = "TEXT")
     private String imageUrl;

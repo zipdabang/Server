@@ -1,5 +1,7 @@
 package zipdabang.server.domain;
 
+import javax.persistence.*;
+
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -21,7 +23,6 @@ public class Steps extends BaseEntity {
     private Long id;
 
     private String name;
-
     private Integer stepNum;
 
     @Column(columnDefinition = "TEXT")

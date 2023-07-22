@@ -8,7 +8,6 @@ import zipdabang.server.domain.common.BaseEntity;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)

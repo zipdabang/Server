@@ -8,18 +8,20 @@ import zipdabang.server.domain.common.BaseEntity;
 import javax.persistence.*;
 import java.util.List;
 
-@Entity
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
+@Entity
 public class QuestionCategories extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
+
+    private String tinytext;
 
     private String name;
 

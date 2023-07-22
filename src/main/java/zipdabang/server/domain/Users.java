@@ -13,13 +13,13 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
-@Entity
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
+@Entity
 public class Users extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,10 +42,9 @@ public class Users extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private GenderType gender;
 
+    private String address;
     @Column(length = 5)
     private String zipCode;
-
-    private String address;
 
     private String detailAddress;
 
@@ -60,7 +59,6 @@ public class Users extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String profileUrl;
-
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private InfoAgree infoAgree;

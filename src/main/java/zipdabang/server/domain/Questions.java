@@ -8,13 +8,14 @@ import zipdabang.server.domain.common.BaseEntity;
 import javax.persistence.*;
 import java.util.List;
 
-@Entity
+
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
+@Entity
 public class Questions extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,6 +35,7 @@ public class Questions extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)
     private QuestionCategories questionCategories;
+
 
     @OneToMany(mappedBy = "questions", cascade = CascadeType.ALL)
     private List<Replies> repliesList;

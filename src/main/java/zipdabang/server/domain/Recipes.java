@@ -1,5 +1,7 @@
 package zipdabang.server.domain;
 
+import javax.persistence.*;
+
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -10,13 +12,13 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
-@Entity
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
+@Entity
 public class Recipes extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,29 +30,31 @@ public class Recipes extends BaseEntity {
     private String name;
 
     @Column(columnDefinition = "TEXT")
+    private String thumbnail_url;
+
+
     private String thumbnailUrl;
 
     private String intro;
 
     private Float star;
     @Column(columnDefinition = "BIGINT DEFAULT 0")
-    private Long total_view;
+    private Long totalView;
 
     @Column(columnDefinition = "BIGINT DEFAULT 0")
-    private Long total_like;
+    private Long totalLike;
 
     @Column(columnDefinition = "BIGINT DEFAULT 0")
-    private Long total_scrap;
+    private Long totalScrap;
 
     @Column(columnDefinition = "BIGINT DEFAULT 0")
-    private Long week_view;
+    private Long weekView;
 
     @Column(columnDefinition = "BIGINT DEFAULT 0")
-    private Long week_like;
+    private Long weekLike;
 
     @Column(columnDefinition = "BIGINT DEFAULT 0")
-    private Long week_scrap;
-
+    private Long weekScrap;
 
     //updated_at
 
@@ -61,13 +65,13 @@ public class Recipes extends BaseEntity {
     @OneToMany(mappedBy = "recipes")
     private List<Comments> commentsList;
 
-    @OneToMany(mappedBy = "recipes", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "recipes")
     private List<Likes> likesList;
 
-    @OneToMany(mappedBy = "recipes", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "recipes")
     private List<Scraps> scrapsList;
 
-    @OneToMany(mappedBy = "recipes", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "recipes")
     private List<Steps> stepsList;
 
     @OneToMany(mappedBy = "recipes", cascade = CascadeType.ALL)
