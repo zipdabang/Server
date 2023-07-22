@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 public enum Code {
     OK(HttpStatus.OK,2000, "Ok"),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 4006, "UnAuthorized"),
     BAD_REQUEST(HttpStatus.BAD_REQUEST,4005 ,"잘못된 요청 입니다.");
     private final HttpStatus httpStatus;
     private final Integer code;
