@@ -21,8 +21,6 @@ public class QuestionCategories extends BaseEntity {
     @Column(nullable = false)
     private Long id;
 
-    private String tinytext;
-
     private String name;
 
     @Column(columnDefinition = "BIGINT DEFAULT 0")

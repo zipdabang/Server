@@ -23,7 +23,6 @@ public class Replies extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
-    private String tinytext;
 
     private String name;
 
