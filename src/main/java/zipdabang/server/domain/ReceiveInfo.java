@@ -2,8 +2,22 @@ package zipdabang.server.domain;
 
 import javax.persistence.*;
 
+
+import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import zipdabang.server.domain.common.BaseEntity;
+
+import javax.persistence.*;
+
 @Entity
-public class ReceiveInfo {
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicInsert
+@DynamicUpdate
+public class ReceiveInfo extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
@@ -19,7 +33,7 @@ public class ReceiveInfo {
 
     private String address;
 
-    private String detail_address;
+    private String detailAddress;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id", nullable = false)
