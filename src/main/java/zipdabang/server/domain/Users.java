@@ -1,6 +1,11 @@
 package zipdabang.server.domain;
 
 import javax.persistence.*;
+
+import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import zipdabang.server.domain.common.BaseEntity;
 import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.StatusType;
 
@@ -9,11 +14,17 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-public class Users {
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicInsert
+@DynamicUpdate
+public class Users extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
-    private Long user_id;
+    private Long userId;
 
     private String name;
 
@@ -24,19 +35,19 @@ public class Users {
     private String email;
 
     @Column(length = 18)
-    private String phone_num;
+    private String phoneNum;
 
-    private int age;
+    private Integer age;
 
     @Enumerated(EnumType.STRING)
     private GenderType gender;
 
     @Column(length = 5)
-    private String zip_code;
+    private String zipCode;
 
     private String address;
 
-    private String detail_address;
+    private String detailAddress;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -48,33 +59,27 @@ public class Users {
     private String password;
 
     @Column(columnDefinition = "TEXT")
-    private String profile_url;
+    private String profileUrl;
 
-    //created_at DATETIME
-    private LocalDateTime created_at;
-
-    //updated_at DATETIME
-    private LocalDateTime updated_at;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private InfoAgree infoAgree;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<ReceiveInfo> receiveInfoList;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Questions> questionsList;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Comments> commentsList;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Likes> likesList;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Scraps> scrapsList;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Recipes> recipesList;
 }

@@ -1,7 +1,11 @@
 package zipdabang.server.domain.mapping;
 
 import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import zipdabang.server.domain.Users;
+import zipdabang.server.domain.common.BaseEntity;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -12,7 +16,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class Coupons {
+@DynamicInsert
+@DynamicUpdate
+public class Coupons extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,10 +30,10 @@ public class Coupons {
 
     private String name;
 
-    private float discountRate;
+    private Float discountRate;
 
     @Column(columnDefinition = "boolean default true")
-    private boolean isUsable;
+    private Boolean isUsable;
     //이거 builder 패턴 사용해서 default 값 true로 할 수 있다는데
 
     private LocalDateTime expirationDate;
