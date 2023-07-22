@@ -1,6 +1,8 @@
 package zipdabang.server.domain;
 
 import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
 
 import javax.persistence.*;
@@ -10,6 +12,8 @@ import javax.persistence.*;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicInsert
+@DynamicUpdate
 public class Carts extends BaseEntity {
 
     @Id
@@ -28,7 +32,7 @@ public class Carts extends BaseEntity {
 
     private int count;
 
-    private boolean is_shown;
+    private boolean isShown;
 
     public Carts updateCount(int count){
         this.count = count;

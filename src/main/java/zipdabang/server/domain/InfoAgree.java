@@ -1,21 +1,30 @@
 package zipdabang.server.domain;
 
+import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import zipdabang.server.domain.common.BaseEntity;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "INFO_AGREE")
-public class InfoAgree {
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicInsert
+@DynamicUpdate
+public class InfoAgree extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
 
-    private Boolean info_others_agree;
+    private Boolean infoOthersAgree;
 
-    private LocalDateTime info_agree_date;
+    private Boolean infoAgreeBoolean;
 
-    private Boolean info_agree_boolean;
+    private LocalDateTime infoAgreeDate;
 
     @OneToOne
     @JoinColumn(name="user_id", nullable = false)

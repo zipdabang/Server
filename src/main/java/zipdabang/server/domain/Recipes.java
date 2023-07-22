@@ -1,42 +1,60 @@
 package zipdabang.server.domain;
 
 import javax.persistence.*;
+
+import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import zipdabang.server.domain.common.BaseEntity;
+
+import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicInsert
+@DynamicUpdate
 @Entity
-public class Recipes {
+public class Recipes extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
 
-    private Boolean is_influencer;
+    private Boolean isInfluencer;
 
     private String name;
 
     @Column(columnDefinition = "TEXT")
     private String thumbnail_url;
 
-    @Lob
+
+    private String thumbnailUrl;
+
     private String intro;
 
-    private float star;
+    private Float star;
+    @Column(columnDefinition = "BIGINT DEFAULT 0")
+    private Long totalView;
 
-    private Integer total_view;
+    @Column(columnDefinition = "BIGINT DEFAULT 0")
+    private Long totalLike;
 
-    private Integer total_like;
+    @Column(columnDefinition = "BIGINT DEFAULT 0")
+    private Long totalScrap;
 
-    private Integer total_scrap;
+    @Column(columnDefinition = "BIGINT DEFAULT 0")
+    private Long weekView;
 
-    private Integer week_view;
+    @Column(columnDefinition = "BIGINT DEFAULT 0")
+    private Long weekLike;
 
-    private Integer week_like;
-
-    private Integer week_scrap;
-
-    @Temporal(value = TemporalType.DATE)
-    private Date created_at;
+    @Column(columnDefinition = "BIGINT DEFAULT 0")
+    private Long weekScrap;
 
     //updated_at
 
@@ -45,7 +63,6 @@ public class Recipes {
     private Users user;
 
     @OneToMany(mappedBy = "recipes")
-    @JoinColumn(name = "recipe_id", nullable = false)
     private List<Comments> commentsList;
 
     @OneToMany(mappedBy = "recipes")
@@ -57,7 +74,7 @@ public class Recipes {
     @OneToMany(mappedBy = "recipes")
     private List<Steps> stepsList;
 
-    @OneToMany(mappedBy = "recipes")
+    @OneToMany(mappedBy = "recipes", cascade = CascadeType.ALL)
     private List<Ingredients> ingredientsList;
 
     @OneToOne(mappedBy = "recipes", cascade = CascadeType.ALL)

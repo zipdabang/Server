@@ -2,8 +2,22 @@ package zipdabang.server.domain;
 
 import javax.persistence.*;
 
+
+import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import zipdabang.server.domain.common.BaseEntity;
+
+import javax.persistence.*;
+
 @Entity
-public class Ingredients {
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicInsert
+@DynamicUpdate
+public class Ingredients extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
@@ -14,7 +28,7 @@ public class Ingredients {
     private Integer step_num;
 
     @Column(columnDefinition = "TEXT")
-    private String image_url;
+    private String imageUrl;
 
     @Column(columnDefinition = "TEXT")
     private String description;
