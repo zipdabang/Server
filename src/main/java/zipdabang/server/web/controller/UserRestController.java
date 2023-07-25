@@ -17,7 +17,7 @@ import java.io.IOException;
 public class UserRestController {
 
     //소셜로그인
-    @PostMapping("/users/oauth")
+    @PostMapping("/users/oauth/{type}")
     public ResponseDto<OAuthResult.OAuthResultDto> oauth(
             @PathVariable("type") String type,
             @RequestBody UserRequestDto.KakaoSocialDto kakaoRequest,
