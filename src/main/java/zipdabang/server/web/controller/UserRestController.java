@@ -19,7 +19,7 @@ public class UserRestController {
     //소셜로그인
     @PostMapping("/users/oauth")
     public ResponseDto<OAuthResult.OAuthResultDto> oauth(
-            @PathVariable String type,
+            @PathVariable("type") String type,
             @RequestBody UserRequestDto.KakaoSocialDto kakaoRequest,
             @RequestBody UserRequestDto.AppleSocialDto appleRequest) {
 
