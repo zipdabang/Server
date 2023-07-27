@@ -10,7 +10,7 @@ public class UserResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class userProfileDto{
+    public static class UserProfileDto{
 
 //        private String name;
         private String nickname;

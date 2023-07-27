@@ -14,7 +14,7 @@ public class UserRestController {
 
     //프로필 수정
     @PatchMapping("/users/{userId}")
-    public ResponseDto<UserResponseDto.userProfileDto> updateProfile(
+    public ResponseDto<UserResponseDto.UserProfileDto> updateProfile(
             @PathVariable("userId") Long userId,
             @RequestBody UserRequestDto.userProfileDto request) {
         return null;
@@ -22,7 +22,7 @@ public class UserRestController {
 
     //프로필 조회
     @GetMapping("/users/{userId}")
-    public ResponseDto<UserResponseDto.userProfileDto> showProfile(@PathVariable("userId") Long userId){
+    public ResponseDto<UserResponseDto.UserProfileDto> showProfile(@PathVariable("userId") Long userId){
         return null;
     }
 
