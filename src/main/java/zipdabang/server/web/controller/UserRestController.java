@@ -12,11 +12,9 @@ import zipdabang.server.web.dto.requestDto.UserRequestDto;
 import zipdabang.server.web.dto.responseDto.UserResponseDto;
 
 import org.springframework.web.bind.annotation.*;
-import zipdabang.server.base.ResponseDto;
 import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.OAuthResult;
-import zipdabang.server.web.dto.requestDto.UserRequestDto;
-import zipdabang.server.web.dto.responseDto.UserResponseDto;
+
 
 import java.io.IOException;
 
