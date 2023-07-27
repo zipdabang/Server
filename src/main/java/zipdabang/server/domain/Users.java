@@ -37,14 +37,18 @@ public class Users extends BaseEntity {
     @Column(length = 18)
     private String phoneNum;
 
+    @Column(length = 6)
+    private String birth;
+
     private Integer age;
 
     @Enumerated(EnumType.STRING)
     private GenderType gender;
 
-    private String address;
     @Column(length = 5)
     private String zipCode;
+
+    private String address;
 
     private String detailAddress;
 
