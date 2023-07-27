@@ -16,17 +16,17 @@ import zipdabang.server.web.dto.responseDto.UserResponseDto;
 public class UserRestController {
 
     @PostMapping("/users/logout")
-    public ResponseDto<UserResponseDto.userIdDto> logout(@RequestBody UserRequestDto.logoutUser request){
+    public ResponseDto<UserResponseDto.UserIdDto> logout(@RequestBody UserRequestDto.logoutUser request){
         return null;
     }
 
     @PatchMapping("/users/quit")
-    public ResponseDto<UserResponseDto.userIdDto> quit(@RequestBody UserRequestDto.quitUser request) {
+    public ResponseDto<UserResponseDto.UserIdDto> quit(@RequestBody UserRequestDto.quitUser request) {
         return null;
     }
 
     @PatchMapping("/users/restore")
-    public ResponseDto<UserResponseDto.userIdDto> restore(@RequestBody UserRequestDto.restoreUser request) {
+    public ResponseDto<UserResponseDto.UserIdDto> restore(@RequestBody UserRequestDto.restoreUser request) {
         return null;
     }
 }
