@@ -9,15 +9,19 @@ import zipdabang.server.web.dto.responseDto.UserResponseDto;
 @RequiredArgsConstructor
 public class UserConverter {
 
-    public static UserResponseDto.UserIdDto toUserIdDto(Users user) {
-        return UserResponseDto.UserIdDto.builder()
-                .userId(user.getUserId())
-
-    public static UserResponseDto.JoinUserDto toJoinUserDto(Users user) {
-        return UserResponseDto.JoinUserDto.builder()
-                .userId(user.getUserId())
-                .nickname(user.getNickname())
+    public static UserResponseDto.JoinUserDto toJoinUserDto(Users user){
+            return UserResponseDto.JoinUserDto.builder()
+                    .userId(user.getUserId())
+                    .nickname(user.getNickname()).build();
 //                .accessToken()
+        }
+    public static UserResponseDto.UserProfileDto toUserProfileDto(Users user) {
+        return UserResponseDto.UserProfileDto.builder()
+//                .name(user.getName())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .phoneNum(user.getPhoneNum())
+                .profileUrl(user.getProfileUrl())
                 .build();
     }
 }
