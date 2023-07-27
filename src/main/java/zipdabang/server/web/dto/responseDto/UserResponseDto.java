@@ -9,6 +9,9 @@ public class UserResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
+
+    public static class UserIdDto{
+        private Long userId;
     public static class JoinUserDto {
         private Long userId;
         private String nickname;
