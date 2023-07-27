@@ -13,8 +13,20 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public enum Code {
     OK(HttpStatus.OK,2000, "Ok"),
+
+
+    // error Codes
+
+    FORBIDDEN(HttpStatus.FORBIDDEN, 4003, "접근 권한이 없습니다."),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 4006, "UnAuthorized"),
+    JWT_BAD_REQUEST(HttpStatus.UNAUTHORIZED, 4006,"잘못된 JWT 서명입니다."),
+    JWT_ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 4007,"액세스 토큰이 만료되었습니다."),
+    JWT_REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 4008,"리프레시 토큰이 만료되었습니다. 다시 로그인하시기 바랍니다."),
+    JWT_UNSUPPORTED_TOKEN(HttpStatus.UNAUTHORIZED, 4009,"지원하지 않는 JWT 토큰입니다."),
+    JWT_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 4010,"유효한 JWT 토큰이 없습니다."),
+
+    MEMBER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 4013,"해당 사용자가 존재하지 않습니다"),
     BAD_REQUEST(HttpStatus.BAD_REQUEST,4005 ,"잘못된 요청 입니다.");
     private final HttpStatus httpStatus;
     private final Integer code;
