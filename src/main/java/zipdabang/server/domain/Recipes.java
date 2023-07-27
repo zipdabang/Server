@@ -30,9 +30,6 @@ public class Recipes extends BaseEntity {
     private String name;
 
     @Column(columnDefinition = "TEXT")
-    private String thumbnail_url;
-
-
     private String thumbnailUrl;
 
     private String intro;
