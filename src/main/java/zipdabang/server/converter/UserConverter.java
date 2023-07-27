@@ -12,6 +12,12 @@ public class UserConverter {
     public static UserResponseDto.UserIdDto toUserIdDto(Users user) {
         return UserResponseDto.UserIdDto.builder()
                 .userId(user.getUserId())
+
+    public static UserResponseDto.JoinUserDto toJoinUserDto(Users user) {
+        return UserResponseDto.JoinUserDto.builder()
+                .userId(user.getUserId())
+                .nickname(user.getNickname())
+//                .accessToken()
                 .build();
     }
 }
