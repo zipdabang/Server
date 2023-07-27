@@ -1,6 +1,11 @@
 package zipdabang.server.web.dto.requestDto;
+import lombok.Getter;
+import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import java.util.List;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 public class UserRequestDto {
 
@@ -53,40 +58,20 @@ public class UserRequestDto {
         private String restoreDate;
         private String status;
     }
-=======
-import lombok.Getter;
-import lombok.Setter;
-
-import javax.validation.constraints.NotBlank;
-import java.util.List;
-
-public class UserRequestDto {
 
     @Getter
     @Setter
-    public static class KakaoSocialDto {
+    public static class OAuthRequestDto {
         @Override
         public String toString() {
             return "KakaoSocialDto{" +
-                    "socialId='" + socialId + '\'' +
-                    "}";
+                    "token='" + token + '\'' +
+                    '}';
         }
 
-        private String socialId;
+        private String token;
     }
 
-    @Getter
-    @Setter
-    public static class AppleSocialDto{
-        @Override
-        public String toString() {
-            return "AppleSocialDto{" +
-                    "identityToken='" + identityToken + '\'' +
-                    "}";
-        }
-
-        private String identityToken;
-    }
 
     @Getter
     @Setter
@@ -140,5 +125,24 @@ public class UserRequestDto {
         private Integer authNum;
     }
 
+    @Getter @Setter
+    public static class userProfileDto {
 
+        @Override
+        public String toString() {
+            return "userProfileDto{" +
+                    "name='" + name + '\'' +
+                    ", nickname='" + nickname + '\'' +
+                    ", email='" + email + '\'' +
+                    ", phoneNum='" + phoneNum + '\'' +
+                    ", profileImage=" + profileImage +
+                    '}';
+        }
+
+        private String name;
+        private String nickname;
+        private String email;
+        private String phoneNum;
+        private MultipartFile profileImage;
+    }
 }
