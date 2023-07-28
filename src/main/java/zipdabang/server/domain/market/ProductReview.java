@@ -1,14 +1,11 @@
-package zipdabang.server.domain;
+package zipdabang.server.domain.market;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Builder
@@ -17,11 +14,17 @@ import javax.persistence.Id;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class Category extends BaseEntity {
+public class ProductReview extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
     private String name;
+    private String imageUrl;
+    private String description;
 }

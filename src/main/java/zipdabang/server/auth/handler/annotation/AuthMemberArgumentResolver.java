@@ -13,7 +13,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.converter.MemberConverter;
-import zipdabang.server.domain.Member;
+import zipdabang.server.domain.member.Member;
 
 @Component
 @RequiredArgsConstructor

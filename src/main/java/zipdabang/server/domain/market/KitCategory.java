@@ -1,4 +1,4 @@
-package zipdabang.server.domain;
+package zipdabang.server.domain.market;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -17,7 +17,7 @@ import javax.persistence.Id;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class Category extends BaseEntity {
+public class KitCategory extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

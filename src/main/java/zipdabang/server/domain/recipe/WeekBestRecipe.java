@@ -1,27 +1,27 @@
-package zipdabang.server.domain;
+package zipdabang.server.domain.recipe;
+
+import javax.persistence.*;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import zipdabang.server.domain.recipe.Recipe;
 
 @Entity
-@Builder
 @Getter
+@Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class Category extends BaseEntity {
-
+public class WeekBestRecipe extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private Long id;
 
-    private String name;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipe_id", nullable = false)
+    private Recipe recipe;
 }

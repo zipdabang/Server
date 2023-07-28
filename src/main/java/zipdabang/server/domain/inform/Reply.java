@@ -1,27 +1,33 @@
-package zipdabang.server.domain;
+package zipdabang.server.domain.inform;
+
+
+import javax.persistence.*;
+
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
 @Entity
-@Builder
 @Getter
+@Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class Category extends BaseEntity {
-
+public class Reply extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private Long id;
 
     private String name;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "question_id", nullable = false)
+    private Question question;
 }

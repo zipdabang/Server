@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.MemberException;
-import zipdabang.server.domain.Member;
+import zipdabang.server.domain.member.Member;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 

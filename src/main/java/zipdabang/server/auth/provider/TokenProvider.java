@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.JwtAuthenticationException;
-import zipdabang.server.domain.Member;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
