@@ -5,6 +5,7 @@ import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import zipdabang.server.domain.Category;
 import zipdabang.server.domain.common.BaseEntity;
 import zipdabang.server.domain.member.Member;
 
@@ -30,9 +31,10 @@ public class Recipe extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String thumbnailUrl;
 
+    @Column(length = 500)
     private String intro;
 
-    private Float star;
+    private Float starScore;
     @Column(columnDefinition = "BIGINT DEFAULT 0")
     private Long totalView;
 
@@ -57,6 +59,10 @@ public class Recipe extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @OneToMany(mappedBy = "recipe")
     private List<Comment> commentList;
 
@@ -73,5 +79,5 @@ public class Recipe extends BaseEntity {
     private List<Ingredient> ingredientList;
 
     @OneToOne(mappedBy = "recipe", cascade = CascadeType.ALL)
-    private WeekBestRecipe weekBestRecipe;
+    private WeeklyBestRecipe weeklyBestRecipe;
 }

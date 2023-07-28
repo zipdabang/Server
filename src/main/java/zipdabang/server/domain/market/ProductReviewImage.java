@@ -1,13 +1,10 @@
-package zipdabang.server.domain.etc;
+package zipdabang.server.domain.market;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.data.annotation.CreatedDate;
-import zipdabang.server.domain.member.Member;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Builder
@@ -16,17 +13,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class PhoneAuth {
+public class ProductReviewImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name="target_id")
+    private ProductReview productReview;
 
-    //직접 넣을거면 어노테이션 빼셈
-    @CreatedDate
-    private LocalDateTime authDate;
+    @Column(columnDefinition = "TEXT")
+    private String imageUrl;
 }

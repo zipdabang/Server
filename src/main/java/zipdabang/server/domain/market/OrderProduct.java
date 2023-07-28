@@ -14,7 +14,7 @@ import javax.persistence.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class OrderProductList extends BaseEntity {
+public class OrderProduct extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,12 +28,10 @@ public class OrderProductList extends BaseEntity {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    private String name;
-    private String thumbnailUrl;
-    private Integer price;
-    private Integer count;
+    private Integer productCount;
 
-    public OrderProductList update(){
+    public OrderProduct update(Integer newCount){
+        this.productCount = newCount;
         return this;
     }
 }

@@ -55,6 +55,11 @@ public class Member extends BaseEntity {
 
     private String detailAddress;
 
+    private Long followers;
+    private Long followings;
+
+    private String socialType;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

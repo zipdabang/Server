@@ -24,7 +24,10 @@ public class ProductReview extends BaseEntity {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    private String name;
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
-    private String description;
+    private String contents;
+
+    @Column(nullable = false)
+    private Float starScore;
 }

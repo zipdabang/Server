@@ -3,7 +3,7 @@ package zipdabang.server.domain.market;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import zipdabang.server.domain.Tag;
+import zipdabang.server.domain.recipe.HashTag;
 import zipdabang.server.domain.common.BaseEntity;
 
 import javax.persistence.*;
@@ -26,6 +26,6 @@ public class ProductTag extends BaseEntity {
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tag_id")
-    private Tag tag;
+    @JoinColumn(name = "hash_tag_id")
+    private HashTag hashTag;
 }

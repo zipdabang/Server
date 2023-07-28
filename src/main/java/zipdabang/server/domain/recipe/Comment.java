@@ -21,13 +21,11 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private Long id;
 
-    private String name;
-
     @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(columnDefinition = "TEXT")
-    private String description;
+    private String contents;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)

@@ -8,6 +8,8 @@ import zipdabang.server.domain.common.BaseEntity;
 import zipdabang.server.domain.enums.OrderState;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Builder
@@ -27,21 +29,31 @@ public class Order extends BaseEntity {
     private Member member;
 
     @Enumerated(EnumType.STRING)
-    private OrderState orderState;
+    @Column(nullable = false)
+    private OrderState status;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coupon_id")
-    private Coupon coupon;
+    private String title;
 
-//    @OneToOne(fetch = FetchType.LAZY)
+    @Column(columnDefinition = "TEXT")
+    private String requirement;
+
+    @Column(nullable = false)
+    private String totalPrice;
+
+    @Column(nullable = false)
+    private LocalDate orderDate;
+
+    private LocalDate returnDate;
+
+    //    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "coupon_id")
+//    private Coupon coupon;
+
+    //    @OneToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "payment_id")
 //    private Payments payment;
 //
 //    @OneToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "recieve_info_id")
 //    private RecieveInfos recieveInfo;
-
-    private Integer price;
-
-    private Integer total_price;
 }
