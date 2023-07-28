@@ -1,5 +1,6 @@
 package zipdabang.server.web.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -12,17 +13,16 @@ import zipdabang.server.web.dto.requestDto.UserRequestDto;
 import zipdabang.server.web.dto.responseDto.UserResponseDto;
 
 import org.springframework.web.bind.annotation.*;
-import zipdabang.server.base.ResponseDto;
 import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.OAuthResult;
-import zipdabang.server.web.dto.requestDto.UserRequestDto;
-import zipdabang.server.web.dto.responseDto.UserResponseDto;
+
 
 import java.io.IOException;
 
 @RestController
 @Validated
 @RequiredArgsConstructor
+@Tag(name = "유저 관련 API", description = "로그인, 회원가입, 마이 페이지에서 필요한 API모음")
 public class UserRestController {
 
     @PostMapping("/users/logout")
