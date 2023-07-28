@@ -28,6 +28,6 @@ public class InfoAgree extends BaseEntity {
     private LocalDateTime infoAgreeDate;
 
     @OneToOne
-    @JoinColumn(name="user_id", nullable = false)
-    private Users user;
+    @JoinColumn(name="member_id", nullable = false)
+    private Member member;
 }

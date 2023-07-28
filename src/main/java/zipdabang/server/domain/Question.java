@@ -1,23 +1,24 @@
 package zipdabang.server.domain;
 
-import javax.persistence.*;
-
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
 
-@Entity
+import javax.persistence.*;
+import java.util.List;
+
+
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class FAQ extends BaseEntity {
+@Entity
+public class Question extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
     private Long id;
 
     private String name;
@@ -25,7 +26,18 @@ public class FAQ extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    private Boolean isReplied;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_category_id", nullable = false)
     private QuestionCategory questionCategory;
+
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
+    private List<Reply> replyList;
+
 }

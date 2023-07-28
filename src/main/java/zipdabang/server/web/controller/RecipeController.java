@@ -9,9 +9,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-import zipdabang.server.auth.handler.annotation.AuthUser;
+import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.ResponseDto;
-import zipdabang.server.domain.Users;
+import zipdabang.server.domain.Member;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
@@ -22,10 +22,10 @@ import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 public class RecipeController {
 
     @Parameters({
-            @Parameter(name = "users", hidden = true)
+            @Parameter(name = "member", hidden = true)
     })
-    @PostMapping(value = "/users/recipes",consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseDto<RecipeResponseDto.RecipeStatusDto> createRecipe(@ModelAttribute RecipeRequestDto.CreateRecipeDto request, @AuthUser Users users){
+    @PostMapping(value = "/members/recipes",consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseDto<RecipeResponseDto.RecipeStatusDto> createRecipe(@ModelAttribute RecipeRequestDto.CreateRecipeDto request, @AuthMember Member member){
         return null;
     }
 }

@@ -1,6 +1,8 @@
 package zipdabang.server.domain;
 
+
 import javax.persistence.*;
+
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -14,7 +16,7 @@ import zipdabang.server.domain.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class FAQ extends BaseEntity {
+public class Reply extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
@@ -26,6 +28,6 @@ public class FAQ extends BaseEntity {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_category_id", nullable = false)
-    private QuestionCategory questionCategory;
+    @JoinColumn(name = "question_id", nullable = false)
+    private Question question;
 }

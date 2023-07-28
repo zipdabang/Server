@@ -8,8 +8,6 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
 
-import javax.persistence.*;
-
 @Entity
 @Getter
 @Builder
@@ -36,8 +34,8 @@ public class ReceiveInfo extends BaseEntity {
     private String detailAddress;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="user_id", nullable = false)
-    private Users user;
+    @JoinColumn(name="member_id", nullable = false)
+    private Member member;
 
 
     //payments

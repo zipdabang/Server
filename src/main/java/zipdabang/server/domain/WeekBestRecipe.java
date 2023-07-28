@@ -14,18 +14,13 @@ import zipdabang.server.domain.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class FAQ extends BaseEntity {
+public class WeekBestRecipe extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
 
-    private String name;
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_category_id", nullable = false)
-    private QuestionCategory questionCategory;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipe_id", nullable = false)
+    private Recipe recipe;
 }
