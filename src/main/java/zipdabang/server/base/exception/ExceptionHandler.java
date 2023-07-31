@@ -10,14 +10,16 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 
+import javax.validation.ConstraintViolationException;
+
 @RestControllerAdvice(annotations = {RestController.class})
 public class ExceptionHandler extends ResponseEntityExceptionHandler {
 
 
-//    @org.springframework.web.bind.annotation.ExceptionHandler
-//    public ResponseEntity<Object> validation(ConstraintViolationException e, WebRequest request) {
-//        return handleExceptionInternal(e, Code.UNAUTHORIZED, request);
-//    }
+    @org.springframework.web.bind.annotation.ExceptionHandler
+    public ResponseEntity<Object> validation(ConstraintViolationException e, WebRequest request) {
+        return handleExceptionInternal(e, Code.UNAUTHORIZED, request);
+    }
 
     @org.springframework.web.bind.annotation.ExceptionHandler
     public ResponseEntity<Object> general(GeneralException e, WebRequest request) {
@@ -46,6 +48,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<Object> handleExceptionInternal(Exception e, Code errorCode,
                                                            HttpHeaders headers, HttpStatus status, WebRequest request) {
         ResponseDto<Object> body = ResponseDto.of(true,errorCode, null);
+        e.printStackTrace();
         return super.handleExceptionInternal(
                 e,
                 body,

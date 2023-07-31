@@ -8,7 +8,12 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import zipdabang.server.FeignClient.dto.OAuthInfoDto;
+import zipdabang.server.FeignClient.service.KakaoOauthService;
+import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
+import zipdabang.server.converter.MemberConverter;
+import zipdabang.server.service.MemberService;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
@@ -21,6 +26,10 @@ import zipdabang.server.utils.OAuthResult;
 @RequiredArgsConstructor
 @Tag(name = "유저 관련 API", description = "로그인, 회원가입, 마이 페이지에서 필요한 API모음")
 public class MemberRestController {
+
+    private final MemberService memberService;
+
+    private final KakaoOauthService kakaoOauthService;
 
     @PostMapping("/members/logout")
     public ResponseDto<MemberResponseDto.memberStatusDto> logout(@RequestBody MemberRequestDto.logoutMember request) {
@@ -39,9 +48,12 @@ public class MemberRestController {
 
     //소셜로그인
     @PostMapping("/members/oauth/kakao")
-    public ResponseDto<OAuthResult.OAuthResultDto> oauthKakao(
+    public ResponseDto<MemberResponseDto.SocialLoginDto> oauthKakao(
             @RequestBody MemberRequestDto.OAuthRequestDto oAuthRequestDto) {
-        return null;
+        OAuthInfoDto kakaoUserInfo = kakaoOauthService.getKakaoUserInfo(oAuthRequestDto.getToken());
+        OAuthResult.OAuthResultDto oAuthResultDto = memberService.kakaoSocialLogin(kakaoUserInfo.getEmail(), kakaoUserInfo.getProfileUrl());
+        MemberResponseDto.SocialLoginDto socialLoginDto = MemberConverter.toSocialLoginDto(oAuthResultDto.getJwt());
+        return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN,socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN,socialLoginDto);
     }
 
     @PostMapping("/members/oauth/google")
