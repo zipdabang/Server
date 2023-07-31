@@ -2,8 +2,6 @@ package zipdabang.server.converter;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import zipdabang.server.domain.Recipes;
-import zipdabang.server.domain.Users;
 import zipdabang.server.repository.recipeRepositories.RecipeRepository;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 
