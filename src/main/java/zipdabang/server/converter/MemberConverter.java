@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.MemberException;
+import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
@@ -43,5 +44,19 @@ public class MemberConverter {
 
     public static Member toMember(Long memberId){
         return staticMemberRepository.findById(memberId).orElseThrow(()->new MemberException(Code.MEMBER_NOT_FOUND));
+    }
+
+    public static Member toOAuthMember(String email, String profileUrl){
+        return Member.builder()
+                .socialType(SocialType.KAKAO)
+                .email(email)
+                .profileUrl(profileUrl)
+                .build();
+    }
+
+    public static MemberResponseDto.SocialLoginDto toSocialLoginDto(String jwt){
+        return MemberResponseDto.SocialLoginDto.builder()
+                .accessToken(jwt)
+                .build();
     }
 }

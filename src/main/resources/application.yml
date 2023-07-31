@@ -32,6 +32,14 @@ spring:
       org.hibernate.SQL: DEBUG
       org.hibernate.type: trace
 
+oauth:
+  kakao:
+    baseUrl: ${KAKAO_BASE_URL}
+    clientId: ${KAKAO_CLIENT_ID}
+    secretKeyREST: ${KAKAO_SECRET_REST}
+    secretKeyAndroid : ${KAKAO_SECRET_ANDROID}
+  google:
+
 jwt:
   header: Authorization
   secret: ${JWT_SECRET}

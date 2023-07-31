@@ -5,6 +5,7 @@ import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.inform.Question;
 import zipdabang.server.domain.recipe.Recipe;
 import zipdabang.server.domain.recipe.Scrap;
@@ -58,7 +59,8 @@ public class Member extends BaseEntity {
     private Long followers;
     private Long followings;
 
-    private String socialType;
+    @Enumerated(EnumType.STRING)
+    private SocialType socialType;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

@@ -57,15 +57,14 @@ public class TokenProvider implements InitializingBean {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createAccessToken(Long memberId, String socialType, String socialId, Collection<? extends GrantedAuthority> authorities){
+    public String createAccessToken(Long memberId, String socialType, String email){
         long now = (new Date()).getTime();
         Date validity = new Date(now + this.accessTokenValidityInMilliseconds);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(memberId))
-                .claim(AUTHORITIES_KEY, authorities)
                 .claim("socialType", socialType)
-                .claim("socialID", socialId)
+                .claim("email", email)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .setExpiration(validity)
                 .compact();
