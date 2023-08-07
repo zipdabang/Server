@@ -40,4 +40,9 @@ public class MemberServiceImpl implements MemberService {
                 .jwt(tokenProvider.createAccessToken(newMember.getMemberId(), SocialType.KAKAO.toString(),email))
                 .build();
     }
+
+    @Override
+    public Optional<Member> checkExistNickname(String nickname){
+        return memberRepository.findByNickname(nickname);
+    }
 }

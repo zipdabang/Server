@@ -16,6 +16,8 @@ public enum Code {
 
     OAUTH_LOGIN(HttpStatus.OK,2010, "로그인 입니다."),
     OAUTH_JOIN(HttpStatus.OK,2011,"회원가입 입니다."),
+    NICKNAME_EXIST(HttpStatus.OK,2010, "닉네임이 이미 존재합니다."),
+    NICKNAME_OK(HttpStatus.OK,2011, "사용 가능한 닉네임 입니다."),
 
     // error Codes
 
