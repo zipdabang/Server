@@ -1,5 +1,12 @@
 package zipdabang.server.web.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -47,19 +54,22 @@ public class MemberRestController {
     }
 
     //소셜로그인
-    @PostMapping("/members/oauth/kakao")
+
+    @Operation(summary = "소셜로그인 API", description = "소셜로그인 API, 응답으로 로그인(메인으로 이동), 회원가입(정보 입력으로 이동) code로 구분하며 query String으로 카카오인지 구글인지 주면 됩니다.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "2010",description = "OK, 정상응답"),
+        @ApiResponse(responseCode = "2011",description = "OK, 정상응답"),
+        @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "type",description = "쿼리 스트링, 어떤 소셜로그인이지", required = true)
+    })
+    @PostMapping("/members/oauth")
     public ResponseDto<MemberResponseDto.SocialLoginDto> oauthKakao(
-            @RequestBody MemberRequestDto.OAuthRequestDto oAuthRequestDto) {
-        OAuthInfoDto kakaoUserInfo = kakaoOauthService.getKakaoUserInfo(oAuthRequestDto.getToken());
-        OAuthResult.OAuthResultDto oAuthResultDto = memberService.kakaoSocialLogin(kakaoUserInfo.getEmail(), kakaoUserInfo.getProfileUrl());
+            @RequestBody MemberRequestDto.OAuthRequestDto oAuthRequestDto, @RequestParam(name = "type") String type) {
+        OAuthResult.OAuthResultDto oAuthResultDto = memberService.kakaoSocialLogin(oAuthRequestDto.getEmail(), oAuthRequestDto.getProfileUrl(), type);
         MemberResponseDto.SocialLoginDto socialLoginDto = MemberConverter.toSocialLoginDto(oAuthResultDto.getJwt());
         return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN,socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN,socialLoginDto);
-    }
-
-    @PostMapping("/members/oauth/google")
-    public ResponseDto<OAuthResult.OAuthResultDto> oauthGoogle(
-            @RequestBody MemberRequestDto.OAuthRequestDto oAuthRequestDto) {
-        return null;
     }
 
     //회원 정보 추가입력

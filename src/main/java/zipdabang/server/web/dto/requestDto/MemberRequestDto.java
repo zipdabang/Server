@@ -62,14 +62,8 @@ public class MemberRequestDto {
     @Getter
     @Setter
     public static class OAuthRequestDto {
-        @Override
-        public String toString() {
-            return "KakaoSocialDto{" +
-                    "token='" + token + '\'' +
-                    '}';
-        }
-
-        private String token;
+        private String email;
+        private String profileUrl;
     }
 
 

@@ -13,7 +13,7 @@ import zipdabang.server.domain.common.BaseEntity;
 import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.StatusType;
 import zipdabang.server.domain.recipe.Comment;
-import zipdabang.server.domain.recipe.Like;
+import zipdabang.server.domain.recipe.Likes;
 
 import java.util.List;
 
@@ -88,7 +88,7 @@ public class Member extends BaseEntity {
     private List<Comment> commentList;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-    private List<Like> likeList;
+    private List<Likes> likesList;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Scrap> scrapList;

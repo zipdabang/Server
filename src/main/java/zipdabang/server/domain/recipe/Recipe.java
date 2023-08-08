@@ -67,7 +67,7 @@ public class Recipe extends BaseEntity {
     private List<Comment> commentList;
 
     @OneToMany(mappedBy = "recipe")
-    private List<Like> likeList;
+    private List<Likes> likesList;
 
     @OneToMany(mappedBy = "recipe")
     private List<Scrap> scrapList;
