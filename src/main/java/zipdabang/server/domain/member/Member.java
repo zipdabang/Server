@@ -14,11 +14,8 @@ import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.StatusType;
 import zipdabang.server.domain.recipe.Comment;
 import zipdabang.server.domain.recipe.Likes;
-<<<<<<< HEAD
 
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
-=======
->>>>>>> develop
 
 import java.util.List;
 
