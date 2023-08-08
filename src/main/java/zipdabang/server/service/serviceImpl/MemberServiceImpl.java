@@ -54,14 +54,19 @@ public class MemberServiceImpl implements MemberService {
                             .isLogin(true)
                             .memberId(member.getMemberId())
                             .jwt(tokenProvider.createAccessToken(member.getMemberId(), SocialType.GOOGLE.toString(), email))
-                            .build();
-            }
+                            .build();}
         Member newMember = memberRepository.save(MemberConverter.toOAuthMember(email, profileUrl));
-        return OAuthResult.OAuthResultDto.builder()
-                .isLogin(false)
-                .memberId(newMember.getMemberId())
-                .jwt(tokenProvider.createAccessToken(newMember.getMemberId(), SocialType.KAKAO.toString(), email))
-                .build();
-
+        if(type.equals("kakao"))
+            return OAuthResult.OAuthResultDto.builder()
+                    .isLogin(false)
+                    .memberId(newMember.getMemberId())
+                    .jwt(tokenProvider.createAccessToken(newMember.getMemberId(), SocialType.KAKAO.toString(), email))
+                    .build();
+        else
+            return OAuthResult.OAuthResultDto.builder()
+                    .isLogin(false)
+                    .memberId(newMember.getMemberId())
+                    .jwt(tokenProvider.createAccessToken(newMember.getMemberId(), SocialType.GOOGLE.toString(), email))
+                    .build();
     }
 }
