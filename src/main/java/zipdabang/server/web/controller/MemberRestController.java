@@ -138,5 +138,7 @@ public class MemberRestController {
         return member.isPresent() ?
                 ResponseDto.of(Code.NICKNAME_EXIST, nickname) : ResponseDto.of(Code.NICKNAME_OK, nickname);
     }
-    
+
+
+
 }
