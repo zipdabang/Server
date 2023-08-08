@@ -20,6 +20,8 @@ import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 =======
 >>>>>>> develop
 
+import zipdabang.server.web.dto.requestDto.MemberRequestDto;
+
 import java.util.List;
 
 @Getter
