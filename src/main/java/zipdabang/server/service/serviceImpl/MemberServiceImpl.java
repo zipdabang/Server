@@ -19,6 +19,7 @@ import zipdabang.server.service.MemberService;
 import zipdabang.server.utils.OAuthResult;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -54,6 +55,11 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Optional<Member> checkExistNickname(String nickname){
         return memberRepository.findByNickname(nickname);
+    }
+
+    @Override
+    public List<Category> getCategoryList(){
+        return categoryRepository.findAll();
     }
 
     @Override

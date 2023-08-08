@@ -16,6 +16,7 @@ import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.MemberConverter;
+import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.service.MemberService;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.OAuthResult;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -67,6 +69,14 @@ public class MemberRestController {
     public ResponseDto<OAuthResult.OAuthResultDto> oauthGoogle(
             @RequestBody MemberRequestDto.OAuthRequestDto oAuthRequestDto) {
         return null;
+    }
+
+    @GetMapping("/members/category")
+    public ResponseDto<List<Category>> getCategoryList() {
+        List<Category> categoryList = memberService.getCategoryList();
+
+        log.info("음료 카테고리 리스트: {}", categoryList);
+        return ResponseDto.of(categoryList);
     }
 
     //회원 정보 추가입력
