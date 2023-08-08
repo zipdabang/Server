@@ -11,7 +11,6 @@ import java.util.Optional;
 public interface MemberService {
     OAuthResult.OAuthResultDto kakaoSocialLogin(String email, String profileUrl, String type);
 
-
     Optional<Member> checkExistNickname(String nickname);
     
     Member joinInfoComplete(MemberRequestDto.MemberInfoDto request, Member member);
