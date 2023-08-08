@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,9 +18,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import zipdabang.server.FeignClient.dto.OAuthInfoDto;
 import zipdabang.server.FeignClient.service.KakaoOauthService;
+import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.MemberConverter;
+import zipdabang.server.domain.Category;
+import zipdabang.server.domain.member.Member;
 import zipdabang.server.service.MemberService;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
@@ -28,8 +32,12 @@ import org.springframework.web.bind.annotation.*;
 import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.OAuthResult;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @Validated
+@Slf4j
 @RequiredArgsConstructor
 @Tag(name = "유저 관련 API", description = "로그인, 회원가입, 마이 페이지에서 필요한 API모음")
 public class MemberRestController {
@@ -72,10 +80,21 @@ public class MemberRestController {
         return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN,socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN,socialLoginDto);
     }
 
+    @GetMapping("/members/category")
+    public ResponseDto<List<Category>> getCategoryList() {
+        List<Category> categoryList = memberService.getCategoryList();
+
+        log.info("음료 카테고리 리스트: {}", categoryList);
+        return ResponseDto.of(categoryList);
+    }
+
     //회원 정보 추가입력
     @PostMapping("/members/oauth/info")
-    public ResponseDto<MemberResponseDto.JoinMemberDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request) {
-        return null;
+    public ResponseDto<MemberResponseDto.SocialInfoDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @AuthMember Member member) {
+        log.info("body로 넘겨온 사용자 정보: {}", request.toString());
+        Member joinMember = memberService.joinInfoComplete(request, member);
+        log.info("로그인 된 사용자 정보: {}", member.toString());
+        return ResponseDto.of(MemberConverter.toSocialInfoDto(joinMember));
     }
 
     //인증번호 요청
@@ -111,6 +130,13 @@ public class MemberRestController {
     //닉네임 중복검사
     @GetMapping("/members/exist-nickname")
     public ResponseDto<String> checkExistNickname (@RequestParam String nickname){
-        return null;
+
+        log.info("넘어온 nickname 정보: {}", nickname);
+
+        Optional<Member> member = memberService.checkExistNickname(nickname);
+
+        return member.isPresent() ?
+                ResponseDto.of(Code.NICKNAME_EXIST, nickname) : ResponseDto.of(Code.NICKNAME_OK, nickname);
     }
+    
 }

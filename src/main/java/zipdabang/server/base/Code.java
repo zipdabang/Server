@@ -16,6 +16,8 @@ public enum Code {
 
     OAUTH_LOGIN(HttpStatus.OK,2010, "로그인 입니다."),
     OAUTH_JOIN(HttpStatus.OK,2011,"회원가입 입니다."),
+    NICKNAME_EXIST(HttpStatus.OK,2010, "닉네임이 이미 존재합니다."),
+    NICKNAME_OK(HttpStatus.OK,2011, "사용 가능한 닉네임 입니다."),
 
     // error Codes
 
@@ -31,6 +33,8 @@ public enum Code {
 
     FEIGN_CLIENT_ERROR_400(HttpStatus.BAD_REQUEST, 4011, "feign에서 400번대 에러가 발생했습니다."),
     MEMBER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 4013,"해당 사용자가 존재하지 않습니다"),
+
+    NO_CATEGORY_EXIST(HttpStatus.BAD_REQUEST, 4017, "선호하는 음료 카테고리가 잘못 되었습니다."),
 
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),
     FEIGN_CLIENT_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "Inter server Error in feign client");
