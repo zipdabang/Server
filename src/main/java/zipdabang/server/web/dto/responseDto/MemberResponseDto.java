@@ -17,6 +17,15 @@ public class MemberResponseDto {
         private String nickname;
         private String accessToken;
     }
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class SocialInfoDto {
+        private Long memberId;
+        private String nickname;
+    }
+
 
     @Builder
     @Getter
