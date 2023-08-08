@@ -25,19 +25,48 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public OAuthResult.OAuthResultDto kakaoSocialLogin(String email, String profileUrl) {
+    public OAuthResult.OAuthResultDto kakaoSocialLogin(String email, String profileUrl, String type) {
         Member member = memberRepository.findByEmail(email).orElse(null);
         if(member != null)
-            return OAuthResult.OAuthResultDto.builder()
-                    .isLogin(true)
-                    .memberId(member.getMemberId())
-                    .jwt(tokenProvider.createAccessToken(member.getMemberId(), SocialType.KAKAO.toString(),email))
-                    .build();
+            if (type.equals("kakao")) {
+                if(member.getAge() == null || member.getGender() == null)
+                    return OAuthResult.OAuthResultDto.builder()
+                            .isLogin(false)
+                            .memberId(member.getMemberId())
+                            .jwt(tokenProvider.createAccessToken(member.getMemberId(), SocialType.KAKAO.toString(), email))
+                            .build();
+                else
+                    return OAuthResult.OAuthResultDto.builder()
+                            .isLogin(true)
+                            .memberId(member.getMemberId())
+                            .jwt(tokenProvider.createAccessToken(member.getMemberId(), SocialType.KAKAO.toString(), email))
+                            .build();
+            }
+            else {
+                if(member.getAge() == null || member.getGender() == null)
+                    return OAuthResult.OAuthResultDto.builder()
+                            .isLogin(false)
+                            .memberId(member.getMemberId())
+                            .jwt(tokenProvider.createAccessToken(member.getMemberId(), SocialType.GOOGLE.toString(), email))
+                            .build();
+                else
+                    return OAuthResult.OAuthResultDto.builder()
+                            .isLogin(true)
+                            .memberId(member.getMemberId())
+                            .jwt(tokenProvider.createAccessToken(member.getMemberId(), SocialType.GOOGLE.toString(), email))
+                            .build();}
         Member newMember = memberRepository.save(MemberConverter.toOAuthMember(email, profileUrl));
-        return OAuthResult.OAuthResultDto.builder()
-                .isLogin(false)
-                .memberId(newMember.getMemberId())
-                .jwt(tokenProvider.createAccessToken(newMember.getMemberId(), SocialType.KAKAO.toString(),email))
-                .build();
+        if(type.equals("kakao"))
+            return OAuthResult.OAuthResultDto.builder()
+                    .isLogin(false)
+                    .memberId(newMember.getMemberId())
+                    .jwt(tokenProvider.createAccessToken(newMember.getMemberId(), SocialType.KAKAO.toString(), email))
+                    .build();
+        else
+            return OAuthResult.OAuthResultDto.builder()
+                    .isLogin(false)
+                    .memberId(newMember.getMemberId())
+                    .jwt(tokenProvider.createAccessToken(newMember.getMemberId(), SocialType.GOOGLE.toString(), email))
+                    .build();
     }
 }

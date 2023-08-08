@@ -24,6 +24,6 @@ public class WeeklyBestRecipe extends BaseEntity {
     @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
 
-    private Integer rank;
-    private Integer preRank;
+    private Integer ranking;
+    private Integer preRanking;
 }
