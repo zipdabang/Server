@@ -5,12 +5,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import zipdabang.server.auth.provider.TokenProvider;
+import zipdabang.server.base.Code;
+import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.converter.MemberConverter;
+import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.member.Member;
+import zipdabang.server.domain.member.MemberPreferCategory;
+import zipdabang.server.repository.CategoryRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
+import zipdabang.server.repository.memberRepositories.PreferCategoryRepository;
 import zipdabang.server.service.MemberService;
 import zipdabang.server.utils.OAuthResult;
+import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 
 import java.util.Optional;
 
@@ -22,6 +29,9 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
 
     private final TokenProvider tokenProvider;
+
+    private final CategoryRepository categoryRepository;
+    private final PreferCategoryRepository preferCategoryRepository;
 
     @Override
     @Transactional
@@ -44,5 +54,19 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Optional<Member> checkExistNickname(String nickname){
         return memberRepository.findByNickname(nickname);
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public Member joinInfoComplete(MemberRequestDto.MemberInfoDto request, Member member){
+        Member joinUser = MemberConverter.toSocialMember(request, member);
+        for (int i = 0; i < request.getPreferBeverages().size(); i++) {
+            Category category = categoryRepository.findById(Long.valueOf(request.getPreferBeverages().get(i)))
+                    .orElseThrow(() -> new MemberException(Code.NO_CATEGORY_EXIST));
+            MemberPreferCategory memberPreferCategory = MemberConverter.toMemberPreferCategory(joinUser, category);
+            preferCategoryRepository.save(memberPreferCategory);
+        }
+
+        return joinUser;
     }
 }

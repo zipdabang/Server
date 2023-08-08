@@ -14,6 +14,7 @@ import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.StatusType;
 import zipdabang.server.domain.recipe.Comment;
 import zipdabang.server.domain.recipe.Like;
+import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 
 import java.util.List;
 
@@ -95,4 +96,18 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Recipe> recipeList;
+
+    public Member updateInfo(MemberRequestDto.MemberInfoDto request, int age, GenderType gender, InfoAgree infoAgree) {
+        this.name = request.getName();
+        this.age = age;
+        this.infoAgree = infoAgree;
+        this.nickname =request.getNickname();
+        this.gender = gender;
+        this.birth = request.getBirth();
+        this.phoneNum = request.getPhoneNum();
+        this.zipCode = request.getZipCode();
+        this.address = request.getAddress();
+        this.detailAddress =request.getDetailAddress();
+        return this;
+    }
 }

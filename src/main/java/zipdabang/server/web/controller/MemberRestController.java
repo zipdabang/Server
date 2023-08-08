@@ -1,5 +1,6 @@
 package zipdabang.server.web.controller;
 
+import feign.Response;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,10 +71,11 @@ public class MemberRestController {
 
     //회원 정보 추가입력
     @PostMapping("/members/oauth/info")
-    public ResponseDto<MemberResponseDto.JoinMemberDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @AuthMember Member member) {
-        log.info("body로 넘겨온 사용자 정보 : {}", request.toString());
-        return null;
-
+    public ResponseDto<MemberResponseDto.SocialInfoDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @AuthMember Member member) {
+        log.info("body로 넘겨온 사용자 정보: {}", request.toString());
+        Member joinMember = memberService.joinInfoComplete(request, member);
+        log.info("로그인 된 사용자 정보: {}", member.toString());
+        return ResponseDto.of(MemberConverter.toSocialInfoDto(joinMember));
     }
 
     //인증번호 요청
@@ -117,4 +119,5 @@ public class MemberRestController {
         return member.isPresent() ?
                 ResponseDto.of(Code.NICKNAME_EXIST, nickname) : ResponseDto.of(Code.NICKNAME_OK, nickname);
     }
+    
 }

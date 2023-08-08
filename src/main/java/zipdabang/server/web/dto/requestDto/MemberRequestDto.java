@@ -92,6 +92,11 @@ public class MemberRequestDto {
         private String detailAddress;
         @NotBlank
         private String nickname;
+        @NotBlank
+        private String phoneNum;
+
+        private Boolean infoAgree;
+        private Boolean infoOthersAgree;
 
         private List<Integer> preferBeverages;
 
