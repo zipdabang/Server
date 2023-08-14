@@ -21,9 +21,9 @@ public class MemberResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class SocialInfoDto {
-        private Long memberId;
-        private String nickname;
+    public static class SocialJoinDto {
+        private String accessToken;
+        private String refreshToken;
     }
 
 
@@ -33,6 +33,7 @@ public class MemberResponseDto {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class SocialLoginDto{
         private String accessToken;
+        private String refreshToken;
     }
 
     @Builder

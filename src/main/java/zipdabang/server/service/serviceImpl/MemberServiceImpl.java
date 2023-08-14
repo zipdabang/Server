@@ -1,6 +1,5 @@
 package zipdabang.server.service.serviceImpl;
 
-import antlr.Token;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,15 +11,18 @@ import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.MemberPreferCategory;
+import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.repository.CategoryRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.repository.memberRepositories.PreferCategoryRepository;
 import zipdabang.server.service.MemberService;
-import zipdabang.server.utils.OAuthResult;
+import zipdabang.server.utils.dto.OAuthJoin;
+import zipdabang.server.utils.dto.OAuthResult;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,51 +36,31 @@ public class MemberServiceImpl implements MemberService {
     private final CategoryRepository categoryRepository;
     private final PreferCategoryRepository preferCategoryRepository;
 
+    private final RedisService redisService;
+
     @Override
     @Transactional
     public OAuthResult.OAuthResultDto kakaoSocialLogin(String email, String profileUrl, String type) {
         Member member = memberRepository.findByEmail(email).orElse(null);
-        if(member != null)
-            if (type.equals("kakao")) {
-                if(member.getAge() == null || member.getGender() == null)
-                    return OAuthResult.OAuthResultDto.builder()
-                            .isLogin(false)
-                            .memberId(member.getMemberId())
-                            .jwt(tokenProvider.createAccessToken(member.getMemberId(), SocialType.KAKAO.toString(), email))
-                            .build();
-                else
-                    return OAuthResult.OAuthResultDto.builder()
-                            .isLogin(true)
-                            .memberId(member.getMemberId())
-                            .jwt(tokenProvider.createAccessToken(member.getMemberId(), SocialType.KAKAO.toString(), email))
-                            .build();
-            }
-            else {
-                if(member.getAge() == null || member.getGender() == null)
-                    return OAuthResult.OAuthResultDto.builder()
-                            .isLogin(false)
-                            .memberId(member.getMemberId())
-                            .jwt(tokenProvider.createAccessToken(member.getMemberId(), SocialType.GOOGLE.toString(), email))
-                            .build();
-                else
-                    return OAuthResult.OAuthResultDto.builder()
-                            .isLogin(true)
-                            .memberId(member.getMemberId())
-                            .jwt(tokenProvider.createAccessToken(member.getMemberId(), SocialType.GOOGLE.toString(), email))
-                            .build();}
-        Member newMember = memberRepository.save(MemberConverter.toOAuthMember(email, profileUrl));
-        if(type.equals("kakao"))
-            return OAuthResult.OAuthResultDto.builder()
-                    .isLogin(false)
-                    .memberId(newMember.getMemberId())
-                    .jwt(tokenProvider.createAccessToken(newMember.getMemberId(), SocialType.KAKAO.toString(), email))
-                    .build();
-        else
-            return OAuthResult.OAuthResultDto.builder()
-                    .isLogin(false)
-                    .memberId(newMember.getMemberId())
-                    .jwt(tokenProvider.createAccessToken(newMember.getMemberId(), SocialType.GOOGLE.toString(), email))
-                    .build();
+        if(member != null) {
+            if (type.equals("kakao"))
+                return OAuthResult.OAuthResultDto.builder()
+                        .isLogin(true)
+                        .memberId(member.getMemberId())
+                        .accessToken(tokenProvider.createAccessToken(member.getMemberId(), SocialType.KAKAO.toString(), email))
+                        .refreshToken(redisService.generateRefreshToken(email))
+                        .build();
+            else
+                return OAuthResult.OAuthResultDto.builder()
+                        .isLogin(true)
+                        .memberId(member.getMemberId())
+                        .accessToken(tokenProvider.createAccessToken(member.getMemberId(), SocialType.GOOGLE.toString(), email))
+                        .refreshToken(redisService.generateRefreshToken(email))
+                        .build();
+        }
+        return OAuthResult.OAuthResultDto.builder()
+                .isLogin(false)
+                .build();
     }
 
     @Override
@@ -93,15 +75,21 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional(readOnly = false)
-    public Member joinInfoComplete(MemberRequestDto.MemberInfoDto request, Member member){
-        Member joinUser = MemberConverter.toSocialMember(request, member);
-        for (int i = 0; i < request.getPreferBeverages().size(); i++) {
-            Category category = categoryRepository.findById(Long.valueOf(request.getPreferBeverages().get(i)))
-                    .orElseThrow(() -> new MemberException(Code.NO_CATEGORY_EXIST));
-            MemberPreferCategory memberPreferCategory = MemberConverter.toMemberPreferCategory(joinUser, category);
-            preferCategoryRepository.save(memberPreferCategory);
-        }
+    public OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type){
+        Member joinUser = MemberConverter.toSocialMember(request,type);
 
-        return joinUser;
+        request.getPreferBeverages().stream()
+                .map(prefer ->
+                        {
+                            Category category = categoryRepository.findById(prefer).orElseThrow(() -> new MemberException(Code.NO_CATEGORY_EXIST));
+                            MemberPreferCategory memberPreferCategory = MemberConverter.toMemberPreferCategory(joinUser, category);
+                            return preferCategoryRepository.save(memberPreferCategory);
+                        }
+                ).collect(Collectors.toList());
+
+        return OAuthJoin.OAuthJoinDto.builder()
+                .refreshToken(redisService.generateRefreshToken(request.getEmail()))
+                .accessToken(tokenProvider.createAccessToken(joinUser.getMemberId(), type.equals("kakao") ? SocialType.KAKAO.toString() : SocialType.GOOGLE.toString(),request.getEmail()))
+                .build();
     }
 }

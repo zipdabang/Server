@@ -16,21 +16,20 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import zipdabang.server.FeignClient.dto.OAuthInfoDto;
 import zipdabang.server.FeignClient.service.KakaoOauthService;
-import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.service.MemberService;
+import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 import org.springframework.web.bind.annotation.*;
 import zipdabang.server.sms.dto.SmsResponseDto;
-import zipdabang.server.utils.OAuthResult;
+import zipdabang.server.utils.dto.OAuthResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -65,8 +64,8 @@ public class MemberRestController {
 
     @Operation(summary = "소셜로그인 API", description = "소셜로그인 API, 응답으로 로그인(메인으로 이동), 회원가입(정보 입력으로 이동) code로 구분하며 query String으로 카카오인지 구글인지 주면 됩니다.")
     @ApiResponses({
-        @ApiResponse(responseCode = "2010",description = "OK, 정상응답"),
-        @ApiResponse(responseCode = "2011",description = "OK, 정상응답"),
+        @ApiResponse(responseCode = "2010",description = "OK, 로그인, access Token과 refresh 토큰을 반환함"),
+        @ApiResponse(responseCode = "2011",description = "OK, 회원가입, 디비에 유저정보 저장 X, 만약 회원정보 입력하다가 도망가면 그냥 처음부터 다시 할 것"),
         @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
@@ -76,8 +75,8 @@ public class MemberRestController {
     public ResponseDto<MemberResponseDto.SocialLoginDto> oauthKakao(
             @RequestBody MemberRequestDto.OAuthRequestDto oAuthRequestDto, @RequestParam(name = "type") String type) {
         OAuthResult.OAuthResultDto oAuthResultDto = memberService.kakaoSocialLogin(oAuthRequestDto.getEmail(), oAuthRequestDto.getProfileUrl(), type);
-        MemberResponseDto.SocialLoginDto socialLoginDto = MemberConverter.toSocialLoginDto(oAuthResultDto.getJwt());
-        return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN,socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN,socialLoginDto);
+        MemberResponseDto.SocialLoginDto socialLoginDto = MemberConverter.toSocialLoginDto(oAuthResultDto.getAccessToken(),oAuthResultDto.getRefreshToken());
+        return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN,socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN,null);
     }
 
     @GetMapping("/members/category")
@@ -88,13 +87,12 @@ public class MemberRestController {
         return ResponseDto.of(categoryList);
     }
 
-    //회원 정보 추가입력
+    //회원 정보 추가입력 = 회원가입 완료 + 로그인
     @PostMapping("/members/oauth/info")
-    public ResponseDto<MemberResponseDto.SocialInfoDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @AuthMember Member member) {
+    public ResponseDto<MemberResponseDto.SocialJoinDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @RequestParam(name = "type") String type) {
         log.info("body로 넘겨온 사용자 정보: {}", request.toString());
-        Member joinMember = memberService.joinInfoComplete(request, member);
-        log.info("로그인 된 사용자 정보: {}", member.toString());
-        return ResponseDto.of(MemberConverter.toSocialInfoDto(joinMember));
+        OAuthJoin.OAuthJoinDto oAuthJoinDto = memberService.joinInfoComplete(request, type);
+        return ResponseDto.of(MemberConverter.toSocialJoinDto(oAuthJoinDto));
     }
 
     //인증번호 요청

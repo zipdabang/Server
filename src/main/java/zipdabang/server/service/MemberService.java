@@ -2,7 +2,8 @@ package zipdabang.server.service;
 
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Member;
-import zipdabang.server.utils.OAuthResult;
+import zipdabang.server.utils.dto.OAuthJoin;
+import zipdabang.server.utils.dto.OAuthResult;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public interface MemberService {
 
     Optional<Member> checkExistNickname(String nickname);
     
-    Member joinInfoComplete(MemberRequestDto.MemberInfoDto request, Member member);
+    OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type);
 
     List<Category> getCategoryList();
 }

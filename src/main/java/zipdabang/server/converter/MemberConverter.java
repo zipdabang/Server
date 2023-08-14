@@ -11,6 +11,7 @@ import zipdabang.server.domain.member.InfoAgree;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.MemberPreferCategory;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
+import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
@@ -34,7 +35,7 @@ public class MemberConverter {
 //                .accessToken()
         }
 
-    public static Member toSocialMember(MemberRequestDto.MemberInfoDto request, Member member) {
+    public static Member toSocialMember(MemberRequestDto.MemberInfoDto request, String type) {
 
         String birthString = request.getBirth();
 
@@ -54,20 +55,33 @@ public class MemberConverter {
         LocalDate date = LocalDate.parse(MMDD, DateTimeFormatter.ofPattern("yyMMdd"));
         LocalDate completeDate = date.withYear(currentYear);
 
-        age = ChronoUnit.DAYS.between(completeDate, currentDate) >= 0 ? age + 1 : age;
-
+        age = ChronoUnit.DAYS.between(completeDate, currentDate) >= 0 ? age + 1 : age; // 최종 나이
         GenderType gender = Integer.valueOf(request.getGender()) % 2 == 0 ? GenderType.WOMAN : GenderType.MAN;
+
+        Member member = Member.builder()
+                .age(age)
+                .socialType(type.equals("kakao") ? SocialType.KAKAO : SocialType.GOOGLE)
+                .email(request.getEmail())
+                .profileUrl(request.getProfileUrl())
+                .nickname(request.getNickname())
+                .address(request.getAddress())
+                .detailAddress(request.getDetailAddress())
+                .gender(gender)
+                .name(request.getName())
+                .phoneNum(request.getPhoneNum())
+                .zipCode(request.getZipCode())
+                .build();
 
         InfoAgree infoAgree = new InfoAgree();
         infoAgree.update(request.getInfoAgree(), request.getInfoOthersAgree(), member);
 
-        return member.updateInfo(request, age, gender, infoAgree);
+        return staticMemberRepository.save(member);
     }
 
-    public static MemberResponseDto.SocialInfoDto toSocialInfoDto(Member member) {
-        return MemberResponseDto.SocialInfoDto.builder()
-                .memberId(member.getMemberId())
-                .nickname(member.getNickname())
+    public static MemberResponseDto.SocialJoinDto toSocialJoinDto(OAuthJoin.OAuthJoinDto result) {
+        return MemberResponseDto.SocialJoinDto.builder()
+                .refreshToken(result.getRefreshToken())
+                .accessToken(result.getAccessToken())
                 .build();
     }
 
@@ -99,9 +113,10 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.SocialLoginDto toSocialLoginDto(String jwt){
+    public static MemberResponseDto.SocialLoginDto toSocialLoginDto(String accessToken, String refreshToken){
         return MemberResponseDto.SocialLoginDto.builder()
-                .accessToken(jwt)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 

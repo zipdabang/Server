@@ -77,6 +77,10 @@ public class MemberRequestDto {
         @NotBlank
         private String birth;
         @NotBlank
+        private String email;
+        @NotBlank
+        private String profileUrl;
+        @NotBlank
         private String gender;
         @NotBlank
         private String zipCode;
@@ -92,7 +96,7 @@ public class MemberRequestDto {
         private Boolean infoAgree;
         private Boolean infoOthersAgree;
 
-        private List<Integer> preferBeverages;
+        private List<Long> preferBeverages;
 
     }
 
