@@ -21,7 +21,9 @@ public enum Code {
 
     // error Codes
 
+    JWT_FORBIDDEN(HttpStatus.FORBIDDEN, 4002, "이미 로그아웃 된 토큰입니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, 4003, "접근 권한이 없습니다."),
+
     BAD_REQUEST(HttpStatus.BAD_REQUEST,4005 ,"잘못된 요청 입니다."),
 
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 4006, "UnAuthorized"),
