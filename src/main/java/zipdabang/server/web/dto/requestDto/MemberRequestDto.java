@@ -10,20 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberRequestDto {
 
     @Getter @Setter
-    public static class logoutMember{
-        @Override
-        public String toString() {
-            return "logoutMember{" +
-                    "memberId=" + memberId +
-                    ", nickname='" + nickname + '\'' +
-                    '}';
-        }
-
-        private Long memberId;
-        private String nickname;
-    }
-
-    @Getter @Setter
     public static class quitMember {
         @Override
         public String toString() {

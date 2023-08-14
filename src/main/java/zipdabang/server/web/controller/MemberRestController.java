@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import zipdabang.server.FeignClient.service.KakaoOauthService;
+import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.MemberConverter;
@@ -45,18 +46,25 @@ public class MemberRestController {
 
     private final KakaoOauthService kakaoOauthService;
 
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "Authorization", description = "swagger에서 나오는 이건 무시하고 오른쪽 위의 자물쇠에 토큰 넣어서 테스트 하세요")
+    })
+
     @PostMapping("/members/logout")
-    public ResponseDto<MemberResponseDto.memberStatusDto> logout(@RequestBody MemberRequestDto.logoutMember request) {
-        return null;
+    public ResponseDto<MemberResponseDto.MemberStatusDto> logout(@AuthMember Member member, @RequestHeader(value = "Authorization",required = false) String authorizationHeader) {
+        String token = authorizationHeader.substring(7);
+        memberService.logout(token);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "logout"));
     }
 
     @PatchMapping("/members/quit")
-    public ResponseDto<MemberResponseDto.memberStatusDto> quit(@RequestBody MemberRequestDto.quitMember request) {
+    public ResponseDto<MemberResponseDto.MemberStatusDto> quit(@RequestBody MemberRequestDto.quitMember request) {
         return null;
     }
 
     @PatchMapping("/members/restore")
-    public ResponseDto<MemberResponseDto.memberStatusDto> restore(@RequestBody MemberRequestDto.restoreMember request) {
+    public ResponseDto<MemberResponseDto.MemberStatusDto> restore(@RequestBody MemberRequestDto.restoreMember request) {
         return null;
     }
 
@@ -74,7 +82,7 @@ public class MemberRestController {
     @PostMapping("/members/oauth")
     public ResponseDto<MemberResponseDto.SocialLoginDto> oauthKakao(
             @RequestBody MemberRequestDto.OAuthRequestDto oAuthRequestDto, @RequestParam(name = "type") String type) {
-        OAuthResult.OAuthResultDto oAuthResultDto = memberService.kakaoSocialLogin(oAuthRequestDto.getEmail(), oAuthRequestDto.getProfileUrl(), type);
+        OAuthResult.OAuthResultDto oAuthResultDto = memberService.SocialLogin(oAuthRequestDto.getEmail(), oAuthRequestDto.getProfileUrl(), type);
         MemberResponseDto.SocialLoginDto socialLoginDto = MemberConverter.toSocialLoginDto(oAuthResultDto.getAccessToken(),oAuthResultDto.getRefreshToken());
         return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN,socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN,null);
     }
@@ -108,7 +116,7 @@ public class MemberRestController {
 
     //프로필 수정
     @PatchMapping(value = "/members",consumes = { MediaType.MULTIPART_FORM_DATA_VALUE } )
-    public ResponseDto<MemberResponseDto.memberStatusDto> updateProfile (@ModelAttribute MemberRequestDto.memberProfileDto request )
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateProfile (@ModelAttribute MemberRequestDto.memberProfileDto request )
     {
         return null;
     }
@@ -136,7 +144,6 @@ public class MemberRestController {
         return member.isPresent() ?
                 ResponseDto.of(Code.NICKNAME_EXIST, nickname) : ResponseDto.of(Code.NICKNAME_OK, nickname);
     }
-
 
 
 }

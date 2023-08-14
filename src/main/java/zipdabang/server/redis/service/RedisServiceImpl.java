@@ -71,13 +71,15 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     @Transactional
-    public void saveLoginStatus(Long memberId, String accessToken) {
+    public String saveLoginStatus(Long memberId, String accessToken) {
         loginStatusRepository.save(
                 LoginStatus.builder()
                         .accessToken(accessToken)
                         .memberId(memberId)
                         .build()
         );
+
+        return accessToken;
     }
 
     @Override

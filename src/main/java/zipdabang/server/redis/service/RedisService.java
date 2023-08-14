@@ -9,7 +9,7 @@ public interface RedisService {
     String reGenerateRefreshToken(String refreshToken);
 
     // 로그아웃을 위해 로그인 되었다고 저장
-    void saveLoginStatus(Long memberId, String accessToken);
+    String saveLoginStatus(Long memberId, String accessToken);
 
     // 로그아웃 처리
     void resolveLogout(String accessToken);

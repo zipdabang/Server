@@ -1,6 +1,7 @@
 package zipdabang.server.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import zipdabang.server.auth.provider.TokenProvider;
@@ -20,6 +21,7 @@ import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.utils.dto.OAuthResult;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,21 +42,22 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public OAuthResult.OAuthResultDto kakaoSocialLogin(String email, String profileUrl, String type) {
+    public OAuthResult.OAuthResultDto SocialLogin(String email, String profileUrl, String type) {
         Member member = memberRepository.findByEmail(email).orElse(null);
         if(member != null) {
+            String accessToken = null;
             if (type.equals("kakao"))
                 return OAuthResult.OAuthResultDto.builder()
                         .isLogin(true)
                         .memberId(member.getMemberId())
-                        .accessToken(tokenProvider.createAccessToken(member.getMemberId(), SocialType.KAKAO.toString(), email))
+                        .accessToken(redisService.saveLoginStatus(member.getMemberId(),tokenProvider.createAccessToken(member.getMemberId(), SocialType.KAKAO.toString(), email, Arrays.asList(new SimpleGrantedAuthority("USER")))))
                         .refreshToken(redisService.generateRefreshToken(email))
                         .build();
             else
                 return OAuthResult.OAuthResultDto.builder()
                         .isLogin(true)
                         .memberId(member.getMemberId())
-                        .accessToken(tokenProvider.createAccessToken(member.getMemberId(), SocialType.GOOGLE.toString(), email))
+                        .accessToken(redisService.saveLoginStatus(member.getMemberId(), tokenProvider.createAccessToken(member.getMemberId(), SocialType.GOOGLE.toString(), email,Arrays.asList(new SimpleGrantedAuthority("USER")))))
                         .refreshToken(redisService.generateRefreshToken(email))
                         .build();
         }
@@ -74,6 +77,12 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
+    public void logout(String accessToken) {
+        redisService.resolveLogout(accessToken);
+    }
+
+    @Override
     @Transactional(readOnly = false)
     public OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type){
         Member joinUser = MemberConverter.toSocialMember(request,type);
@@ -89,7 +98,7 @@ public class MemberServiceImpl implements MemberService {
 
         return OAuthJoin.OAuthJoinDto.builder()
                 .refreshToken(redisService.generateRefreshToken(request.getEmail()))
-                .accessToken(tokenProvider.createAccessToken(joinUser.getMemberId(), type.equals("kakao") ? SocialType.KAKAO.toString() : SocialType.GOOGLE.toString(),request.getEmail()))
+                .accessToken(redisService.saveLoginStatus(joinUser.getMemberId(), tokenProvider.createAccessToken(joinUser.getMemberId(), type.equals("kakao") ? SocialType.KAKAO.toString() : SocialType.GOOGLE.toString(),request.getEmail(),Arrays.asList(new SimpleGrantedAuthority("USER")))))
                 .build();
     }
 }

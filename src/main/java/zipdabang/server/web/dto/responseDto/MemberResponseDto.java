@@ -54,8 +54,9 @@ public class MemberResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class memberStatusDto{
+    public static class MemberStatusDto{
         private Long memberId;
+        private String status;
         private LocalDateTime calledAt;
     }
 }

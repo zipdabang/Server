@@ -10,11 +10,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberService {
-    OAuthResult.OAuthResultDto kakaoSocialLogin(String email, String profileUrl, String type);
+    OAuthResult.OAuthResultDto SocialLogin(String email, String profileUrl, String type);
 
     Optional<Member> checkExistNickname(String nickname);
     
     OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type);
 
     List<Category> getCategoryList();
+
+    void logout(String accessToken);
 }

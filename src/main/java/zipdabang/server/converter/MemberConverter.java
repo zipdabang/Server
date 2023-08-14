@@ -17,6 +17,7 @@ import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
@@ -37,25 +38,28 @@ public class MemberConverter {
 
     public static Member toSocialMember(MemberRequestDto.MemberInfoDto request, String type) {
 
-        String birthString = request.getBirth();
+        // 생년월일 문자열을 LocalDate로 변환
+        String birth = request.getBirth().substring(0,2);
 
-        String YY = birthString.substring(0, 2);
-        String MMDD = birthString.substring(2);
-
+        // 현재 날짜를 가져옴
         LocalDate currentDate = LocalDate.now();
 
-        //만나이 계산
-        int age = currentDate.getYear() % 100 - Integer.valueOf(YY) - 1;
+        // 생년월일과 현재 날짜를 기준으로 만 나이 계산
+        int age = currentDate.getYear() % 100 - Integer.valueOf(birth)- 1;
 
-        if(age < 0)
+        if (age < 0)
             age += 100;
 
+        // 현재 연도를 가져옴
         int currentYear = LocalDate.now().getYear();
 
-        LocalDate date = LocalDate.parse(MMDD, DateTimeFormatter.ofPattern("yyMMdd"));
+        // 날짜 문자열을 LocalDate로 변환
+        LocalDate date = LocalDate.parse(request.getBirth(), DateTimeFormatter.ofPattern("yyMMdd"));
+
+        // 생년월일에 현재 연도를 설정하여 완전한 날짜로 만듦
         LocalDate completeDate = date.withYear(currentYear);
 
-        age = ChronoUnit.DAYS.between(completeDate, currentDate) >= 0 ? age + 1 : age; // 최종 나이
+        age = ChronoUnit.DAYS.between(completeDate, currentDate) >= 0 ? age + 1 : age;
         GenderType gender = Integer.valueOf(request.getGender()) % 2 == 0 ? GenderType.WOMAN : GenderType.MAN;
 
         Member member = Member.builder()
@@ -124,6 +128,14 @@ public class MemberConverter {
         return MemberPreferCategory.builder()
                 .member(member)
                 .category(category)
+                .build();
+    }
+
+    public static MemberResponseDto.MemberStatusDto toMemberStatusDto(Long memberId, String status){
+        return MemberResponseDto.MemberStatusDto.builder()
+                .memberId(memberId)
+                .status(status)
+                .calledAt(LocalDateTime.now())
                 .build();
     }
 }

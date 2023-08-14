@@ -6,7 +6,7 @@ import org.springframework.data.redis.core.RedisHash;
 
 import java.time.LocalDateTime;
 
-@RedisHash(value = "refreshToken", timeToLive = 180000)
+@RedisHash(value = "refreshTokenZipdabang", timeToLive = 180000)
 @Builder
 @Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
