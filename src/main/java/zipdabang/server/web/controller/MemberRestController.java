@@ -23,6 +23,8 @@ import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Member;
+import zipdabang.server.redis.domain.RefreshToken;
+import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.service.MemberService;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
@@ -45,6 +47,8 @@ public class MemberRestController {
     private final MemberService memberService;
 
     private final KakaoOauthService kakaoOauthService;
+
+    private final RedisService redisService;
 
     @Parameters({
             @Parameter(name = "member", hidden = true),
@@ -145,5 +149,15 @@ public class MemberRestController {
                 ResponseDto.of(Code.NICKNAME_EXIST, nickname) : ResponseDto.of(Code.NICKNAME_OK, nickname);
     }
 
+    @PostMapping("/members/new-token")
+    public ResponseDto<MemberResponseDto.IssueNewTokenDto> getNewToken(String refreshToken){
+        RefreshToken newRefreshToken = redisService.reGenerateRefreshToken(refreshToken);
+        String accessToken = memberService.regenerateAccessToken(newRefreshToken);
+        return ResponseDto.of(MemberConverter.toIssueNewTokenDto(accessToken, newRefreshToken.getToken()));
+    }
 
+    @GetMapping("/members/test")
+    public String test(){
+        return "test!";
+    }
 }

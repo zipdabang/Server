@@ -59,4 +59,13 @@ public class MemberResponseDto {
         private String status;
         private LocalDateTime calledAt;
     }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class IssueNewTokenDto{
+        private String refreshToken;
+        private String accessToken;
+    }
 }

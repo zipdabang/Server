@@ -1,11 +1,14 @@
 package zipdabang.server.redis.service;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.JwtAuthenticationException;
 import zipdabang.server.base.exception.handler.MemberException;
+import zipdabang.server.base.exception.handler.RefreshTokenExceptionHandler;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.redis.domain.LoginStatus;
 import zipdabang.server.redis.domain.RefreshToken;
@@ -15,6 +18,7 @@ import zipdabang.server.repository.memberRepositories.MemberRepository;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -28,9 +32,11 @@ public class RedisServiceImpl implements RedisService {
 
     private final LoginStatusRepository loginStatusRepository;
 
+    Logger logger = LoggerFactory.getLogger(RedisServiceImpl.class);
+
     @Override
     @Transactional
-    public String generateRefreshToken(String email) {
+    public RefreshToken generateRefreshToken(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
 
         String token = UUID.randomUUID().toString();
@@ -39,34 +45,41 @@ public class RedisServiceImpl implements RedisService {
         LocalDateTime currentTime = LocalDateTime.now();
 
         // test를 할 때는 plus 인자를 짧게
-        LocalDateTime expireTime = currentTime.plus(2, ChronoUnit.WEEKS);
+        LocalDateTime expireTime = currentTime.plus(1, ChronoUnit.MINUTES);
 
         return refreshTokenRepository.save(
                 RefreshToken.builder()
                         .memberId(memberId)
                         .token(token)
                         .expireTime(expireTime).build()
-        ).getToken();
+        );
     }
 
     @Override
     @Transactional
-    public String reGenerateRefreshToken(String refreshToken) {
-        RefreshToken findRefreshToken = refreshTokenRepository.findById(refreshToken).orElseThrow(() -> new JwtAuthenticationException(Code.JWT_REFRESH_TOKEN_EXPIRED));
+    public RefreshToken reGenerateRefreshToken(String refreshToken) {
+        RefreshToken findRefreshToken = refreshTokenRepository.findById(refreshToken).orElseThrow(() -> new RefreshTokenExceptionHandler(Code.JWT_REFRESH_TOKEN_EXPIRED));
         LocalDateTime expireTime = findRefreshToken.getExpireTime();
         LocalDateTime current = LocalDateTime.now();
-        LocalDateTime expireDeadLine = current.plusMinutes(30);
+        LocalDateTime expireDeadLine = current.plusSeconds(20);
 
         Member member = memberRepository.findById(findRefreshToken.getMemberId()).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
 
-        if(current.isAfter(expireTime))
-            throw new JwtAuthenticationException(Code.JWT_REFRESH_TOKEN_EXPIRED);
+        if(current.isAfter(expireTime)) {
+            logger.error("이미 만료된 리프레시 토큰 발견");
+            throw new RefreshTokenExceptionHandler(Code.JWT_REFRESH_TOKEN_EXPIRED);
+        }
 
         // 새로 발급할 accessToken보다 refreshToken이 먼저 만료 될 경우인가?
-        if(expireTime.isAfter(expireDeadLine))
-            return findRefreshToken.getToken();
-        else
+        if(expireTime.isAfter(expireDeadLine)) {
+            logger.info("기존 리프레시 토큰 발급");
+            return findRefreshToken;
+        }
+        else {
+            logger.info("accessToken보다 먼저 만료될 예정인 리프레시 토큰 발견");
+            deleteRefreshToken(refreshToken);
             return generateRefreshToken(member.getEmail());
+        }
     }
 
     @Override
@@ -87,6 +100,13 @@ public class RedisServiceImpl implements RedisService {
     public void resolveLogout(String accessToken) {
         LoginStatus loginStatus = loginStatusRepository.findById(accessToken).get();
         loginStatusRepository.delete(loginStatus);
+    }
+
+    @Override
+    public void deleteRefreshToken(String refreshToken) {
+        Optional<RefreshToken> target = refreshTokenRepository.findById(refreshToken);
+        if(target.isPresent())
+            refreshTokenRepository.delete(target.get());
     }
 
     @Override

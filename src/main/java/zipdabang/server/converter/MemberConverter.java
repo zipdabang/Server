@@ -138,4 +138,11 @@ public class MemberConverter {
                 .calledAt(LocalDateTime.now())
                 .build();
     }
+
+    public static MemberResponseDto.IssueNewTokenDto toIssueNewTokenDto(String accessToken, String refreshToken){
+        return MemberResponseDto.IssueNewTokenDto.builder()
+                .refreshToken(refreshToken)
+                .accessToken(accessToken)
+                .build();
+    }
 }

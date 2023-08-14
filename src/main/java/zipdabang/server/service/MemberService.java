@@ -2,6 +2,7 @@ package zipdabang.server.service;
 
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Member;
+import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.utils.dto.OAuthResult;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
@@ -19,4 +20,6 @@ public interface MemberService {
     List<Category> getCategoryList();
 
     void logout(String accessToken);
+
+    String regenerateAccessToken(RefreshToken refreshToken);
 }
