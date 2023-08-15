@@ -12,6 +12,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import zipdabang.server.auth.handler.JwtAccessDeniedHandler;
 import zipdabang.server.auth.handler.JwtAuthenticationEntryPoint;
 import zipdabang.server.auth.provider.TokenProvider;
+import zipdabang.server.redis.service.RedisService;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -23,6 +24,8 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     private final UrlBasedCorsConfigurationSource corsConfigurationSource;
+
+    private final RedisService redisService;
 
     private final TokenProvider tokenProvider;
     @Bean
@@ -36,7 +39,7 @@ public class SecurityConfig {
                         "/v3/api-docs",
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
-                        "/docs/**","/members/oauth"
+                        "/docs/**","/members/oauth", "/members/oauth/info","/members/new-token"
                 );
     }
 
@@ -61,7 +64,7 @@ public class SecurityConfig {
 
 
                 .and()
-                .apply(new JwtSecurityConfig(tokenProvider))
+                .apply(new JwtSecurityConfig(tokenProvider, redisService))
                 .and().build();
     }
 }

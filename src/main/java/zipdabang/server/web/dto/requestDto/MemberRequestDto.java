@@ -10,20 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberRequestDto {
 
     @Getter @Setter
-    public static class logoutMember{
-        @Override
-        public String toString() {
-            return "logoutMember{" +
-                    "memberId=" + memberId +
-                    ", nickname='" + nickname + '\'' +
-                    '}';
-        }
-
-        private Long memberId;
-        private String nickname;
-    }
-
-    @Getter @Setter
     public static class quitMember {
         @Override
         public String toString() {
@@ -77,6 +63,10 @@ public class MemberRequestDto {
         @NotBlank
         private String birth;
         @NotBlank
+        private String email;
+        @NotBlank
+        private String profileUrl;
+        @NotBlank
         private String gender;
         @NotBlank
         private String zipCode;
@@ -92,7 +82,7 @@ public class MemberRequestDto {
         private Boolean infoAgree;
         private Boolean infoOthersAgree;
 
-        private List<Integer> preferBeverages;
+        private List<Long> preferBeverages;
 
     }
 
@@ -143,5 +133,10 @@ public class MemberRequestDto {
         private String email;
         private String phoneNum;
         private MultipartFile profileImage;
+    }
+
+    @Getter @Setter
+    public static class IssueTokenDto{
+        String refreshToken;
     }
 }

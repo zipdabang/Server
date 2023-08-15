@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import zipdabang.server.FeignClient.dto.OAuthInfoDto;
 import zipdabang.server.FeignClient.service.KakaoOauthService;
 import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
@@ -24,13 +23,16 @@ import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Member;
+import zipdabang.server.redis.domain.RefreshToken;
+import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.service.MemberService;
+import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 import org.springframework.web.bind.annotation.*;
 import zipdabang.server.sms.dto.SmsResponseDto;
-import zipdabang.server.utils.OAuthResult;
+import zipdabang.server.utils.dto.OAuthResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,18 +48,27 @@ public class MemberRestController {
 
     private final KakaoOauthService kakaoOauthService;
 
+    private final RedisService redisService;
+
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "Authorization", description = "swagger에서 나오는 이건 무시하고 오른쪽 위의 자물쇠에 토큰 넣어서 테스트 하세요")
+    })
+
     @PostMapping("/members/logout")
-    public ResponseDto<MemberResponseDto.memberStatusDto> logout(@RequestBody MemberRequestDto.logoutMember request) {
-        return null;
+    public ResponseDto<MemberResponseDto.MemberStatusDto> logout(@AuthMember Member member, @RequestHeader(value = "Authorization",required = false) String authorizationHeader) {
+        String token = authorizationHeader.substring(7);
+        memberService.logout(token);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "logout"));
     }
 
     @PatchMapping("/members/quit")
-    public ResponseDto<MemberResponseDto.memberStatusDto> quit(@RequestBody MemberRequestDto.quitMember request) {
+    public ResponseDto<MemberResponseDto.MemberStatusDto> quit(@RequestBody MemberRequestDto.quitMember request) {
         return null;
     }
 
     @PatchMapping("/members/restore")
-    public ResponseDto<MemberResponseDto.memberStatusDto> restore(@RequestBody MemberRequestDto.restoreMember request) {
+    public ResponseDto<MemberResponseDto.MemberStatusDto> restore(@RequestBody MemberRequestDto.restoreMember request) {
         return null;
     }
 
@@ -65,8 +76,8 @@ public class MemberRestController {
 
     @Operation(summary = "소셜로그인 API", description = "소셜로그인 API, 응답으로 로그인(메인으로 이동), 회원가입(정보 입력으로 이동) code로 구분하며 query String으로 카카오인지 구글인지 주면 됩니다.")
     @ApiResponses({
-        @ApiResponse(responseCode = "2010",description = "OK, 정상응답"),
-        @ApiResponse(responseCode = "2011",description = "OK, 정상응답"),
+        @ApiResponse(responseCode = "2010",description = "OK, 로그인, access Token과 refresh 토큰을 반환함"),
+        @ApiResponse(responseCode = "2011",description = "OK, 회원가입, 디비에 유저정보 저장 X, 만약 회원정보 입력하다가 도망가면 그냥 처음부터 다시 할 것"),
         @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
@@ -75,9 +86,9 @@ public class MemberRestController {
     @PostMapping("/members/oauth")
     public ResponseDto<MemberResponseDto.SocialLoginDto> oauthKakao(
             @RequestBody MemberRequestDto.OAuthRequestDto oAuthRequestDto, @RequestParam(name = "type") String type) {
-        OAuthResult.OAuthResultDto oAuthResultDto = memberService.kakaoSocialLogin(oAuthRequestDto.getEmail(), oAuthRequestDto.getProfileUrl(), type);
-        MemberResponseDto.SocialLoginDto socialLoginDto = MemberConverter.toSocialLoginDto(oAuthResultDto.getJwt());
-        return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN,socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN,socialLoginDto);
+        OAuthResult.OAuthResultDto oAuthResultDto = memberService.SocialLogin(oAuthRequestDto.getEmail(), oAuthRequestDto.getProfileUrl(), type);
+        MemberResponseDto.SocialLoginDto socialLoginDto = MemberConverter.toSocialLoginDto(oAuthResultDto.getAccessToken(),oAuthResultDto.getRefreshToken());
+        return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN,socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN,null);
     }
 
     @GetMapping("/members/category")
@@ -88,13 +99,21 @@ public class MemberRestController {
         return ResponseDto.of(categoryList);
     }
 
-    //회원 정보 추가입력
+    //회원 정보 추가입력 = 회원가입 완료 + 로그인
+    @Operation(summary = "소셜 회원가입 최종 완료 API", description = "소셜로그인을 통한 회원가입 최종완료 API입니다.")
+    @Parameters({
+            @Parameter(name = "type", description = "kakao or google을 쿼리 스트링으로 소문자로만 필수로 주면 됨")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
+            @ApiResponse(responseCode = "4017", description = "BAD_REQEUST, 선호하는 음료 카테고리 id가 이상할 경우",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
     @PostMapping("/members/oauth/info")
-    public ResponseDto<MemberResponseDto.SocialInfoDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @AuthMember Member member) {
+    public ResponseDto<MemberResponseDto.SocialJoinDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @RequestParam(name = "type", required = true) String type) {
         log.info("body로 넘겨온 사용자 정보: {}", request.toString());
-        Member joinMember = memberService.joinInfoComplete(request, member);
-        log.info("로그인 된 사용자 정보: {}", member.toString());
-        return ResponseDto.of(MemberConverter.toSocialInfoDto(joinMember));
+        OAuthJoin.OAuthJoinDto oAuthJoinDto = memberService.joinInfoComplete(request, type);
+        return ResponseDto.of(MemberConverter.toSocialJoinDto(oAuthJoinDto));
     }
 
     //인증번호 요청
@@ -110,7 +129,7 @@ public class MemberRestController {
 
     //프로필 수정
     @PatchMapping(value = "/members",consumes = { MediaType.MULTIPART_FORM_DATA_VALUE } )
-    public ResponseDto<MemberResponseDto.memberStatusDto> updateProfile (@ModelAttribute MemberRequestDto.memberProfileDto request )
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateProfile (@ModelAttribute MemberRequestDto.memberProfileDto request )
     {
         return null;
     }
@@ -139,6 +158,21 @@ public class MemberRestController {
                 ResponseDto.of(Code.NICKNAME_EXIST, nickname) : ResponseDto.of(Code.NICKNAME_OK, nickname);
     }
 
+    @Operation(summary = "리프레쉬 토큰을 이용해 accessToken 재발급 API", description = "리프레쉬 토큰을 이용해 accessToken 재발급하는 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
+            @ApiResponse(responseCode = "4014",description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @PostMapping("/members/new-token")
+    public ResponseDto<MemberResponseDto.IssueNewTokenDto> getNewToken(MemberRequestDto.IssueTokenDto request){
+        RefreshToken newRefreshToken = redisService.reGenerateRefreshToken(request);
+        String accessToken = memberService.regenerateAccessToken(newRefreshToken);
+        return ResponseDto.of(MemberConverter.toIssueNewTokenDto(accessToken, newRefreshToken.getToken()));
+    }
 
-
+    @GetMapping("/members/test")
+    public String test(){
+        return "test!";
+    }
 }

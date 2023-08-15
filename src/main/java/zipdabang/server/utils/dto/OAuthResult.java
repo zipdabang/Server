@@ -1,4 +1,4 @@
-package zipdabang.server.utils;
+package zipdabang.server.utils.dto;
 
 import lombok.*;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,8 @@ public class OAuthResult {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class OAuthResultDto{
         Boolean isLogin;
-        String jwt;
+        String accessToken;
+        String refreshToken;
         Long memberId;
     }
 }
