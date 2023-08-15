@@ -15,6 +15,7 @@ import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.redis.repository.LoginStatusRepository;
 import zipdabang.server.redis.repository.RefreshTokenRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
+import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -57,8 +58,10 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     @Transactional
-    public RefreshToken reGenerateRefreshToken(String refreshToken) {
-        RefreshToken findRefreshToken = refreshTokenRepository.findById(refreshToken).orElseThrow(() -> new RefreshTokenExceptionHandler(Code.JWT_REFRESH_TOKEN_EXPIRED));
+    public RefreshToken reGenerateRefreshToken(MemberRequestDto.IssueTokenDto request) {
+        if(request.getRefreshToken() == null)
+            throw new MemberException(Code.REFRESH_TOKEN_NOT_FOUND);
+        RefreshToken findRefreshToken = refreshTokenRepository.findById(request.getRefreshToken()).orElseThrow(() -> new RefreshTokenExceptionHandler(Code.JWT_REFRESH_TOKEN_EXPIRED));
         LocalDateTime expireTime = findRefreshToken.getExpireTime();
         LocalDateTime current = LocalDateTime.now();
         LocalDateTime expireDeadLine = current.plusSeconds(20);
@@ -77,7 +80,7 @@ public class RedisServiceImpl implements RedisService {
         }
         else {
             logger.info("accessToken보다 먼저 만료될 예정인 리프레시 토큰 발견");
-            deleteRefreshToken(refreshToken);
+            deleteRefreshToken(request.getRefreshToken());
             return generateRefreshToken(member.getEmail());
         }
     }

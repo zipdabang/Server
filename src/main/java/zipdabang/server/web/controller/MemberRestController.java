@@ -100,8 +100,17 @@ public class MemberRestController {
     }
 
     //회원 정보 추가입력 = 회원가입 완료 + 로그인
+    @Operation(summary = "소셜 회원가입 최종 완료 API", description = "소셜로그인을 통한 회원가입 최종완료 API입니다.")
+    @Parameters({
+            @Parameter(name = "type", description = "kakao or google을 쿼리 스트링으로 소문자로만 필수로 주면 됨")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
+            @ApiResponse(responseCode = "4017", description = "BAD_REQEUST, 선호하는 음료 카테고리 id가 이상할 경우",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
     @PostMapping("/members/oauth/info")
-    public ResponseDto<MemberResponseDto.SocialJoinDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @RequestParam(name = "type") String type) {
+    public ResponseDto<MemberResponseDto.SocialJoinDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @RequestParam(name = "type", required = true) String type) {
         log.info("body로 넘겨온 사용자 정보: {}", request.toString());
         OAuthJoin.OAuthJoinDto oAuthJoinDto = memberService.joinInfoComplete(request, type);
         return ResponseDto.of(MemberConverter.toSocialJoinDto(oAuthJoinDto));
@@ -149,9 +158,15 @@ public class MemberRestController {
                 ResponseDto.of(Code.NICKNAME_EXIST, nickname) : ResponseDto.of(Code.NICKNAME_OK, nickname);
     }
 
+    @Operation(summary = "리프레쉬 토큰을 이용해 accessToken 재발급 API", description = "리프레쉬 토큰을 이용해 accessToken 재발급하는 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
+            @ApiResponse(responseCode = "4014",description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
     @PostMapping("/members/new-token")
-    public ResponseDto<MemberResponseDto.IssueNewTokenDto> getNewToken(String refreshToken){
-        RefreshToken newRefreshToken = redisService.reGenerateRefreshToken(refreshToken);
+    public ResponseDto<MemberResponseDto.IssueNewTokenDto> getNewToken(MemberRequestDto.IssueTokenDto request){
+        RefreshToken newRefreshToken = redisService.reGenerateRefreshToken(request);
         String accessToken = memberService.regenerateAccessToken(newRefreshToken);
         return ResponseDto.of(MemberConverter.toIssueNewTokenDto(accessToken, newRefreshToken.getToken()));
     }

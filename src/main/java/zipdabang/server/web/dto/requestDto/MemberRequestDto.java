@@ -134,4 +134,9 @@ public class MemberRequestDto {
         private String phoneNum;
         private MultipartFile profileImage;
     }
+
+    @Getter @Setter
+    public static class IssueTokenDto{
+        String refreshToken;
+    }
 }
