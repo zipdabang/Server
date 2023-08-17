@@ -48,6 +48,10 @@ public class MarketResponseDto {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class WatchedProductDto{
         private List<ProductDto> productList;
-        private Integer productListSize;
+        Long totalElements;
+        Integer currentPageElements;
+        Integer totalPage;
+        Boolean isFirst;
+        Boolean isLast;
     }
 }
