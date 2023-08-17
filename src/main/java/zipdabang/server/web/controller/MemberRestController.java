@@ -50,9 +50,15 @@ public class MemberRestController {
 
     private final RedisService redisService;
 
+    @Operation(summary = "로그아웃 API", description = "로그아웃 API 입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "Authorization", description = "swagger에서 나오는 이건 무시하고 오른쪽 위의 자물쇠에 토큰 넣어서 테스트 하세요")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공, 로그아웃, access toekn + refresh 토큰 버려주세요"),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+
     })
     @PostMapping("/members/logout")
     public ResponseDto<MemberResponseDto.MemberStatusDto> logout(@AuthMember Member member, @RequestHeader(value = "Authorization",required = false) String authorizationHeader) {
