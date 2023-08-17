@@ -1,6 +1,7 @@
 package zipdabang.server.converter.market;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import zipdabang.server.domain.market.MarketCategory;
 import zipdabang.server.domain.market.Product;
@@ -54,14 +55,18 @@ public class ProductConverter {
                 .build();
     }
 
-    public static MarketResponseDto.WatchedProductDto toWatchedProductDto(List<Product> productList){
+    public static MarketResponseDto.WatchedProductDto toWatchedProductDto(Page<Product> productList){
         List<MarketResponseDto.ProductDto> productDtoList = productList.stream().map(
                 product -> toProductDto(product)
         ).collect(Collectors.toList());
 
         return MarketResponseDto.WatchedProductDto.builder()
                 .productList(productDtoList)
-                .productListSize(productDtoList.size())
+                .totalElements(productList.getTotalElements())
+                .currentPageElements(productDtoList.size())
+                .totalPage(productList.getTotalPages())
+                .isFirst(productList.isFirst())
+                .isLast(productList.isLast())
                 .build();
     }
 }
