@@ -24,4 +24,6 @@ public class MarketCategory extends BaseEntity {
     private Long id;
 
     private String name;
+
+    private String imageUrl;
 }

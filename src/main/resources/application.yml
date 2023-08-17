@@ -11,7 +11,7 @@ spring:
     ansi:
       enabled: always
 
-  # local redis
+##  # local redis
 #  redis:
 #    host:localhost
 

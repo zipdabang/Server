@@ -19,6 +19,13 @@ public enum Code {
     NICKNAME_EXIST(HttpStatus.OK,2010, "닉네임이 이미 존재합니다."),
     NICKNAME_OK(HttpStatus.OK,2011, "사용 가능한 닉네임 입니다."),
 
+
+
+
+    // marget response
+
+    WATCHED_NOT_FOUND(HttpStatus.OK, 2060, "조회했던 아이템이 없습니다."),
+
     // error Codes
 
     JWT_FORBIDDEN(HttpStatus.FORBIDDEN, 4002, "이미 로그아웃 된 토큰입니다."),
@@ -38,6 +45,13 @@ public enum Code {
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, 4014,"refresh token이 필요합니다."),
 
     NO_CATEGORY_EXIST(HttpStatus.BAD_REQUEST, 4017, "선호하는 음료 카테고리가 잘못 되었습니다."),
+
+    PAGE_INDEX_ERROR(HttpStatus.BAD_REQUEST, 4018, "페이지 번호가 이상합니다."),
+
+
+
+    // market error
+
 
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),
     FEIGN_CLIENT_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "Inter server Error in feign client");
