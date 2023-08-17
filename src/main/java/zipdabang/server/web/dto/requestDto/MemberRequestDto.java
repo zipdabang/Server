@@ -49,7 +49,6 @@ public class MemberRequestDto {
     @Setter
     public static class OAuthRequestDto {
         private String email;
-        private String profileUrl;
     }
 
 

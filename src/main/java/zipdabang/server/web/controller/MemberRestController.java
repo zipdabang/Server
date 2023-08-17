@@ -54,7 +54,6 @@ public class MemberRestController {
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "Authorization", description = "swagger에서 나오는 이건 무시하고 오른쪽 위의 자물쇠에 토큰 넣어서 테스트 하세요")
     })
-
     @PostMapping("/members/logout")
     public ResponseDto<MemberResponseDto.MemberStatusDto> logout(@AuthMember Member member, @RequestHeader(value = "Authorization",required = false) String authorizationHeader) {
         String token = authorizationHeader.substring(7);
@@ -86,7 +85,7 @@ public class MemberRestController {
     @PostMapping("/members/oauth")
     public ResponseDto<MemberResponseDto.SocialLoginDto> oauthKakao(
             @RequestBody MemberRequestDto.OAuthRequestDto oAuthRequestDto, @RequestParam(name = "type") String type) {
-        OAuthResult.OAuthResultDto oAuthResultDto = memberService.SocialLogin(oAuthRequestDto.getEmail(), oAuthRequestDto.getProfileUrl(), type);
+        OAuthResult.OAuthResultDto oAuthResultDto = memberService.SocialLogin(oAuthRequestDto.getEmail(), type);
         MemberResponseDto.SocialLoginDto socialLoginDto = MemberConverter.toSocialLoginDto(oAuthResultDto.getAccessToken(),oAuthResultDto.getRefreshToken());
         return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN,socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN,null);
     }

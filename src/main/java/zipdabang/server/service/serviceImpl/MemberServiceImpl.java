@@ -43,7 +43,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public OAuthResult.OAuthResultDto SocialLogin(String email, String profileUrl, String type) {
+    public OAuthResult.OAuthResultDto SocialLogin(String email,String type) {
         Member member = memberRepository.findByEmail(email).orElse(null);
         if(member != null) {
             String accessToken = null;
