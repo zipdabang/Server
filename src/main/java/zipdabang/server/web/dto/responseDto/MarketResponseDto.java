@@ -10,7 +10,7 @@ public class MarketResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    private static class ProductCategoryDto{
+    public static class ProductCategoryDto{
         private Long categoryId;
         private String name;
         private String categoryImageUrl;
@@ -20,7 +20,7 @@ public class MarketResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    private static class ProductDto{
+    public static class ProductDto{
         private Long productId;
         private Long productCategoryId;
         private String productImageUrl;
