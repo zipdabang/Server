@@ -16,28 +16,35 @@ import java.time.LocalDateTime;
 @DynamicInsert
 @DynamicUpdate
 @Entity
-public class InfoAgree extends BaseEntity {
+public class TermsAgree extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
 
-    private Boolean infoOthersAgree;
+    private LocalDate infoAgreeDate;
 
-    private Boolean infoAgreeBoolean;
-
-    private LocalDateTime infoAgreeDate;
-
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="member_id", nullable = false)
     private Member member;
 
-    public InfoAgree update(Boolean infoAgreeBoolean, Boolean infoOthersAgree, Member member) {
-        this.infoAgreeBoolean = infoAgreeBoolean;
-        this.infoOthersAgree =infoOthersAgree;
-        this.infoAgreeDate = LocalDateTime.now();
-        this.member=member;
+    @ManyToOne
+    @JoinColumn(name = "terms_id")
+    private Terms terms;
 
-        return this;
+    public void setMember(Member member) {
+        if(this.member != null) {
+            member.getTermsAgree().remove(this);
+        }
+        this.member = member;
+        member.getTermsAgree().add(this);
+    }
+
+    public void setTerms(Terms terms){
+        if(this.terms != null) {
+            terms.getTermsAgreeList().remove(this);
+        }
+        this.terms = terms;
+        terms.getTermsAgreeList().add(this);
     }
 }

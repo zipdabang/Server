@@ -1,6 +1,9 @@
 package zipdabang.server.utils.dto;
 
 import lombok.*;
+import zipdabang.server.domain.member.Terms;
+
+import java.util.List;
 
 public class OAuthJoin {
 
@@ -11,5 +14,6 @@ public class OAuthJoin {
     public static class OAuthJoinDto{
         String accessToken;
         String refreshToken;
+        List<Terms> termsList;
     }
 }
