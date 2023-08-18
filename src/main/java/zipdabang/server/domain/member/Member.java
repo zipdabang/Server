@@ -77,8 +77,8 @@ public class Member extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String profileUrl;
 
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
-    private InfoAgree infoAgree;
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<TermsAgree> termsAgree;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<ReceiveInfo> receiveInfoList;
@@ -98,17 +98,4 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Recipe> recipeList;
 
-    public Member updateInfo(MemberRequestDto.MemberInfoDto request, int age, GenderType gender, InfoAgree infoAgree) {
-        this.name = request.getName();
-        this.age = age;
-        this.infoAgree = infoAgree;
-        this.nickname =request.getNickname();
-        this.gender = gender;
-        this.birth = request.getBirth();
-        this.phoneNum = request.getPhoneNum();
-        this.zipCode = request.getZipCode();
-        this.address = request.getAddress();
-        this.detailAddress =request.getDetailAddress();
-        return this;
-    }
 }

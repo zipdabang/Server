@@ -105,7 +105,7 @@ public class MemberRestController {
     }
 
     //회원 정보 추가입력 = 회원가입 완료 + 로그인
-    @Operation(summary = "소셜 회원가입 최종 완료 API", description = "소셜로그인을 통한 회원가입 최종완료 API입니다.")
+    @Operation(summary = "소셜 회원가입 최종 완료 API", description = "소셜로그인을 통한 회원가입 최종완료 API입니다. agreeTermsIdList는 동의 한(선택 약관 중) 약관의 Id를 주세요 약관의 Id는 약관 조회 API에서 준 데이터에서 가져오세요")
     @Parameters({
             @Parameter(name = "type", description = "kakao or google을 쿼리 스트링으로 소문자로만 필수로 주면 됨")
     })
@@ -179,5 +179,16 @@ public class MemberRestController {
     @GetMapping("/members/test")
     public String test(){
         return "test!";
+    }
+
+    @Operation(summary = "이용약관 조회 API", description = "이용약관 조회 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
+            @ApiResponse(responseCode = "4014",description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/members/terms")
+    public ResponseDto<MemberResponseDto.TermsListDto> showTerms(){
+        return ResponseDto.of(MemberConverter.toTermsDto(memberService.getAllTerms()));
     }
 }

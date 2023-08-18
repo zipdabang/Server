@@ -78,8 +78,7 @@ public class MemberRequestDto {
         @NotBlank
         private String phoneNum;
 
-        private Boolean infoAgree;
-        private Boolean infoOthersAgree;
+        private List<Long> agreeTermsIdList;
 
         private List<Long> preferBeverages;
 

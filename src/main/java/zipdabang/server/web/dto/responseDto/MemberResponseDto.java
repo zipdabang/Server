@@ -1,9 +1,11 @@
 package zipdabang.server.web.dto.responseDto;
 
 import lombok.*;
+import zipdabang.server.domain.member.Terms;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class MemberResponseDto {
 
@@ -67,5 +69,24 @@ public class MemberResponseDto {
     public static class IssueNewTokenDto{
         private String refreshToken;
         private String accessToken;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TermsDto{
+        Long termsId;
+        String termsTitle;
+        String termsBody;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TermsListDto{
+        List<TermsDto> termsList;
+        Integer size;
     }
 }

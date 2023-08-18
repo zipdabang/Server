@@ -7,7 +7,8 @@ import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.SocialType;
-import zipdabang.server.domain.member.InfoAgree;
+import zipdabang.server.domain.member.Terms;
+import zipdabang.server.domain.member.TermsAgree;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.MemberPreferCategory;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
@@ -20,6 +21,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -74,11 +78,8 @@ public class MemberConverter {
                 .name(request.getName())
                 .phoneNum(request.getPhoneNum())
                 .zipCode(request.getZipCode())
+                .termsAgree(new ArrayList<>())
                 .build();
-
-        InfoAgree infoAgree = new InfoAgree();
-        infoAgree.update(request.getInfoAgree(), request.getInfoOthersAgree(), member);
-
         return staticMemberRepository.save(member);
     }
 
@@ -143,6 +144,23 @@ public class MemberConverter {
         return MemberResponseDto.IssueNewTokenDto.builder()
                 .refreshToken(refreshToken)
                 .accessToken(accessToken)
+                .build();
+    }
+
+    public static MemberResponseDto.TermsDto toTermsDto(Terms terms){
+        return MemberResponseDto.TermsDto.builder()
+                .termsId(terms.getId())
+                .termsTitle(terms.getTermsTitle())
+                .termsBody(terms.getTermsBody())
+                .build();
+    }
+
+    public static MemberResponseDto.TermsListDto toTermsDto(List<Terms> termsList){
+        List<MemberResponseDto.TermsDto> termsBodyList = termsList.stream()
+                .map(terms -> toTermsDto(terms)).collect(Collectors.toList());
+        return MemberResponseDto.TermsListDto.builder()
+                .termsList(termsBodyList)
+                .size(termsBodyList.size())
                 .build();
     }
 }

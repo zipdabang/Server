@@ -12,7 +12,11 @@ import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.MemberPreferCategory;
+import zipdabang.server.domain.member.Terms;
+import zipdabang.server.domain.member.TermsAgree;
 import zipdabang.server.redis.domain.RefreshToken;
+import zipdabang.server.redis.repository.TermsAgreeRepository;
+import zipdabang.server.redis.repository.TermsRepository;
 import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.repository.CategoryRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
@@ -22,6 +26,7 @@ import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.utils.dto.OAuthResult;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +43,10 @@ public class MemberServiceImpl implements MemberService {
 
     private final CategoryRepository categoryRepository;
     private final PreferCategoryRepository preferCategoryRepository;
+
+    private final TermsRepository termsRepository;
+
+    private final TermsAgreeRepository termsAgreeRepository;
 
     private final RedisService redisService;
 
@@ -90,8 +99,14 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public List<Terms> getAllTerms() {
+        return termsRepository.findAll();
+    }
+
+    @Override
     @Transactional(readOnly = false)
     public OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type){
+        List<Terms> termsList = termsRepository.findByIdIn(request.getAgreeTermsIdList());
         Member joinUser = MemberConverter.toSocialMember(request,type);
 
         request.getPreferBeverages().stream()
@@ -102,6 +117,20 @@ public class MemberServiceImpl implements MemberService {
                             return preferCategoryRepository.save(memberPreferCategory);
                         }
                 ).collect(Collectors.toList());
+
+        termsList.stream()
+                .map(terms ->
+                {
+                    TermsAgree savedTermsAgree  = termsAgreeRepository.save(
+                            TermsAgree.builder()
+                            .terms(terms)
+                            .member(joinUser)
+                                    .infoAgreeDate(LocalDate.now())
+                            .build());
+                    savedTermsAgree.setMember(joinUser);
+                    savedTermsAgree.setTerms(terms);
+                    return savedTermsAgree;
+                }).collect(Collectors.toList());
 
         return OAuthJoin.OAuthJoinDto.builder()
                 .refreshToken(redisService.generateRefreshToken(request.getEmail()).getToken())
