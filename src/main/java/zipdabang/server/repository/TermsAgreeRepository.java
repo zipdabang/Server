@@ -1,4 +1,4 @@
-package zipdabang.server.redis.repository;
+package zipdabang.server.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import zipdabang.server.domain.member.TermsAgree;
