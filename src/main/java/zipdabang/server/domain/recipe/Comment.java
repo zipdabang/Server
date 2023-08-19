@@ -22,10 +22,7 @@ public class Comment extends BaseEntity {
     private Long id;
 
     @Column(columnDefinition = "TEXT")
-    private String imageUrl;
-
-    @Column(columnDefinition = "TEXT")
-    private String contents;
+    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)

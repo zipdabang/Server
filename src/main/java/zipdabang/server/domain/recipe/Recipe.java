@@ -34,6 +34,11 @@ public class Recipe extends BaseEntity {
     @Column(length = 500)
     private String intro;
 
+    @Column(length = 500)
+    private String recipeTip;
+
+    private String time;
+
     private Float starScore;
     @Column(columnDefinition = "BIGINT DEFAULT 0")
     private Long totalView;
