@@ -79,7 +79,7 @@ public class MemberRestController {
 
     //소셜로그인
 
-    @Operation(summary = "소셜로그인 API", description = "소셜로그인 API, 응답으로 로그인(메인으로 이동), 회원가입(정보 입력으로 이동) code로 구분하며 query String으로 카카오인지 구글인지 주면 됩니다.")
+    @Operation(summary = "🎪figma[온보딩1] 소셜로그인 API ✔️", description = "소셜로그인 API, 응답으로 로그인(메인으로 이동), 회원가입(정보 입력으로 이동) code로 구분하며 query String으로 카카오인지 구글인지 주면 됩니다.")
     @ApiResponses({
         @ApiResponse(responseCode = "2010",description = "OK, 로그인, access Token과 refresh 토큰을 반환함"),
         @ApiResponse(responseCode = "2011",description = "OK, 회원가입, 디비에 유저정보 저장 X, 만약 회원정보 입력하다가 도망가면 그냥 처음부터 다시 할 것"),
@@ -105,7 +105,7 @@ public class MemberRestController {
     }
 
     //회원 정보 추가입력 = 회원가입 완료 + 로그인
-    @Operation(summary = "소셜 회원가입 최종 완료 API", description = "소셜로그인을 통한 회원가입 최종완료 API입니다. agreeTermsIdList는 동의 한(선택 약관 중) 약관의 Id를 주세요 약관의 Id는 약관 조회 API에서 준 데이터에서 가져오세요")
+    @Operation(summary = "🎪figma[회원가입 까지 페이지 -  회원가입 완료 시] 소셜 회원가입 최종 완료 API ✔️", description = "소셜로그인을 통한 회원가입 최종완료 API입니다. agreeTermsIdList는 동의 한(선택 약관 중) 약관의 Id를 주세요 약관의 Id는 약관 조회 API에서 준 데이터에서 가져오세요")
     @Parameters({
             @Parameter(name = "type", description = "kakao or google을 쿼리 스트링으로 소문자로만 필수로 주면 됨")
     })
@@ -163,7 +163,7 @@ public class MemberRestController {
                 ResponseDto.of(Code.NICKNAME_EXIST, nickname) : ResponseDto.of(Code.NICKNAME_OK, nickname);
     }
 
-    @Operation(summary = "리프레쉬 토큰을 이용해 accessToken 재발급 API", description = "리프레쉬 토큰을 이용해 accessToken 재발급하는 API입니다.")
+    @Operation(summary = "리프레쉬 토큰을 이용해 accessToken 재발급 API ✔️", description = "리프레쉬 토큰을 이용해 accessToken 재발급하는 API입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
             @ApiResponse(responseCode = "4014",description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -181,7 +181,7 @@ public class MemberRestController {
         return "test!";
     }
 
-    @Operation(summary = "이용약관 조회 API", description = "이용약관 조회 API입니다.")
+    @Operation(summary = "🎪figma[회원가입 까지 페이지 - 이용약관] 이용약관 조회 API ✔️", description = "이용약관 조회 API입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
             @ApiResponse(responseCode = "4014",description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
