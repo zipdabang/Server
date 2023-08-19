@@ -10,26 +10,31 @@ import java.util.List;
 
 public class RecipeRequestDto {
 
+    /**
+     * 재정의 필요
+     */
     @Getter @Setter
     public static class CreateRecipeDto{
 
-        Long categoryId;
-        Boolean isInfluencer;
-        String name;
+        List<Long> categoryId;
         MultipartFile thumbnailUrl;
+        String name;
+        String time;
+        String intro;
+        String recipeTip;
+        Integer stepCount;
+        Integer ingredientCount;
         List<StepDto> steps;
         List<NewIngredientDto> ingredients;
     }
 
     public static class NewIngredientDto{
-        private String IngredientName;
+        private String ingredientName;
         private String quantity;
-        private MultipartFile image;
     }
 
     public static class StepDto{
         private Integer stepNum;
-        private String stepTitle;
         private String description;
         private MultipartFile image;
     }

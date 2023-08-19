@@ -26,6 +26,9 @@ public enum Code {
 
     WATCHED_NOT_FOUND(HttpStatus.OK, 2060, "조회했던 아이템이 없습니다."),
 
+    //recipe response
+    RECIPE_NOT_FOUND(HttpStatus.OK, 2100, "해당되는 레시피가 없습니다"),
+
     // error Codes
 
     JWT_FORBIDDEN(HttpStatus.FORBIDDEN, 4002, "이미 로그아웃 된 토큰입니다."),
@@ -51,6 +54,9 @@ public enum Code {
 
 
     // market error
+
+    //recipe error
+    NULL_RECIPE_ERROR(HttpStatus.BAD_REQUEST, 4100, "레시피 작성시 누락된 내용이 있습니다."),
 
 
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),

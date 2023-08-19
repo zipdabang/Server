@@ -21,7 +21,6 @@ public class Step extends BaseEntity {
     @Column(nullable = false)
     private Long id;
 
-    private String title;
     private Integer stepNum;
 
     @Column(columnDefinition = "TEXT")
