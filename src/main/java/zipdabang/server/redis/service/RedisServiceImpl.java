@@ -46,7 +46,7 @@ public class RedisServiceImpl implements RedisService {
         LocalDateTime currentTime = LocalDateTime.now();
 
         // test를 할 때는 plus 인자를 짧게
-        LocalDateTime expireTime = currentTime.plus(1, ChronoUnit.MINUTES);
+        LocalDateTime expireTime = currentTime.plus(1000, ChronoUnit.MINUTES);
 
         return refreshTokenRepository.save(
                 RefreshToken.builder()
