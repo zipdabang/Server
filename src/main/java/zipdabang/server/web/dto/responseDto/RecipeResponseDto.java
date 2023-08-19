@@ -62,7 +62,16 @@ public class RecipeResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class RecipeSearchDto {
+    public static class RecipeListDto {
+        private List<RecipeSimpleDto> recipeList;
+        Long totalElements;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RecipePageListDto {
         private List<RecipeSimpleDto> recipeList;
         Long totalElements;
         Integer currentPageElements;
@@ -111,11 +120,4 @@ public class RecipeResponseDto {
         private LocalDate createdAt;
     }
 
-    @Builder
-    @Getter
-    @AllArgsConstructor(access = AccessLevel.PROTECTED)
-    @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class CreateRecipeDto {
-        private Long recipeId;
-    }
 }
