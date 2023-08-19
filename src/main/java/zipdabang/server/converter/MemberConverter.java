@@ -152,6 +152,7 @@ public class MemberConverter {
                 .termsId(terms.getId())
                 .termsTitle(terms.getTermsTitle())
                 .termsBody(terms.getTermsBody())
+                .isMoreToSee(terms.getIsMoreToSee())
                 .build();
     }
 

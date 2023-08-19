@@ -79,6 +79,7 @@ public class MemberResponseDto {
         Long termsId;
         String termsTitle;
         String termsBody;
+        Boolean isMoreToSee;
     }
 
     @Builder

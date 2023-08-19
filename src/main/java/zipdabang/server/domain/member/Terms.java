@@ -23,6 +23,8 @@ public class Terms {
 
     private String termsBody;
 
+    private Boolean isMoreToSee;
+
     @OneToMany(mappedBy = "terms", cascade = CascadeType.ALL)
     private List<TermsAgree> termsAgreeList;
 }
