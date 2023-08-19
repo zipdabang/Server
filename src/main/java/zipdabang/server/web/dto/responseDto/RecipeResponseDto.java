@@ -23,7 +23,7 @@ public class RecipeResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class RecipeDto {
+    public static class RecipeSimpleDto {
         private Long recipeId;
         List<Long> categoryId;
         private String recipeName;
@@ -37,13 +37,33 @@ public class RecipeResponseDto {
         private Boolean isScrapped;
     }
 
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RecipeDto {
+        private Long recipeId;
+        List<Long> categoryId;
+        private String recipeName;
+        private String owner;
+        private String thumbnailUrl;
+        private String time;
+        private String intro;
+        private String recipeTip;
+        private LocalDate createdAt;
+        private Long likes;
+        private Long comments;
+        private Long scraps;
+        private Boolean isLiked;
+        private Boolean isScrapped;
+    }
 
     @Builder
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class RecipeSearchDto {
-        private List<RecipeDto> recipeList;
+        private List<RecipeSimpleDto> recipeList;
         Long totalElements;
         Integer currentPageElements;
         Integer totalPage;
@@ -62,17 +82,29 @@ public class RecipeResponseDto {
         private List<CommentDto> comments;
     }
 
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class IngredientDto{
         private String IngredientName;
         private String quantity;
     }
 
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class StepDto{
         private Integer stepNum;
         private String description;
         private MultipartFile image;
     }
 
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class CommentDto{
         private String owner;
         private String content;
