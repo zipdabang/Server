@@ -23,9 +23,6 @@ public class Ingredient extends BaseEntity {
 
     private String name;
 
-    @Column(columnDefinition = "TEXT")
-    private String imageUrl;
-
     @Column(length = 100)
     private String quantity;
 

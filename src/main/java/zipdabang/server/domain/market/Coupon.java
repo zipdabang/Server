@@ -4,7 +4,7 @@ import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import zipdabang.server.domain.member.Member;
+import zipdabang.server.domain.market.member.Member;
 import zipdabang.server.domain.common.BaseEntity;
 
 import javax.persistence.*;

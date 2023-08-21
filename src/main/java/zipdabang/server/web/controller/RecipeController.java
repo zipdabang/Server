@@ -14,7 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.ResponseDto;
-import zipdabang.server.domain.member.Member;
+import zipdabang.server.domain.market.member.Member;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
@@ -24,16 +24,6 @@ import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 @Tag(name = "레시피 관련 API", description = "레시피 관련 API 모음입니다.")
 public class
 RecipeController {
-
-    /*
-    @Parameters({
-            @Parameter(name = "member", hidden = true)
-    })
-    @PostMapping(value = "/members/recipes",consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseDto<RecipeResponseDto.RecipeStatusDto> createRecipe(@ModelAttribute RecipeRequestDto.CreateRecipeDto request, @AuthMember Member member){
-        return null;
-    }
-     */
 
     @Operation(summary = "🍹figma 레시피 작성하기1, 레시피 등록 API 🔑", description = "레시피 (작성)등록 화면 API입니다. 임시저장 api는 별도로 있음. step이랑 ingredient 몇개 들어오는지 각Count에 적어주세요")
     @ApiResponses({

@@ -7,7 +7,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.common.BaseEntity;
-import zipdabang.server.domain.member.Member;
+import zipdabang.server.domain.market.member.Member;
 
 import java.util.List;
 
@@ -39,6 +39,7 @@ public class Recipe extends BaseEntity {
 
     private String time;
 
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
     private Float starScore;
     @Column(columnDefinition = "BIGINT DEFAULT 0")
     private Long totalView;
@@ -64,20 +65,19 @@ public class Recipe extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
+    private List<RecipeCategoryMapping> categoryMappingList;
 
-    @OneToMany(mappedBy = "recipe")
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     private List<Comment> commentList;
 
-    @OneToMany(mappedBy = "recipe")
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     private List<Likes> likesList;
 
     @OneToMany(mappedBy = "recipe")
     private List<Scrap> scrapList;
 
-    @OneToMany(mappedBy = "recipe")
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     private List<Step> stepList;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
@@ -85,4 +85,16 @@ public class Recipe extends BaseEntity {
 
     @OneToOne(mappedBy = "recipe", cascade = CascadeType.ALL)
     private WeeklyBestRecipe weeklyBestRecipe;
+
+    public void addIngredient(Ingredient ingredient){
+        this.ingredientList.add(ingredient);
+    }
+
+    public void addStep(Step step) {
+        this.stepList.add(step);
+    }
+
+    public void addCategory(RecipeCategoryMapping categoryMapping) {
+        this.categoryMappingList.add(categoryMapping);
+    }
 }

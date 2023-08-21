@@ -1,8 +1,8 @@
 package zipdabang.server.service;
 
 import zipdabang.server.domain.Category;
-import zipdabang.server.domain.member.Member;
-import zipdabang.server.domain.member.Terms;
+import zipdabang.server.domain.market.member.Member;
+import zipdabang.server.domain.market.member.Terms;
 import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.utils.dto.OAuthResult;

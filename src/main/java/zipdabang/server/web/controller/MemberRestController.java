@@ -22,7 +22,7 @@ import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
-import zipdabang.server.domain.member.Member;
+import zipdabang.server.domain.market.member.Member;
 import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.service.MemberService;

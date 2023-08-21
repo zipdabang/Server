@@ -10,9 +10,6 @@ import java.util.List;
 
 public class RecipeRequestDto {
 
-    /**
-     * 재정의 필요
-     */
     @Getter @Setter
     public static class CreateRecipeDto{
 
@@ -28,11 +25,13 @@ public class RecipeRequestDto {
         List<NewIngredientDto> ingredients;
     }
 
+    @Getter
     public static class NewIngredientDto{
         private String ingredientName;
         private String quantity;
     }
 
+    @Getter
     public static class StepDto{
         private Integer stepNum;
         private String description;
