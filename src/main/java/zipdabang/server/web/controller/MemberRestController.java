@@ -61,9 +61,9 @@ public class MemberRestController {
 
     })
     @PostMapping("/members/logout")
-    public ResponseDto<MemberResponseDto.MemberStatusDto> logout(@AuthMember Member member, @RequestHeader(value = "Authorization",required = false) String authorizationHeader) {
+    public ResponseDto<MemberResponseDto.MemberStatusDto> logout(@AuthMember Member member, @RequestHeader(value = "Authorization",required = false) String authorizationHeader, @RequestBody MemberRequestDto.LogoutDto request) {
         String token = authorizationHeader.substring(7);
-        memberService.logout(token);
+        memberService.logout(token,request);
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "logout"));
     }
 

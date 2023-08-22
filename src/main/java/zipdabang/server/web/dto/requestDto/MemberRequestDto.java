@@ -139,4 +139,10 @@ public class MemberRequestDto {
     public static class IssueTokenDto{
         String refreshToken;
     }
+
+    @Getter @Setter
+    public static class LogoutDto{
+        String fcmToken;
+        String serialNumber;
+    }
 }

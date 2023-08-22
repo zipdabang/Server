@@ -20,7 +20,7 @@ public interface MemberService {
 
     List<Category> getCategoryList();
 
-    void logout(String accessToken);
+    void logout(String accessToken, MemberRequestDto.LogoutDto request);
 
     String regenerateAccessToken(RefreshToken refreshToken);
 

@@ -56,14 +56,16 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findByEmail(request.getEmail()).orElse(null);
         if(member != null) {
             String accessToken = null;
-            FcmToken savedToken = fcmTokenRepository.save(FcmToken.builder()
-                    .member(member)
-                    .token(request.getFcmToken())
-                    .serialNumber(request.getSerialNumber())
-                    .build());
+            Optional<FcmToken> fcmToken = fcmTokenRepository.findByTokenAndSerialNumber(request.getFcmToken(), request.getSerialNumber());
+            if(fcmToken.isEmpty()) {
+                FcmToken savedToken = fcmTokenRepository.save(FcmToken.builder()
+                        .member(member)
+                        .token(request.getFcmToken())
+                        .serialNumber(request.getSerialNumber())
+                        .build());
 
-            savedToken.setMember(member);
-
+                savedToken.setMember(member);
+            }
             if (type.equals("kakao"))
                 return OAuthResult.OAuthResultDto.builder()
                         .isLogin(true)
@@ -96,8 +98,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public void logout(String accessToken) {
+    public void logout(String accessToken, MemberRequestDto.LogoutDto request) {
         redisService.resolveLogout(accessToken);
+        FcmToken fcmToken = fcmTokenRepository.findByTokenAndSerialNumber(request.getFcmToken(), request.getSerialNumber()).orElseThrow(() -> new MemberException(Code.LOGOUT_FAIL));
+        fcmTokenRepository.delete(fcmToken);
     }
 
     @Override
