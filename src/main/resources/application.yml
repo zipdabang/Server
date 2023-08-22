@@ -47,6 +47,23 @@ oauth:
     secretKeyAndroid : ${KAKAO_SECRET_ANDROID}
   google:
 
+cloud:
+  aws:
+    s3:
+      bucket: zipdabang
+      folder:
+        zipdabang-recipe-thumbNail: recipe/thumbnail
+        zipdabang-recipe-steps : recipe/steps
+        zipdabang-proifile : user
+    #        zipdabang-facilities : facilities
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    credentials:
+      accessKey: ${AWS_ACCESS_KEY_ID}
+      secretKey: ${AWS_SECRET_ACCESS_KEY}
+
 jwt:
   header: Authorization
   secret: ${JWT_SECRET}
