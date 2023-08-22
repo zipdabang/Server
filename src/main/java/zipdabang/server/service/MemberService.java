@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberService {
-    OAuthResult.OAuthResultDto SocialLogin(String email, String type);
+    OAuthResult.OAuthResultDto SocialLogin(MemberRequestDto.OAuthRequestDto request, String type);
 
     Optional<Member> checkExistNickname(String nickname);
     
@@ -20,7 +20,7 @@ public interface MemberService {
 
     List<Category> getCategoryList();
 
-    void logout(String accessToken);
+    void logout(String accessToken, MemberRequestDto.LogoutDto request);
 
     String regenerateAccessToken(RefreshToken refreshToken);
 

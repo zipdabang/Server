@@ -10,15 +10,13 @@ import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.SocialType;
-import zipdabang.server.domain.member.Member;
-import zipdabang.server.domain.member.MemberPreferCategory;
-import zipdabang.server.domain.member.Terms;
-import zipdabang.server.domain.member.TermsAgree;
+import zipdabang.server.domain.member.*;
 import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.repository.TermsAgreeRepository;
 import zipdabang.server.repository.TermsRepository;
 import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.repository.CategoryRepository;
+import zipdabang.server.repository.memberRepositories.FcmTokenRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.repository.memberRepositories.PreferCategoryRepository;
 import zipdabang.server.service.MemberService;
@@ -50,25 +48,37 @@ public class MemberServiceImpl implements MemberService {
 
     private final RedisService redisService;
 
+    private final FcmTokenRepository fcmTokenRepository;
+
     @Override
     @Transactional
-    public OAuthResult.OAuthResultDto SocialLogin(String email,String type) {
-        Member member = memberRepository.findByEmail(email).orElse(null);
+    public OAuthResult.OAuthResultDto SocialLogin(MemberRequestDto.OAuthRequestDto request,String type) {
+        Member member = memberRepository.findByEmail(request.getEmail()).orElse(null);
         if(member != null) {
             String accessToken = null;
+            Optional<FcmToken> fcmToken = fcmTokenRepository.findByTokenAndSerialNumber(request.getFcmToken(), request.getSerialNumber());
+            if(fcmToken.isEmpty()) {
+                FcmToken savedToken = fcmTokenRepository.save(FcmToken.builder()
+                        .member(member)
+                        .token(request.getFcmToken())
+                        .serialNumber(request.getSerialNumber())
+                        .build());
+
+                savedToken.setMember(member);
+            }
             if (type.equals("kakao"))
                 return OAuthResult.OAuthResultDto.builder()
                         .isLogin(true)
                         .memberId(member.getMemberId())
-                        .accessToken(redisService.saveLoginStatus(member.getMemberId(),tokenProvider.createAccessToken(member.getMemberId(), SocialType.KAKAO.toString(), email, Arrays.asList(new SimpleGrantedAuthority("USER")))))
-                        .refreshToken(redisService.generateRefreshToken(email).getToken())
+                        .accessToken(redisService.saveLoginStatus(member.getMemberId(),tokenProvider.createAccessToken(member.getMemberId(), SocialType.KAKAO.toString(), request.getEmail(), Arrays.asList(new SimpleGrantedAuthority("USER")))))
+                        .refreshToken(redisService.generateRefreshToken(request.getEmail()).getToken())
                         .build();
             else
                 return OAuthResult.OAuthResultDto.builder()
                         .isLogin(true)
                         .memberId(member.getMemberId())
-                        .accessToken(redisService.saveLoginStatus(member.getMemberId(), tokenProvider.createAccessToken(member.getMemberId(), SocialType.GOOGLE.toString(), email,Arrays.asList(new SimpleGrantedAuthority("USER")))))
-                        .refreshToken(redisService.generateRefreshToken(email).getToken())
+                        .accessToken(redisService.saveLoginStatus(member.getMemberId(), tokenProvider.createAccessToken(member.getMemberId(), SocialType.GOOGLE.toString(), request.getEmail(),Arrays.asList(new SimpleGrantedAuthority("USER")))))
+                        .refreshToken(redisService.generateRefreshToken(request.getEmail()).getToken())
                         .build();
         }
         return OAuthResult.OAuthResultDto.builder()
@@ -88,8 +98,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public void logout(String accessToken) {
+    public void logout(String accessToken, MemberRequestDto.LogoutDto request) {
         redisService.resolveLogout(accessToken);
+        FcmToken fcmToken = fcmTokenRepository.findByTokenAndSerialNumber(request.getFcmToken(), request.getSerialNumber()).orElseThrow(() -> new MemberException(Code.LOGOUT_FAIL));
+        fcmTokenRepository.delete(fcmToken);
     }
 
     @Override

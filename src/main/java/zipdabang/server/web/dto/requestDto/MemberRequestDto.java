@@ -49,6 +49,8 @@ public class MemberRequestDto {
     @Setter
     public static class OAuthRequestDto {
         private String email;
+        private String fcmToken;
+        private String serialNumber;
     }
 
 
@@ -136,5 +138,11 @@ public class MemberRequestDto {
     @Getter @Setter
     public static class IssueTokenDto{
         String refreshToken;
+    }
+
+    @Getter @Setter
+    public static class LogoutDto{
+        String fcmToken;
+        String serialNumber;
     }
 }
