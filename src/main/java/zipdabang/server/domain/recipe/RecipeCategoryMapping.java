@@ -27,4 +27,13 @@ public class RecipeCategoryMapping {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    public RecipeCategoryMapping setRecipe(Recipe recipe){
+        if(this.recipe != null)
+            recipe.getCategoryMappingList().remove(this);
+        this.recipe = recipe;
+        recipe.getCategoryMappingList().add(this);
+
+        return this;
+    }
 }

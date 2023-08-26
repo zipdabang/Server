@@ -29,4 +29,13 @@ public class Ingredient extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
+
+    public Ingredient setRecipe(Recipe recipe){
+        if(this.recipe != null)
+            recipe.getIngredientList().remove(this);
+        this.recipe = recipe;
+        recipe.getIngredientList().add(this);
+
+        return this;
+    }
 }

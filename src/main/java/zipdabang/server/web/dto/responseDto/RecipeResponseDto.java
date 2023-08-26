@@ -3,6 +3,7 @@ package zipdabang.server.web.dto.responseDto;
 
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
+import zipdabang.server.base.ResponseDto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -88,7 +89,6 @@ public class RecipeResponseDto {
         private RecipeDto recipeInfo;
         private List<StepDto> steps;
         private List<IngredientDto> ingredients;
-        private List<CommentDto> comments;
     }
 
     @Builder

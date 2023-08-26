@@ -94,7 +94,8 @@ public class Recipe extends BaseEntity {
         this.stepList.add(step);
     }
 
-    public void addCategory(RecipeCategoryMapping categoryMapping) {
-        this.categoryMappingList.add(categoryMapping);
+    public Recipe setThumbnail(String imageUrl) {
+        this.thumbnailUrl = imageUrl;
+        return this;
     }
 }

@@ -14,7 +14,6 @@ public class RecipeRequestDto {
     public static class CreateRecipeDto{
 
         List<Long> categoryId;
-        MultipartFile thumbnailUrl;
         String name;
         String time;
         String intro;
@@ -35,6 +34,5 @@ public class RecipeRequestDto {
     public static class StepDto{
         private Integer stepNum;
         private String description;
-        private MultipartFile image;
     }
 }

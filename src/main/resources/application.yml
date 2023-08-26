@@ -39,6 +39,12 @@ spring:
       org.hibernate.SQL: DEBUG
       org.hibernate.type: trace
 
+  servlet:
+    multipart:
+      maxFileSize: 20MB
+      maxRequestSize: 30MB
+      enabled: true
+
 oauth:
   kakao:
     baseUrl: ${KAKAO_BASE_URL}

@@ -32,4 +32,18 @@ public class Step extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
+
+    public Step setImage(String imageUrl) {
+        this.imageUrl = imageUrl;
+        return this;
+    }
+
+    public Step setRecipe(Recipe recipe){
+        if(this.recipe != null)
+            recipe.getStepList().remove(this);
+        this.recipe = recipe;
+        recipe.getStepList().add(this);
+
+        return this;
+    }
 }
