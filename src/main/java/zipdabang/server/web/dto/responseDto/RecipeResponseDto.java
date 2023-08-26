@@ -46,7 +46,7 @@ public class RecipeResponseDto {
         private Long recipeId;
         List<Long> categoryId;
         private String recipeName;
-        private String owner;
+        private String nickname;
         private String thumbnailUrl;
         private String time;
         private String intro;
@@ -87,6 +87,7 @@ public class RecipeResponseDto {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class RecipeInfoDto {
         private RecipeDto recipeInfo;
+        private boolean isOwner;
         private List<StepDto> steps;
         private List<IngredientDto> ingredients;
     }
@@ -107,7 +108,7 @@ public class RecipeResponseDto {
     public static class StepDto{
         private Integer stepNum;
         private String description;
-        private MultipartFile image;
+        private String image;
     }
 
     @Builder

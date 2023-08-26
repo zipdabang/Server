@@ -12,9 +12,11 @@ public interface RecipeService {
 
     Recipe create(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member)throws IOException;
 
-    Recipe getRecipe(Long recipeId);
+    Recipe getRecipe(Long recipeId, Member member);
 
     Boolean getLike(Recipe recipe, Member member);
 
     Boolean getScrap(Recipe recipe, Member member);
+
+    Boolean checkOwner(Recipe recipe, Member member);
 }

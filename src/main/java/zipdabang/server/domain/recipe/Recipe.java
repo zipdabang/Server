@@ -85,13 +85,6 @@ public class Recipe extends BaseEntity {
     @OneToOne(mappedBy = "recipe", cascade = CascadeType.ALL)
     private WeeklyBestRecipe weeklyBestRecipe;
 
-    public void addIngredient(Ingredient ingredient){
-        this.ingredientList.add(ingredient);
-    }
-
-    public void addStep(Step step) {
-        this.stepList.add(step);
-    }
 
     public Recipe setThumbnail(String imageUrl) {
         this.thumbnailUrl = imageUrl;

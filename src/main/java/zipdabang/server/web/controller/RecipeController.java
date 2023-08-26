@@ -35,7 +35,7 @@ RecipeController {
 
     private final RecipeService recipeService;
 
-    @Operation(summary = "🍹figma 레시피 작성하기1, 레시피 등록 API 🔑", description = "레시피 (작성)등록 화면 API입니다. 임시저장 api는 별도로 있음. step이랑 ingredient 몇개 들어오는지 각Count에 적어주세요")
+    @Operation(summary = "🍹figma 레시피 작성하기1, 레시피 등록 API 🔑 ✔", description = "레시피 (작성)등록 화면 API입니다. 임시저장 api는 별도로 있음. step이랑 ingredient 몇개 들어오는지 각Count에 적어주세요")
     @ApiResponses({
             @ApiResponse(responseCode = "2000"),
             @ApiResponse(responseCode = "4006",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -61,7 +61,7 @@ RecipeController {
         return ResponseDto.of(RecipeConverter.toRecipeStatusDto(recipe));
     }
 
-    @Operation(summary = "🍹figma 레시피 상세페이지, 레시피 상세 정보 조회 API 🔑", description = "레시피 조회 화면 API입니다. 댓글은 처음 10개만 가져오고 나머지는 댓글 page api 드림")
+    @Operation(summary = "🍹figma 레시피 상세페이지, 레시피 상세 정보 조회 API 🔑 ✔", description = "레시피 조회 화면 API입니다. 댓글은 처음 10개만 가져오고 나머지는 댓글 page api 드림")
     @ApiResponses({
             @ApiResponse(responseCode = "2000"),
             @ApiResponse(responseCode = "4006",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -69,6 +69,7 @@ RecipeController {
             @ApiResponse(responseCode = "4010",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4013",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4101",description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4102",description = "BAD_REQUEST, 차단한 사용자의 recipe 입니다. 접근할 수 없습니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
@@ -77,12 +78,12 @@ RecipeController {
     @GetMapping(value = "/members/recipes/{recipeId}")
     public ResponseDto<RecipeResponseDto.RecipeInfoDto> recipeDetail(@PathVariable(name = "recipeId") Long recipeId, @AuthMember Member member) {
 
-        //차단한 사용자 안보이도록 해야함.
-        Recipe recipe = recipeService.getRecipe(recipeId);
+        Recipe recipe = recipeService.getRecipe(recipeId, member);
+        Boolean isOwner = recipeService.checkOwner(recipe, member);
         Boolean isLiked = recipeService.getLike(recipe, member);
         Boolean isScrapped = recipeService.getScrap(recipe, member);
 
-        return ResponseDto.of(RecipeConverter.toRecipeInfoDto(recipe, isLiked, isScrapped));
+        return ResponseDto.of(RecipeConverter.toRecipeInfoDto(recipe, isOwner, isLiked, isScrapped));
     }
 
     @Operation(summary = "🍹figma 나의 레시피 삭제_알럿, 레시피 삭제 API 🔑", description = "레시피 삭제 API입니다.")

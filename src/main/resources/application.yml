@@ -12,11 +12,11 @@ spring:
       enabled: always
 
 ##  # local redis
-  redis:
-    host:localhost
-
 #  redis:
-#    host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com
+#    host:localhost
+
+  redis:
+    host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com
   #  batch:
   #    jdbc:
   #      initialize-schema: always

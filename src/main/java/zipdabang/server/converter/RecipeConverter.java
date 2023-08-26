@@ -13,12 +13,14 @@ import zipdabang.server.domain.recipe.Recipe;
 import zipdabang.server.domain.recipe.RecipeCategoryMapping;
 import zipdabang.server.domain.recipe.Step;
 import zipdabang.server.repository.CategoryRepository;
+import zipdabang.server.repository.recipeRepositories.RecipeCategoryMappingRepository;
 import zipdabang.server.repository.recipeRepositories.RecipeRepository;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,16 +30,19 @@ import java.util.stream.Collectors;
 public class RecipeConverter {
 
     private final RecipeRepository recipeRepository;
+    private final RecipeCategoryMappingRepository recipeCategoryMappingRepository;
     private final CategoryRepository categoryRepository;
     private final AmazonS3Manager amazonS3Manager;
 
     private static RecipeRepository staticRecipeRepository;
+    private static RecipeCategoryMappingRepository staticRecipeCategoryMappingRepository;
     private static CategoryRepository staticCategoryRepository;
     private static AmazonS3Manager staticAmazonS3Manager;
 
     @PostConstruct
     public void init() {
         this.staticRecipeRepository = this.recipeRepository;
+        this.staticRecipeCategoryMappingRepository = this.recipeCategoryMappingRepository;
         this.staticCategoryRepository = this.categoryRepository;
         this.staticAmazonS3Manager = this.amazonS3Manager;
     }
@@ -74,13 +79,60 @@ public class RecipeConverter {
     }
 
 
-    public static RecipeResponseDto.RecipeInfoDto toRecipeInfoDto(Recipe recipe, Boolean isLiked, Boolean isScrapped) {
+    public static RecipeResponseDto.RecipeInfoDto toRecipeInfoDto(Recipe recipe, Boolean isOwner, Boolean isLiked, Boolean isScrapped) {
         return RecipeResponseDto.RecipeInfoDto.builder()
+                .recipeInfo(toResponseRecipeDto(recipe, isLiked, isScrapped))
+                .isOwner(isOwner)
+                .steps(toResponseStepDto(recipe))
+                .ingredients(toResponseIngredientDto(recipe))
                 .build();
-
     }
 
-    public static Recipe toReicepe(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, Member member) throws IOException {
+    public static List<RecipeResponseDto.StepDto> toResponseStepDto(Recipe recipe) {
+
+        return recipe.getStepList().stream()
+                .map(step-> RecipeResponseDto.StepDto.builder()
+                        .stepNum(step.getStepNum())
+                        .description(step.getDescription())
+                        .image(step.getImageUrl())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public static List<RecipeResponseDto.IngredientDto> toResponseIngredientDto(Recipe recipe) {
+        return recipe.getIngredientList().stream()
+                .map(ingredient -> RecipeResponseDto.IngredientDto.builder()
+                        .IngredientName(ingredient.getName())
+                        .quantity(ingredient.getQuantity())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public static RecipeResponseDto.RecipeDto toResponseRecipeDto(Recipe recipe, Boolean isLiked, Boolean isScrapped){
+        List<Long> categoryIdList = recipe.getCategoryMappingList().stream()
+                .map(categoryMapping -> categoryMapping.getCategory().getId())
+                .collect(Collectors.toList());
+
+
+        return  RecipeResponseDto.RecipeDto.builder()
+                .recipeId(recipe.getId())
+                .categoryId(categoryIdList)
+                .recipeName(recipe.getName())
+                .nickname(recipe.getMember().getNickname())
+                .thumbnailUrl(recipe.getThumbnailUrl())
+                .time(recipe.getTime())
+                .intro(recipe.getIntro())
+                .recipeTip(recipe.getRecipeTip())
+                .createdAt(recipe.getCreatedAt().toLocalDate())
+                .likes(recipe.getTotalLike())
+                .comments(Long.valueOf(recipe.getCommentList().size()))
+                .scraps(recipe.getTotalScrap())
+                .isLiked(isLiked)
+                .isScrapped(isScrapped)
+                .build();
+    }
+
+    public static Recipe toRecipe(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, Member member) throws IOException {
 
         Recipe recipe = Recipe.builder()
                 .isInfluencer(member.isInfluencer())
