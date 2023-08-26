@@ -15,6 +15,8 @@ public interface MemberService {
     OAuthResult.OAuthResultDto SocialLogin(MemberRequestDto.OAuthRequestDto request, String type);
 
     Optional<Member> checkExistNickname(String nickname);
+
+    public void existByPhoneNumber(String phoneNum);
     
     OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type);
 

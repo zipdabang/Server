@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import zipdabang.server.auth.provider.TokenProvider;
 import zipdabang.server.base.Code;
+import zipdabang.server.base.exception.handler.AuthNumberException;
 import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
@@ -89,6 +90,13 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Optional<Member> checkExistNickname(String nickname){
         return memberRepository.findByNickname(nickname);
+    }
+
+    @Override
+    public void existByPhoneNumber(String phoneNum) {
+        if (memberRepository.existsByPhoneNum(phoneNum)) {
+            throw new AuthNumberException(Code.PHONE_NUMBER_EXIST);
+        }
     }
 
     @Override

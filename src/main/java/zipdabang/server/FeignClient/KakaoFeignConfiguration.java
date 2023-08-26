@@ -8,10 +8,9 @@ import zipdabang.server.FeignClient.exception.FeignClientExceptionErrorDecoder;
 
 public class KakaoFeignConfiguration {
 
-    @Bean
-    public RequestInterceptor requestInterceptor(){
-        return template -> template.header("Content-Type", "application/x-www-form-urlencoded");
-    }
+//    @Bean
+//    public RequestInterceptor requestInterceptor(){ return null;
+//    }
 
     @Bean
     public ErrorDecoder errorDecoder() {

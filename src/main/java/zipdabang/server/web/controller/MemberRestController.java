@@ -1,5 +1,6 @@
 package zipdabang.server.web.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientException;
 import zipdabang.server.FeignClient.service.KakaoOauthService;
 import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
@@ -26,6 +28,7 @@ import zipdabang.server.domain.member.Member;
 import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.service.MemberService;
+import zipdabang.server.sms.service.SmsService;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
@@ -34,6 +37,10 @@ import org.springframework.web.bind.annotation.*;
 import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.dto.OAuthResult;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +52,7 @@ import java.util.Optional;
 public class MemberRestController {
 
     private final MemberService memberService;
+    private final SmsService smsService;
 
     private final KakaoOauthService kakaoOauthService;
 
@@ -123,13 +131,18 @@ public class MemberRestController {
 
     //인증번호 요청
     @PostMapping("/members/phone/sms")
-    public ResponseDto<Integer> sendSms(@RequestBody MemberRequestDto.SmsRequestDto request) {
-        return null;
+    public ResponseDto<Integer> sendSms(@RequestBody MemberRequestDto.SmsRequestDto request) throws JsonProcessingException, RestClientException, URISyntaxException, InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException {
+        memberService.existByPhoneNumber(request.getTargetPhoneNum());
+        smsService.sendSms(request.getTargetPhoneNum());
+        return ResponseDto.empty();
     }
 
     //인증번호 검증
     @PostMapping("/members/phone/auth")
-    public ResponseDto<SmsResponseDto.AuthNumResultDto> authPhoneNum(@RequestBody MemberRequestDto.PhoneNumAuthDto request) {return null;}
+    public ResponseDto<SmsResponseDto.AuthNumResultDto> authPhoneNum(@RequestBody MemberRequestDto.PhoneNumAuthDto request) {
+        SmsResponseDto.AuthNumResultDto authNumResultDto = smsService.authNumber(request.getAuthNum(), request.getPhoneNum());
+        return ResponseDto.of(authNumResultDto);
+    }
 
 
     //프로필 수정
