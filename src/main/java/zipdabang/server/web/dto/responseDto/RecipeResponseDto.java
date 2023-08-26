@@ -3,6 +3,7 @@ package zipdabang.server.web.dto.responseDto;
 
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
+import zipdabang.server.base.ResponseDto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,7 +46,7 @@ public class RecipeResponseDto {
         private Long recipeId;
         List<Long> categoryId;
         private String recipeName;
-        private String owner;
+        private String nickname;
         private String thumbnailUrl;
         private String time;
         private String intro;
@@ -86,9 +87,9 @@ public class RecipeResponseDto {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class RecipeInfoDto {
         private RecipeDto recipeInfo;
+        private boolean isOwner;
         private List<StepDto> steps;
         private List<IngredientDto> ingredients;
-        private List<CommentDto> comments;
     }
 
     @Builder
@@ -107,7 +108,7 @@ public class RecipeResponseDto {
     public static class StepDto{
         private Integer stepNum;
         private String description;
-        private MultipartFile image;
+        private String image;
     }
 
     @Builder

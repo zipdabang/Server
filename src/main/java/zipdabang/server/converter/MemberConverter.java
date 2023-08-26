@@ -8,7 +8,6 @@ import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.member.Terms;
-import zipdabang.server.domain.member.TermsAgree;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.MemberPreferCategory;
 import zipdabang.server.repository.memberRepositories.MemberRepository;

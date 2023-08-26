@@ -23,13 +23,19 @@ public class Ingredient extends BaseEntity {
 
     private String name;
 
-    @Column(columnDefinition = "TEXT")
-    private String imageUrl;
-
     @Column(length = 100)
     private String quantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
+
+    public Ingredient setRecipe(Recipe recipe){
+        if(this.recipe != null)
+            recipe.getIngredientList().remove(this);
+        this.recipe = recipe;
+        recipe.getIngredientList().add(this);
+
+        return this;
+    }
 }

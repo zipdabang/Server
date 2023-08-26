@@ -3,11 +3,11 @@ package zipdabang.server.repository.recipeRepositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.Recipe;
+import zipdabang.server.domain.recipe.Scrap;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-public interface RecipeRepository extends JpaRepository<Recipe, Long> {
+public interface ScrapRepository extends JpaRepository<Scrap, Long> {
+    Optional<Scrap> findByRecipeAndMember(Recipe recipe, Member member);
 
 }

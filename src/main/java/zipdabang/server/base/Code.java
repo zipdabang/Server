@@ -22,7 +22,7 @@ public enum Code {
 
 
 
-    // marget response
+    // market response
 
     WATCHED_NOT_FOUND(HttpStatus.OK, 2060, "조회했던 아이템이 없습니다."),
 
@@ -59,6 +59,7 @@ public enum Code {
     //recipe error
     NULL_RECIPE_ERROR(HttpStatus.BAD_REQUEST, 4100, "레시피 작성시 누락된 내용이 있습니다."),
     NO_RECIPE_EXIST(HttpStatus.BAD_REQUEST, 4101, "해당 레시피가 존재하지 않습니다."),
+    BLOCKED_USER_RECIPE(HttpStatus.BAD_REQUEST, 4102, "차단한 사용자의 레시피입니다."),
 
 
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),

@@ -5,7 +5,6 @@ import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import zipdabang.server.domain.Category;
 import zipdabang.server.domain.common.BaseEntity;
 import zipdabang.server.domain.member.Member;
 
@@ -39,6 +38,7 @@ public class Recipe extends BaseEntity {
 
     private String time;
 
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
     private Float starScore;
     @Column(columnDefinition = "BIGINT DEFAULT 0")
     private Long totalView;
@@ -64,20 +64,19 @@ public class Recipe extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
+    private List<RecipeCategoryMapping> categoryMappingList;
 
-    @OneToMany(mappedBy = "recipe")
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     private List<Comment> commentList;
 
-    @OneToMany(mappedBy = "recipe")
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     private List<Likes> likesList;
 
     @OneToMany(mappedBy = "recipe")
     private List<Scrap> scrapList;
 
-    @OneToMany(mappedBy = "recipe")
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     private List<Step> stepList;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
@@ -85,4 +84,10 @@ public class Recipe extends BaseEntity {
 
     @OneToOne(mappedBy = "recipe", cascade = CascadeType.ALL)
     private WeeklyBestRecipe weeklyBestRecipe;
+
+
+    public Recipe setThumbnail(String imageUrl) {
+        this.thumbnailUrl = imageUrl;
+        return this;
+    }
 }

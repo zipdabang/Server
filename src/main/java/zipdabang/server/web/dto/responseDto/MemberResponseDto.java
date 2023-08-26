@@ -1,7 +1,6 @@
 package zipdabang.server.web.dto.responseDto;
 
 import lombok.*;
-import zipdabang.server.domain.member.Terms;
 
 
 import java.time.LocalDateTime;
