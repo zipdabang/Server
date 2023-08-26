@@ -48,11 +48,11 @@ RecipeController {
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
-    @PostMapping(value = "/members/recipes" /*, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}*/)
+    @PostMapping(value = "/members/recipes")
     public ResponseDto<RecipeResponseDto.RecipeStatusDto> createRecipe(
             @RequestPart(value = "content") RecipeRequestDto.CreateRecipeDto request,
-            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
-            @RequestPart(value = "stepImages", required = false) List<MultipartFile> stepImages,
+            @RequestPart(value = "thumbnail") MultipartFile thumbnail,
+            @RequestPart(value = "stepImages") List<MultipartFile> stepImages,
             @AuthMember Member member) throws IOException {
 
         log.info("사용자가 준 정보 : {}", request.toString());

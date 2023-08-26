@@ -45,7 +45,7 @@ public class RecipeServiceImpl implements RecipeService {
                 .map(categoryMapping -> categoryMapping.setRecipe(recipe));
 
 
-        RecipeConverter.toStep(request, recipe).stream()
+        RecipeConverter.toStep(request, recipe, stepImages).stream()
                 .map(step -> stepRepository.save(step))
                 .collect(Collectors.toList())
                 .stream()
