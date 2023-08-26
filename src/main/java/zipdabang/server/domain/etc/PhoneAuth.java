@@ -4,7 +4,7 @@ import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
-import zipdabang.server.domain.market.member.Member;
+import zipdabang.server.domain.member.Member;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

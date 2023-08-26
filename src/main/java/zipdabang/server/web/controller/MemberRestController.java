@@ -22,7 +22,7 @@ import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
-import zipdabang.server.domain.market.member.Member;
+import zipdabang.server.domain.member.Member;
 import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.service.MemberService;
@@ -61,9 +61,9 @@ public class MemberRestController {
 
     })
     @PostMapping("/members/logout")
-    public ResponseDto<MemberResponseDto.MemberStatusDto> logout(@AuthMember Member member, @RequestHeader(value = "Authorization",required = false) String authorizationHeader) {
+    public ResponseDto<MemberResponseDto.MemberStatusDto> logout(@AuthMember Member member, @RequestHeader(value = "Authorization",required = false) String authorizationHeader, @RequestBody MemberRequestDto.LogoutDto request) {
         String token = authorizationHeader.substring(7);
-        memberService.logout(token);
+        memberService.logout(token,request);
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "logout"));
     }
 
@@ -91,7 +91,7 @@ public class MemberRestController {
     @PostMapping("/members/oauth")
     public ResponseDto<MemberResponseDto.SocialLoginDto> oauthKakao(
             @RequestBody MemberRequestDto.OAuthRequestDto oAuthRequestDto, @RequestParam(name = "type") String type) {
-        OAuthResult.OAuthResultDto oAuthResultDto = memberService.SocialLogin(oAuthRequestDto.getEmail(), type);
+        OAuthResult.OAuthResultDto oAuthResultDto = memberService.SocialLogin(oAuthRequestDto, type);
         MemberResponseDto.SocialLoginDto socialLoginDto = MemberConverter.toSocialLoginDto(oAuthResultDto.getAccessToken(),oAuthResultDto.getRefreshToken());
         return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN,socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN,null);
     }
@@ -152,6 +152,13 @@ public class MemberRestController {
     }
 
     //닉네임 중복검사
+
+    @Operation(summary = "🎪[figma 회원가입까지 - 닉네임 입력 1,2,3] 닉네임 중복검사 API ✔️", description = "닉네임 중복검사 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2010",description = "OK 성공 , 닉네임 존재함 다시 시도하세요"),
+            @ApiResponse(responseCode = "2011",description = "OK 성공 , 닉네임 사용 가능"),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
     @GetMapping("/members/exist-nickname")
     public ResponseDto<String> checkExistNickname (@RequestParam String nickname){
 

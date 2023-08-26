@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 //import zipdabang.server.aws.s3.AmazonS3Manager;
-import zipdabang.server.domain.market.member.Member;
+import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.Ingredient;
 import zipdabang.server.domain.recipe.Recipe;
 import zipdabang.server.domain.recipe.RecipeCategoryMapping;

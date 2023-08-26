@@ -1,7 +1,7 @@
 package zipdabang.server.service;
 
 import org.springframework.web.multipart.MultipartFile;
-import zipdabang.server.domain.market.member.Member;
+import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.Recipe;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 

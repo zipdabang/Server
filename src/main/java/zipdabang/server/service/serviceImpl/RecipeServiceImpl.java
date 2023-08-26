@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.converter.RecipeConverter;
-import zipdabang.server.domain.market.member.Member;
+import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.Recipe;
 import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.service.RecipeService;

@@ -1,4 +1,4 @@
-package zipdabang.server.domain.market.member;
+package zipdabang.server.domain.member;
 
 import javax.persistence.*;
 
@@ -99,5 +99,8 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Recipe> recipeList;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<FcmToken> fcmTokenList;
 
 }

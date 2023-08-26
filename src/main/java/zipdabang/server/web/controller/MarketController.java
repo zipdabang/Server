@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.ResponseDto;
-import zipdabang.server.domain.market.member.Member;
+import zipdabang.server.domain.member.Member;
 import zipdabang.server.web.dto.responseDto.MarketResponseDto;
 
 @RestController

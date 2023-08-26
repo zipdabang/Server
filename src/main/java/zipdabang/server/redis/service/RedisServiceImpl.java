@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.base.exception.handler.RefreshTokenExceptionHandler;
-import zipdabang.server.domain.market.member.Member;
+import zipdabang.server.domain.member.Member;
 import zipdabang.server.redis.domain.LoginStatus;
 import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.redis.repository.LoginStatusRepository;

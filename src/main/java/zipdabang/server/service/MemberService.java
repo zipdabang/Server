@@ -1,8 +1,8 @@
 package zipdabang.server.service;
 
 import zipdabang.server.domain.Category;
-import zipdabang.server.domain.market.member.Member;
-import zipdabang.server.domain.market.member.Terms;
+import zipdabang.server.domain.member.Member;
+import zipdabang.server.domain.member.Terms;
 import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.utils.dto.OAuthResult;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberService {
-    OAuthResult.OAuthResultDto SocialLogin(String email, String type);
+    OAuthResult.OAuthResultDto SocialLogin(MemberRequestDto.OAuthRequestDto request, String type);
 
     Optional<Member> checkExistNickname(String nickname);
     
@@ -20,7 +20,7 @@ public interface MemberService {
 
     List<Category> getCategoryList();
 
-    void logout(String accessToken);
+    void logout(String accessToken, MemberRequestDto.LogoutDto request);
 
     String regenerateAccessToken(RefreshToken refreshToken);
 

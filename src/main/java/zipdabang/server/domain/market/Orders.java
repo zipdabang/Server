@@ -3,7 +3,7 @@ package zipdabang.server.domain.market;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import zipdabang.server.domain.market.member.Member;
+import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.common.BaseEntity;
 import zipdabang.server.domain.enums.OrderState;
 

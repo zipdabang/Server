@@ -5,9 +5,8 @@ import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import zipdabang.server.domain.Category;
 import zipdabang.server.domain.common.BaseEntity;
-import zipdabang.server.domain.market.member.Member;
+import zipdabang.server.domain.member.Member;
 
 import java.util.List;
 

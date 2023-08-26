@@ -1,42 +1,26 @@
-package zipdabang.server.domain.market.member;
-
-import javax.persistence.*;
-
+package zipdabang.server.domain.member;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
 
+import javax.persistence.*;
+
 @Entity
-@Getter
 @Builder
+@Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class ReceiveInfo extends BaseEntity {
+public class Follow extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
     private Long id;
 
-    private String name;
-
-    @Column(length = 18)
-    private String Phone_num;
-
-    @Column(length = 5)
-    private String zip_code;
-
-    private String address;
-
-    private String detailAddress;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="member_id", nullable = false)
+    @JoinColumn(name = "target_id")
     private Member member;
-
-
-    //payments
 }

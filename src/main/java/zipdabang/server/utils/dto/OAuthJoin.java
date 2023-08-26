@@ -1,7 +1,7 @@
 package zipdabang.server.utils.dto;
 
 import lombok.*;
-import zipdabang.server.domain.market.member.Terms;
+import zipdabang.server.domain.member.Terms;
 
 import java.util.List;
 

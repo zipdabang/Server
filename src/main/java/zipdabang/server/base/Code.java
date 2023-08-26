@@ -46,6 +46,7 @@ public enum Code {
     FEIGN_CLIENT_ERROR_400(HttpStatus.BAD_REQUEST, 4011, "feign에서 400번대 에러가 발생했습니다."),
     MEMBER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 4013,"해당 사용자가 존재하지 않습니다"),
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, 4014,"refresh token이 필요합니다."),
+    LOGOUT_FAIL(HttpStatus.BAD_REQUEST, 4015, "fcmToken, serialNumber 주세요"),
 
     NO_CATEGORY_EXIST(HttpStatus.BAD_REQUEST, 4017, "선호하는 음료 카테고리가 잘못 되었습니다."),
 

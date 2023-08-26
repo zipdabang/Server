@@ -1,4 +1,4 @@
-package zipdabang.server.domain.market.member;
+package zipdabang.server.domain.member;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
