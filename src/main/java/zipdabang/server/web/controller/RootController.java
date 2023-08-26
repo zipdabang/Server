@@ -43,4 +43,14 @@ public class RootController {
         List<Category> allCategories = rootService.getAllCategories();
         return ResponseDto.of(RootConverter.toBeverageCategoryListDto(allCategories));
     }
+
+    @Operation(summary = "배너 이미지 APII️", description = "홈 화면의 배너 이미지를 가져옵니다. order는 배너 순서를 의미합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/banners")
+    public ResponseDto<RootResponseDto.BannerImageDto> showBanners() {
+        return null;
+    }
 }
