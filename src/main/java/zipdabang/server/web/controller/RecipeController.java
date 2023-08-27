@@ -111,7 +111,7 @@ RecipeController {
     }
 
 
-    @Operation(summary = "🍹figma 레시피2, 레시피 검색 목록조회 화면 API 🔑", description = "검색한 레시피 조회 화면 API입니다. pageIndex로 페이징")
+    @Operation(summary = "🍹figma 레시피2, 레시피 검색 목록조회 화면 API 🔑 ✔", description = "검색한 레시피 조회 화면 API입니다. pageIndex로 페이징")
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK, 목록이 있을 땐 이 응답임"),
             @ApiResponse(responseCode = "2100",description = "OK, 목록이 없을 경우",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -170,7 +170,7 @@ RecipeController {
         return null;
     }
 
-    @Operation(summary = "🍹figma 레시피1, 모든사람/인플루언서/우리들의 레시피 미리보기 API 🔑", description = "5개씩 미리보기로 가져오는 API입니다.")
+    @Operation(summary = "🍹figma 레시피1, 모든사람/인플루언서/우리들의 레시피 미리보기 API 🔑 ✔", description = "5개씩 미리보기로 가져오는 API입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK, 목록이 있을 땐 이 응답임"),
             @ApiResponse(responseCode = "2100",description = "OK, 목록이 없을 경우, result = null",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
