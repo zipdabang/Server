@@ -130,6 +130,12 @@ public class MemberRestController {
     }
 
     //인증번호 요청
+    @Operation(summary = "🎪figma[회원가입 까지 페이지 -  회원정보 입력] 인증번호 요청 API ✔️️", description = "인증번호 요청 API입니다. 대시(-) 제외 전화번호 입력하시면 됩니다. ex) 01012345678 ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공 , 인증번호 전송 완료"),
+            @ApiResponse(responseCode = "2020",description = "OK 성공 , 이미 회원가입된 전화번호입니다."),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
     @PostMapping("/members/phone/sms")
     public ResponseDto<Integer> sendSms(@RequestBody MemberRequestDto.SmsRequestDto request) throws JsonProcessingException, RestClientException, URISyntaxException, InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException {
         memberService.existByPhoneNumber(request.getTargetPhoneNum());
@@ -138,6 +144,14 @@ public class MemberRestController {
     }
 
     //인증번호 검증
+    @Operation(summary = "🎪figma[회원가입 까지 페이지 -  회원정보 입력] 인증번호 검증 API ✔️️", description = "인증번호 검증 API입니다. 대시(-) 제외 전화번호와 인증번호 입력하시면 됩니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공 , 인증 성공"),
+            @ApiResponse(responseCode = "4200",description = "BAD_REQUEST , 전화번호를 잘못 전달했거나, 인증요청을 하지않은 상태로 확인버튼을 누른 경우"),
+            @ApiResponse(responseCode = "4201",description = "BAD_REQUEST, 인증 번호가 옳지 않습니다."),
+            @ApiResponse(responseCode = "4202",description = "BAD_REQUEST, 인증 시간(5분)이 지난 경우"),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
     @PostMapping("/members/phone/auth")
     public ResponseDto<SmsResponseDto.AuthNumResultDto> authPhoneNum(@RequestBody MemberRequestDto.PhoneNumAuthDto request) {
         SmsResponseDto.AuthNumResultDto authNumResultDto = smsService.authNumber(request.getAuthNum(), request.getPhoneNum());

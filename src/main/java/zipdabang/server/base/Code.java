@@ -65,7 +65,7 @@ public enum Code {
     // SMS error
     PHONE_AUTH_NOT_FOUND(HttpStatus.BAD_REQUEST, 4200, "인증 번호 요청이 필요합니다."),
     PHONE_AUTH_ERROR(HttpStatus.BAD_REQUEST, 4201, "잘못된 인증 번호 입니다."),
-    PHONE_AUTH_TIMEOUT(HttpStatus.BAD_REQUEST, 4201, "인증 시간이 초과되었습니다."),
+    PHONE_AUTH_TIMEOUT(HttpStatus.BAD_REQUEST, 4202, "인증 시간이 초과되었습니다."),
 
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),
     FEIGN_CLIENT_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "Inter server Error in feign client");
