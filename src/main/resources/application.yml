@@ -11,7 +11,8 @@ spring:
     ansi:
       enabled: always
 
-  # local redis
+
+##  # local redis
 #  redis:
 #    host:localhost
 
@@ -22,6 +23,7 @@ spring:
         initialize-schema: always
       job:
         names: myJob
+
   jpa:
     properties:
       hibernate:
@@ -77,8 +79,13 @@ jwt:
   access-token-validity-in-seconds: 1210000000 # 30 m
   refresh-token-validity-in-seconds: 1210000000 # 14 d
 
+<<<<<<< HEAD
+paging:
+  size : 10
+=======
 naver-sms:
   accessKey: ${NAVER_SMS_ACCESSKEY}
   secretKey: ${NAVER_SMS_SECRET}
   serviceId: ${NAVER_SMS_SERVICEID}
   senderPhone: ${NAVER_SMS_PHONE}
+>>>>>>> a1ef31e18cf1f7e1ddb2e834114f0bfd38c1dd7f

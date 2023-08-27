@@ -28,7 +28,7 @@ public class RecipeResponseDto {
         private Long recipeId;
         List<Long> categoryId;
         private String recipeName;
-        private String owner;
+        private String nickname;
         private String thumbnailUrl;
         private LocalDate createdAt;
         private Long likes;
@@ -65,7 +65,7 @@ public class RecipeResponseDto {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class RecipeListDto {
         private List<RecipeSimpleDto> recipeList;
-        Long totalElements;
+        Integer totalElements;
     }
 
     @Builder

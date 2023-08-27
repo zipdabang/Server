@@ -2,6 +2,7 @@ package zipdabang.server.converter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 //import zipdabang.server.aws.s3.AmazonS3Manager;
@@ -13,14 +14,15 @@ import zipdabang.server.domain.recipe.Recipe;
 import zipdabang.server.domain.recipe.RecipeCategoryMapping;
 import zipdabang.server.domain.recipe.Step;
 import zipdabang.server.repository.CategoryRepository;
+import zipdabang.server.repository.recipeRepositories.LikesRepository;
 import zipdabang.server.repository.recipeRepositories.RecipeCategoryMappingRepository;
 import zipdabang.server.repository.recipeRepositories.RecipeRepository;
+import zipdabang.server.repository.recipeRepositories.ScrapRepository;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,13 +33,20 @@ public class RecipeConverter {
 
     private final RecipeRepository recipeRepository;
     private final RecipeCategoryMappingRepository recipeCategoryMappingRepository;
+    private final LikesRepository likesRepository;
+    private final ScrapRepository scrapRepository;
     private final CategoryRepository categoryRepository;
     private final AmazonS3Manager amazonS3Manager;
 
     private static RecipeRepository staticRecipeRepository;
     private static RecipeCategoryMappingRepository staticRecipeCategoryMappingRepository;
+
+    private static LikesRepository staticLikesRepository;
+    private static ScrapRepository staticScrapRepository;
+
     private static CategoryRepository staticCategoryRepository;
     private static AmazonS3Manager staticAmazonS3Manager;
+
 
     @PostConstruct
     public void init() {
@@ -45,6 +54,46 @@ public class RecipeConverter {
         this.staticRecipeCategoryMappingRepository = this.recipeCategoryMappingRepository;
         this.staticCategoryRepository = this.categoryRepository;
         this.staticAmazonS3Manager = this.amazonS3Manager;
+        this.staticLikesRepository = this.likesRepository;
+        this.staticScrapRepository = this.scrapRepository;
+    }
+
+    public static RecipeResponseDto.RecipePageListDto toPagingRecipeDtoList(Page<Recipe> recipes, Member member) {
+        return RecipeResponseDto.RecipePageListDto.builder()
+                .recipeList(recipes.toList().stream()
+                        .map(recipe -> toResponseRecipeSimpleDto(recipe, member))
+                        .collect(Collectors.toList()))
+                .totalElements(recipes.getTotalElements())
+                .currentPageElements(recipes.getNumberOfElements())
+                .totalPage(recipes.getTotalPages())
+                .isFirst(recipes.isFirst())
+                .isLast(recipes.isLast())
+                .build();
+
+    }
+
+    public static RecipeResponseDto.RecipeListDto toPreviewRecipeDtoList(List<Recipe> recipes, Member member) {
+        return RecipeResponseDto.RecipeListDto.builder()
+                .recipeList(recipes.stream()
+                        .map(recipe -> toResponseRecipeSimpleDto(recipe,member))
+                        .collect(Collectors.toList()))
+                .totalElements(recipes.size())
+                .build();
+    }
+
+    private static RecipeResponseDto.RecipeSimpleDto toResponseRecipeSimpleDto(Recipe recipe, Member member) {
+        return RecipeResponseDto.RecipeSimpleDto.builder()
+                .recipeId(recipe.getId())
+                .categoryId(getCategoryIds(recipe))
+                .recipeName(recipe.getName())
+                .nickname(recipe.getMember().getNickname())
+                .thumbnailUrl(recipe.getThumbnailUrl())
+                .createdAt(recipe.getCreatedAt().toLocalDate())
+                .likes(recipe.getTotalLike())
+                .scraps(recipe.getTotalScrap())
+                .isLiked(staticLikesRepository.findByRecipeAndMember(recipe, member).isPresent())
+                .isScrapped(staticScrapRepository.findByRecipeAndMember(recipe,member).isPresent())
+                .build();
     }
 
     public static List<Step> toStep(RecipeRequestDto.CreateRecipeDto request, Recipe recipe, List<MultipartFile> stepImages) {
@@ -108,15 +157,17 @@ public class RecipeConverter {
                 .collect(Collectors.toList());
     }
 
-    public static RecipeResponseDto.RecipeDto toResponseRecipeDto(Recipe recipe, Boolean isLiked, Boolean isScrapped){
-        List<Long> categoryIdList = recipe.getCategoryMappingList().stream()
+    public static List<Long> getCategoryIds(Recipe recipe){
+         return recipe.getCategoryMappingList().stream()
                 .map(categoryMapping -> categoryMapping.getCategory().getId())
                 .collect(Collectors.toList());
+    }
 
+    public static RecipeResponseDto.RecipeDto toResponseRecipeDto(Recipe recipe, Boolean isLiked, Boolean isScrapped){
 
         return  RecipeResponseDto.RecipeDto.builder()
                 .recipeId(recipe.getId())
-                .categoryId(categoryIdList)
+                .categoryId(getCategoryIds(recipe))
                 .recipeName(recipe.getName())
                 .nickname(recipe.getMember().getNickname())
                 .thumbnailUrl(recipe.getThumbnailUrl())

@@ -2,10 +2,15 @@ package zipdabang.server.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.base.Code;
+import zipdabang.server.base.ResponseDto;
 import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
@@ -37,6 +42,9 @@ public class RecipeServiceImpl implements RecipeService {
     private final ScrapRepository scrapRepository;
 
     private final BlockedMemberRepository blockedMemberRepository;
+
+    @Value("${paging.size}")
+    Integer pageSize;
 
     @Override
     @Transactional(readOnly = false)
@@ -105,5 +113,59 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Boolean getScrap(Recipe recipe, Member member) {
         return scrapRepository.findByRecipeAndMember(recipe, member).isPresent();
+    }
+
+    @Override
+    public Page<Recipe> searchRecipe(String keyword, Integer pageIndex, Member member) {
+
+        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
+                .map(blockedInfo -> blockedInfo.getBlocked())
+                .collect(Collectors.toList());
+
+        if(blockedMember.isEmpty())
+            return recipeRepository.findByNameContaining(keyword,
+                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        else
+            return recipeRepository.findByNameContainingAndMemberNotIn(keyword,blockedMember,
+                PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+
+    }
+
+    @Override
+    public List<Recipe> getWrittenByRecipePreview(String writtenby, Member member) {
+        List<Recipe> recipeList = new ArrayList<>();
+
+        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
+                .map(blockedInfo -> blockedInfo.getBlocked())
+                .collect(Collectors.toList());
+
+        if (!blockedMember.isEmpty()) {
+            if (writtenby.equals("all")) {
+                recipeList = recipeRepository.findTop5ByMemberNotInOrderByCreatedAtDesc(blockedMember);
+                log.info("all: ", recipeList.toString());
+            } else if (writtenby.equals("influencer")) {
+                recipeList = recipeRepository.findTop5ByIsInfluencerTrueAndMemberNotInOrderByCreatedAtDesc(blockedMember);
+                log.info("influencer: ", recipeList.toString());
+            } else if (writtenby.equals("common")) {
+                recipeList = recipeRepository.findTop5ByIsInfluencerFalseAndMemberNotInOrderByCreatedAtDesc(blockedMember);
+                log.info("common: ", recipeList.toString());
+            } else
+                throw new RecipeException(Code.WRITTEN_BY_TYPE_ERROR);
+        }
+        else{
+            if (writtenby.equals("all")) {
+                recipeList = recipeRepository.findTop5ByOrderByCreatedAtDesc();
+                log.info("all: ", recipeList.toString());
+            } else if (writtenby.equals("influencer")) {
+                recipeList = recipeRepository.findTop5ByIsInfluencerTrueOrderByCreatedAtDesc();
+                log.info("influencer: ", recipeList.toString());
+            } else if (writtenby.equals("common")) {
+                recipeList = recipeRepository.findTop5ByIsInfluencerFalseOrderByCreatedAtDesc();
+                log.info("common: ", recipeList.toString());
+            } else
+                throw new RecipeException(Code.WRITTEN_BY_TYPE_ERROR);
+        }
+
+        return recipeList;
     }
 }

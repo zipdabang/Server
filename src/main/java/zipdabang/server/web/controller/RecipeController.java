@@ -10,20 +10,26 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.auth.handler.annotation.AuthMember;
+import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
+import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.Member;
+import zipdabang.server.domain.recipe.Likes;
 import zipdabang.server.domain.recipe.Recipe;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -105,15 +111,16 @@ RecipeController {
     }
 
 
-    @Operation(summary = "🍹figma 레시피2, 레시피 검색 목록조회 화면 API 🔑", description = "검색한 레시피 조회 화면 API입니다. pageIndex로 페이징")
+    @Operation(summary = "🍹figma 레시피2, 레시피 검색 목록조회 화면 API 🔑 ✔", description = "검색한 레시피 조회 화면 API입니다. pageIndex로 페이징")
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK, 목록이 있을 땐 이 응답임"),
-            @ApiResponse(responseCode = "2100",description = "OK, 목록이 없을 경우, result = null",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "2100",description = "OK, 목록이 없을 경우",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4006",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4007",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4010",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4013",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4018",description = "BAD_REQUEST, 페이지 번호 이상함, -1 이런거 주지 마세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4018",description = "BAD_REQUEST, 페이지 번호 -1 이하입니다. 0 이상으로 주세요.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4019",description = "BAD_REQUEST, 페이지 인덱스 범위 초과함",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
@@ -123,7 +130,22 @@ RecipeController {
     })
     @GetMapping(value = "/members/recipes/search")
     public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@RequestParam(name = "keyword", required = false) String keyword, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member){
-        return null;
+
+        if(pageIndex == null)
+            pageIndex = 0;
+        else if (pageIndex < 0)
+            throw new RecipeException(Code.UNDER_PAGE_INDEX_ERROR);
+
+        Page<Recipe> recipes= recipeService.searchRecipe(keyword,pageIndex,member);
+
+        log.info(recipes.toString());
+
+        if(pageIndex >= recipes.getTotalPages())
+            throw  new RecipeException(Code.OVER_PAGE_INDEX_ERROR);
+        if(recipes.getNumberOfElements() == 0)
+            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+
+        return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
     }
 
     @Operation(summary = "🍹figma 레시피2, 카테고리 별 레시피 목록 조회 API 🔑", description = "카테고리 별 레시피 목록 조회 화면 API입니다. pageIndex로 페이징")
@@ -148,7 +170,7 @@ RecipeController {
         return null;
     }
 
-    @Operation(summary = "🍹figma 레시피1, 모든사람/인플루언서/우리들의 레시피 미리보기 API 🔑", description = "5개씩 미리보기로 가져오는 API입니다.")
+    @Operation(summary = "🍹figma 레시피1, 모든사람/인플루언서/우리들의 레시피 미리보기 API 🔑 ✔", description = "5개씩 미리보기로 가져오는 API입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK, 목록이 있을 땐 이 응답임"),
             @ApiResponse(responseCode = "2100",description = "OK, 목록이 없을 경우, result = null",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -156,15 +178,18 @@ RecipeController {
             @ApiResponse(responseCode = "4007",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4010",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4013",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4103",description = "BAD_REQUEST, 레시피 작성자 타입이 잘못되었습니다. all, influencer, common중 하나로 보내주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
-            @Parameter(name = "writtenby", description = "query string 누가 쓴 레시피 종류인지. 모든 사람: all, 인플루언서: influencer, 우리들: official로 넘겨주세요")
+            @Parameter(name = "writtenby", description = "query string 누가 쓴 레시피 종류인지. 모든 사람: all, 인플루언서: influencer, 우리들: common으로 넘겨주세요")
     })
     @GetMapping(value = "/members/recipes/types/preview")
     public ResponseDto<RecipeResponseDto.RecipeListDto> recipeListPreviewWrittenBy(@RequestParam(name = "writtenby") String writtenby, @AuthMember Member member){
-        return null;
+        List<Recipe> recipes = recipeService.getWrittenByRecipePreview(writtenby, member);
+
+        return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
     }
 
     @Operation(summary = "🍹figma 레시피2, 모든사람/인플루언서/우리들의 레시피 목록 API 🔑", description = "레시피 목록 화면 API입니다. pageIndex로 페이징")
@@ -181,7 +206,7 @@ RecipeController {
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
-            @Parameter(name = "writtenby", description = "query string 누가 쓴 레시피 종류인지. 모든 사람: all, 인플루언서: influencer, 우리들: official로 넘겨주세요"),
+            @Parameter(name = "writtenby", description = "query string 누가 쓴 레시피 종류인지. 모든 사람: all, 인플루언서: influencer, 우리들: common으로 넘겨주세요"),
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 안주면 0으로(최초 페이지) 설정함, -1 이런거 주면 에러 뱉음"),
             @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 조회순: views, 최신순: latest로 넘겨주세요")
     })
