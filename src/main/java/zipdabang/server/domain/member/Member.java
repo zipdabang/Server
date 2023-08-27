@@ -14,7 +14,6 @@ import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.StatusType;
 import zipdabang.server.domain.recipe.Comment;
 import zipdabang.server.domain.recipe.Likes;
-import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 
 
 import java.util.List;
@@ -50,6 +49,9 @@ public class Member extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private GenderType gender;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean isInfluencer;
 
     @Column(length = 5)
     private String zipCode;

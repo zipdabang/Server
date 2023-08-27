@@ -9,15 +9,23 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.ResponseDto;
+import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.Member;
+import zipdabang.server.domain.recipe.Recipe;
+import zipdabang.server.service.RecipeService;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
+import java.io.IOException;
+import java.util.List;
+
+@Slf4j
 @RestController
 @Validated
 @RequiredArgsConstructor
@@ -25,17 +33,9 @@ import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 public class
 RecipeController {
 
-    /*
-    @Parameters({
-            @Parameter(name = "member", hidden = true)
-    })
-    @PostMapping(value = "/members/recipes",consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseDto<RecipeResponseDto.RecipeStatusDto> createRecipe(@ModelAttribute RecipeRequestDto.CreateRecipeDto request, @AuthMember Member member){
-        return null;
-    }
-     */
+    private final RecipeService recipeService;
 
-    @Operation(summary = "🍹figma 레시피 작성하기1, 레시피 등록 API 🔑", description = "레시피 (작성)등록 화면 API입니다. 임시저장 api는 별도로 있음. step이랑 ingredient 몇개 들어오는지 각Count에 적어주세요")
+    @Operation(summary = "🍹figma 레시피 작성하기1, 레시피 등록 API 🔑 ✔", description = "레시피 (작성)등록 화면 API입니다. 임시저장 api는 별도로 있음. step이랑 ingredient 몇개 들어오는지 각Count에 적어주세요")
     @ApiResponses({
             @ApiResponse(responseCode = "2000"),
             @ApiResponse(responseCode = "4006",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -48,12 +48,20 @@ RecipeController {
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
-    @PostMapping(value = "/members/recipes", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseDto<RecipeResponseDto.RecipeStatusDto> createRecipe(@ModelAttribute RecipeRequestDto.CreateRecipeDto request, @AuthMember Member member){
-        return null;
+    @PostMapping(value = "/members/recipes")
+    public ResponseDto<RecipeResponseDto.RecipeStatusDto> createRecipe(
+            @RequestPart(value = "content") RecipeRequestDto.CreateRecipeDto request,
+            @RequestPart(value = "thumbnail") MultipartFile thumbnail,
+            @RequestPart(value = "stepImages") List<MultipartFile> stepImages,
+            @AuthMember Member member) throws IOException {
+
+        log.info("사용자가 준 정보 : {}", request.toString());
+
+        Recipe recipe = recipeService.create(request, thumbnail, stepImages, member);
+        return ResponseDto.of(RecipeConverter.toRecipeStatusDto(recipe));
     }
 
-    @Operation(summary = "🍹figma 레시피 상세페이지, 레시피 상세 정보 조회 API 🔑", description = "레시피 조회 화면 API입니다. 댓글은 처음 10개만 가져오고 나머지는 댓글 page api 드림")
+    @Operation(summary = "🍹figma 레시피 상세페이지, 레시피 상세 정보 조회 API 🔑 ✔", description = "레시피 조회 화면 API입니다. 댓글은 처음 10개만 가져오고 나머지는 댓글 page api 드림")
     @ApiResponses({
             @ApiResponse(responseCode = "2000"),
             @ApiResponse(responseCode = "4006",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -61,6 +69,7 @@ RecipeController {
             @ApiResponse(responseCode = "4010",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4013",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4101",description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4102",description = "BAD_REQUEST, 차단한 사용자의 recipe 입니다. 접근할 수 없습니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
@@ -68,7 +77,13 @@ RecipeController {
     })
     @GetMapping(value = "/members/recipes/{recipeId}")
     public ResponseDto<RecipeResponseDto.RecipeInfoDto> recipeDetail(@PathVariable(name = "recipeId") Long recipeId, @AuthMember Member member) {
-        return null;
+
+        Recipe recipe = recipeService.getRecipe(recipeId, member);
+        Boolean isOwner = recipeService.checkOwner(recipe, member);
+        Boolean isLiked = recipeService.getLike(recipe, member);
+        Boolean isScrapped = recipeService.getScrap(recipe, member);
+
+        return ResponseDto.of(RecipeConverter.toRecipeInfoDto(recipe, isOwner, isLiked, isScrapped));
     }
 
     @Operation(summary = "🍹figma 나의 레시피 삭제_알럿, 레시피 삭제 API 🔑", description = "레시피 삭제 API입니다.")

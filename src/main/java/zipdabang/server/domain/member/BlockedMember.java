@@ -1,31 +1,34 @@
-package zipdabang.server.domain.recipe;
-
-import javax.persistence.*;
+package zipdabang.server.domain.member;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
-import zipdabang.server.domain.member.Member;
 
-@Entity
+import javax.persistence.*;
+
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class Scrap extends BaseEntity {
+@Entity
+public class BlockedMember extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "owner_id")
+    private Member owner;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipe_id")
-    private Recipe recipe;
+    @JoinColumn(name = "blocked_id")
+    private Member blocked;
+
+    public Member getBlocked(){
+        return this.blocked;
+    }
 }

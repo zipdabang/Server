@@ -7,7 +7,6 @@ import zipdabang.server.domain.common.BaseEntity;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Builder
