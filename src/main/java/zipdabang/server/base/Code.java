@@ -18,6 +18,7 @@ public enum Code {
     OAUTH_JOIN(HttpStatus.OK,2011,"회원가입 입니다."),
     NICKNAME_EXIST(HttpStatus.OK,2010, "닉네임이 이미 존재합니다."),
     NICKNAME_OK(HttpStatus.OK,2011, "사용 가능한 닉네임 입니다."),
+    PHONE_NUMBER_EXIST(HttpStatus.OK, 2020, "이미 인증된 전화번호입니다."),
 
 
 
@@ -64,9 +65,16 @@ public enum Code {
     WRITTEN_BY_TYPE_ERROR(HttpStatus.BAD_REQUEST, 4103, "레시피 작성자 타입이 잘못되었습니다. all, influencer, common중 하나로 보내주세요."),
 
 
+    // SMS error
+    PHONE_AUTH_NOT_FOUND(HttpStatus.BAD_REQUEST, 4200, "인증 번호 요청이 필요합니다."),
+    PHONE_AUTH_ERROR(HttpStatus.BAD_REQUEST, 4201, "잘못된 인증 번호 입니다."),
+    PHONE_AUTH_TIMEOUT(HttpStatus.BAD_REQUEST, 4202, "인증 시간이 초과되었습니다."),
 
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),
     FEIGN_CLIENT_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "Inter server Error in feign client");
+
+
+
     private final HttpStatus httpStatus;
     private final Integer code;
     private final String message;
