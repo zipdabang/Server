@@ -11,17 +11,17 @@ spring:
     ansi:
       enabled: always
 
-##  # local redis
+  # local redis
 #  redis:
 #    host:localhost
 
   redis:
     host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com
-  #  batch:
-  #    jdbc:
-  #      initialize-schema: always
-  #    job:
-  #      names: myJob
+    batch:
+      jdbc:
+        initialize-schema: always
+      job:
+        names: myJob
   jpa:
     properties:
       hibernate:
@@ -76,3 +76,9 @@ jwt:
   authorities-key: ${JWT_AUTHORITIES_KEY}
   access-token-validity-in-seconds: 1210000000 # 30 m
   refresh-token-validity-in-seconds: 1210000000 # 14 d
+
+naver-sms:
+  accessKey: ${NAVER_SMS_ACCESSKEY}
+  secretKey: ${NAVER_SMS_SECRET}
+  serviceId: ${NAVER_SMS_SERVICEID}
+  senderPhone: ${NAVER_SMS_PHONE}

@@ -19,10 +19,8 @@ public class AuthNumber {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(length = 18)
     private String phoneNum;
-
     private LocalDateTime authNumTime;
     private Integer authNum;
 }
