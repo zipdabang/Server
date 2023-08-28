@@ -137,10 +137,10 @@ public class MemberRestController {
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping("/members/phone/sms")
-    public ResponseDto<Integer> sendSms(@RequestBody MemberRequestDto.SmsRequestDto request) throws JsonProcessingException, RestClientException, URISyntaxException, InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException {
+    public ResponseDto<SmsResponseDto.AuthNumResultDto> sendSms(@RequestBody MemberRequestDto.SmsRequestDto request) throws JsonProcessingException, RestClientException, URISyntaxException, InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException {
         memberService.existByPhoneNumber(request.getTargetPhoneNum());
-        smsService.sendSms(request.getTargetPhoneNum());
-        return ResponseDto.empty();
+        SmsResponseDto.AuthNumResultDto authNumResultDto = smsService.sendSms(request.getTargetPhoneNum());
+        return ResponseDto.of(authNumResultDto);
     }
 
     //인증번호 검증
@@ -155,7 +155,7 @@ public class MemberRestController {
     @PostMapping("/members/phone/auth")
     public ResponseDto<SmsResponseDto.AuthNumResultDto> authPhoneNum(@RequestBody MemberRequestDto.PhoneNumAuthDto request) {
         SmsResponseDto.AuthNumResultDto authNumResultDto = smsService.authNumber(request.getAuthNum(), request.getPhoneNum());
-        return ResponseDto.of(authNumResultDto);
+        return ResponseDto.of(authNumResultDto.getResponseCode(), authNumResultDto);
     }
 
 

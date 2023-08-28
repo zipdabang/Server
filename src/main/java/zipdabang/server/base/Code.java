@@ -64,11 +64,11 @@ public enum Code {
     BLOCKED_USER_RECIPE(HttpStatus.BAD_REQUEST, 4102, "차단한 사용자의 레시피입니다."),
     WRITTEN_BY_TYPE_ERROR(HttpStatus.BAD_REQUEST, 4103, "레시피 작성자 타입이 잘못되었습니다. all, influencer, common중 하나로 보내주세요."),
 
-
     // SMS error
     PHONE_AUTH_NOT_FOUND(HttpStatus.BAD_REQUEST, 4200, "인증 번호 요청이 필요합니다."),
     PHONE_AUTH_ERROR(HttpStatus.BAD_REQUEST, 4201, "잘못된 인증 번호 입니다."),
     PHONE_AUTH_TIMEOUT(HttpStatus.BAD_REQUEST, 4202, "인증 시간이 초과되었습니다."),
+
 
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),
     FEIGN_CLIENT_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "Inter server Error in feign client");
