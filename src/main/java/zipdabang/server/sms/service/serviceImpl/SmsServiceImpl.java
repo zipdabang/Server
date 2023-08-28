@@ -85,29 +85,43 @@ public class SmsServiceImpl implements SmsService {
     @Override
     @Transactional
     public SmsResponseDto.AuthNumResultDto authNumber(Integer authNum, String phoneNum) {
-        AuthNumber authNumber = authNumberRepository.findByPhoneNum(phoneNum).orElseThrow(() -> new AuthNumberException(Code.PHONE_AUTH_NOT_FOUND));
+        Optional<AuthNumber> authNumber = authNumberRepository.findByPhoneNum(phoneNum);//.orElseThrow(() ->
+        if(authNumber.isEmpty()){
+            return SmsResponseDto.AuthNumResultDto.builder()
+                    .responseCode(Code.PHONE_AUTH_NOT_FOUND)
+                    .build();
+        }
 
-        if (!authNumber.getAuthNum().equals(authNum))
-            throw new AuthNumberException(Code.PHONE_AUTH_ERROR);
+               // new AuthNumberException(Code.PHONE_AUTH_NOT_FOUND));
+        Code code=Code.OK;
+        if (!authNumber.get().getAuthNum().equals(authNum))
+            code = Code.PHONE_AUTH_ERROR;
+//            return SmsResponseDto.AuthNumResultDto.builder()
+//                    .responseCode(Code.PHONE_AUTH_ERROR)
+//                    .build();
+            //throw new AuthNumberException(Code.PHONE_AUTH_ERROR);
         else{
             LocalDateTime nowTime = LocalDateTime.now();
 
-            long timeCheck = ChronoUnit.MINUTES.between(authNumber.getAuthNumTime(), nowTime);
+            long timeCheck = ChronoUnit.MINUTES.between(authNumber.get().getAuthNumTime(), nowTime);
             if (timeCheck >= 5)
-                throw new AuthNumberException(Code.PHONE_AUTH_TIMEOUT);
+                code = Code.PHONE_AUTH_TIMEOUT;
+//                return SmsResponseDto.AuthNumResultDto.builder()
+//                        .responseCode(Code.PHONE_AUTH_TIMEOUT)
+//                        .build();
+                //throw new AuthNumberException(Code.PHONE_AUTH_TIMEOUT);
         }
-
-        System.out.println(authNumber.getPhoneNum());
-        authNumberRepository.deleteByPhoneNum(authNumber.getPhoneNum());
+        if(code.equals(Code.OK))
+            authNumberRepository.deleteByPhoneNum(authNumber.get().getPhoneNum());
 
         return SmsResponseDto.AuthNumResultDto.builder()
-                .responseCode(Code.OK)
+                .responseCode(code)
                 .build();
     }
 
     @Override
     @Transactional
-    public String sendSms(String targetNumber) throws JsonProcessingException, RestClientException, URISyntaxException, InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException {
+    public SmsResponseDto.AuthNumResultDto sendSms(String targetNumber) throws JsonProcessingException, RestClientException, URISyntaxException, InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException {
         Long time = System.currentTimeMillis();
 
         HttpHeaders headers = new HttpHeaders();
@@ -148,7 +162,9 @@ public class SmsServiceImpl implements SmsService {
         authNumberRepository.deleteByPhoneNum(targetNumber);
         authNumberRepository.save(authNumber);
 
-        return randomNumber;
+        return SmsResponseDto.AuthNumResultDto.builder()
+                .responseCode(Code.OK)
+                .build();
     }
 
     @Override

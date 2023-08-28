@@ -13,6 +13,6 @@ import java.security.NoSuchAlgorithmException;
 public interface SmsService {
     public String makeSignature(Long time) throws NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeyException;
     public SmsResponseDto.AuthNumResultDto authNumber(Integer authNum, String phoneNum);
-    public String sendSms(String targetNumber) throws JsonProcessingException, RestClientException, URISyntaxException, InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException;
+    public SmsResponseDto.AuthNumResultDto sendSms(String targetNumber) throws JsonProcessingException, RestClientException, URISyntaxException, InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException;
     public String getRandomNumber();
 }

@@ -1,5 +1,6 @@
 package zipdabang.server.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.Recipe;
@@ -19,4 +20,8 @@ public interface RecipeService {
     Boolean getScrap(Recipe recipe, Member member);
 
     Boolean checkOwner(Recipe recipe, Member member);
+
+    Page<Recipe> searchRecipe(String keyword, Integer pageIndex, Member member);
+
+    List<Recipe> getWrittenByRecipePreview(String writtenby, Member member);
 }

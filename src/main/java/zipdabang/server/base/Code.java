@@ -51,7 +51,8 @@ public enum Code {
 
     NO_CATEGORY_EXIST(HttpStatus.BAD_REQUEST, 4017, "선호하는 음료 카테고리가 잘못 되었습니다."),
 
-    PAGE_INDEX_ERROR(HttpStatus.BAD_REQUEST, 4018, "페이지 번호가 이상합니다."),
+    UNDER_PAGE_INDEX_ERROR(HttpStatus.BAD_REQUEST, 4018, "페이지 번호는 0 이상이여야 합니다."),
+    OVER_PAGE_INDEX_ERROR(HttpStatus.BAD_REQUEST, 4019, "페이지 번호가 페이징 범위를 초과했습니다."),
 
 
 
@@ -61,11 +62,13 @@ public enum Code {
     NULL_RECIPE_ERROR(HttpStatus.BAD_REQUEST, 4100, "레시피 작성시 누락된 내용이 있습니다."),
     NO_RECIPE_EXIST(HttpStatus.BAD_REQUEST, 4101, "해당 레시피가 존재하지 않습니다."),
     BLOCKED_USER_RECIPE(HttpStatus.BAD_REQUEST, 4102, "차단한 사용자의 레시피입니다."),
+    WRITTEN_BY_TYPE_ERROR(HttpStatus.BAD_REQUEST, 4103, "레시피 작성자 타입이 잘못되었습니다. all, influencer, common중 하나로 보내주세요."),
 
     // SMS error
     PHONE_AUTH_NOT_FOUND(HttpStatus.BAD_REQUEST, 4200, "인증 번호 요청이 필요합니다."),
     PHONE_AUTH_ERROR(HttpStatus.BAD_REQUEST, 4201, "잘못된 인증 번호 입니다."),
     PHONE_AUTH_TIMEOUT(HttpStatus.BAD_REQUEST, 4202, "인증 시간이 초과되었습니다."),
+
 
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),
     FEIGN_CLIENT_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "Inter server Error in feign client");

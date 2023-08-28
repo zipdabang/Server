@@ -5,7 +5,7 @@
 |  역할    | 이름  |
 |---------|-----|
 | Server | 최용욱 |
-| Server | 정병석 |
+| Server | 양효빈 |
 | Server | 김예지 |
 
 # Stack
