@@ -46,6 +46,7 @@ public class RecipeResponseDto {
         private Long recipeId;
         List<Long> categoryId;
         private String recipeName;
+        private String ownerImage;
         private String nickname;
         private String thumbnailUrl;
         private String time;
@@ -121,4 +122,22 @@ public class RecipeResponseDto {
         private LocalDate createdAt;
     }
 
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RecipeBannerDto{
+        private Integer order;
+        private String imageUrl;
+        private String searchKeyword;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RecipeBannerImageDto {
+        List<RecipeBannerDto> bannerList;
+        Integer size;
+    }
 }

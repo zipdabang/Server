@@ -128,9 +128,9 @@ public class RecipeConverter {
     }
 
 
-    public static RecipeResponseDto.RecipeInfoDto toRecipeInfoDto(Recipe recipe, Boolean isOwner, Boolean isLiked, Boolean isScrapped) {
+    public static RecipeResponseDto.RecipeInfoDto toRecipeInfoDto(Recipe recipe, Boolean isOwner, Boolean isLiked, Boolean isScrapped, Member member) {
         return RecipeResponseDto.RecipeInfoDto.builder()
-                .recipeInfo(toResponseRecipeDto(recipe, isLiked, isScrapped))
+                .recipeInfo(toResponseRecipeDto(recipe, isLiked, isScrapped, member))
                 .isOwner(isOwner)
                 .steps(toResponseStepDto(recipe))
                 .ingredients(toResponseIngredientDto(recipe))
@@ -163,12 +163,13 @@ public class RecipeConverter {
                 .collect(Collectors.toList());
     }
 
-    public static RecipeResponseDto.RecipeDto toResponseRecipeDto(Recipe recipe, Boolean isLiked, Boolean isScrapped){
+    public static RecipeResponseDto.RecipeDto toResponseRecipeDto(Recipe recipe, Boolean isLiked, Boolean isScrapped, Member member){
 
         return  RecipeResponseDto.RecipeDto.builder()
                 .recipeId(recipe.getId())
                 .categoryId(getCategoryIds(recipe))
                 .recipeName(recipe.getName())
+                .ownerImage(member.getProfileUrl())
                 .nickname(recipe.getMember().getNickname())
                 .thumbnailUrl(recipe.getThumbnailUrl())
                 .time(recipe.getTime())
