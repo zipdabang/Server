@@ -51,8 +51,8 @@ public enum Code {
 
     NO_CATEGORY_EXIST(HttpStatus.BAD_REQUEST, 4017, "선호하는 음료 카테고리가 잘못 되었습니다."),
 
-    UNDER_PAGE_INDEX_ERROR(HttpStatus.BAD_REQUEST, 4018, "페이지 번호는 0 이상이여야 합니다."),
-    OVER_PAGE_INDEX_ERROR(HttpStatus.BAD_REQUEST, 4019, "페이지 번호가 페이징 범위를 초과했습니다."),
+    UNDER_PAGE_INDEX_ERROR(HttpStatus.BAD_REQUEST, 4038, "페이지 번호는 0 이상이여야 합니다."),
+    OVER_PAGE_INDEX_ERROR(HttpStatus.BAD_REQUEST, 4039, "페이지 번호가 페이징 범위를 초과했습니다."),
 
 
 
