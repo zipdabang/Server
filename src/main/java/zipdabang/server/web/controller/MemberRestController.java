@@ -89,8 +89,8 @@ public class MemberRestController {
 
     @Operation(summary = "🎪figma[온보딩1] 소셜로그인 API ✔️", description = "소셜로그인 API, 응답으로 로그인(메인으로 이동), 회원가입(정보 입력으로 이동) code로 구분하며 query String으로 카카오인지 구글인지 주면 됩니다.")
     @ApiResponses({
-        @ApiResponse(responseCode = "2010",description = "OK, 로그인, access Token과 refresh 토큰을 반환함"),
-        @ApiResponse(responseCode = "2011",description = "OK, 회원가입, 디비에 유저정보 저장 X, 만약 회원정보 입력하다가 도망가면 그냥 처음부터 다시 할 것"),
+        @ApiResponse(responseCode = "2050",description = "OK, 로그인, access Token과 refresh 토큰을 반환함"),
+        @ApiResponse(responseCode = "2051",description = "OK, 회원가입, 디비에 유저정보 저장 X, 만약 회원정보 입력하다가 도망가면 그냥 처음부터 다시 할 것"),
         @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
@@ -119,7 +119,7 @@ public class MemberRestController {
     })
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
-            @ApiResponse(responseCode = "4017", description = "BAD_REQEUST, 선호하는 음료 카테고리 id가 이상할 경우",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4053", description = "BAD_REQEUST, 선호하는 음료 카테고리 id가 이상할 경우",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping("/members/oauth/info")
@@ -133,7 +133,7 @@ public class MemberRestController {
     @Operation(summary = "🎪figma[회원가입 까지 페이지 -  회원정보 입력] 인증번호 요청 API ✔️️", description = "인증번호 요청 API입니다. 대시(-) 제외 전화번호 입력하시면 됩니다. ex) 01012345678 ")
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK 성공 , 인증번호 전송 완료"),
-            @ApiResponse(responseCode = "2020",description = "OK 성공 , 이미 회원가입된 전화번호입니다."),
+            @ApiResponse(responseCode = "2054",description = "OK 성공 , 이미 회원가입된 전화번호입니다."),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping("/members/phone/sms")
@@ -147,9 +147,9 @@ public class MemberRestController {
     @Operation(summary = "🎪figma[회원가입 까지 페이지 -  회원정보 입력] 인증번호 검증 API ✔️️", description = "인증번호 검증 API입니다. 대시(-) 제외 전화번호와 인증번호 입력하시면 됩니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK 성공 , 인증 성공"),
-            @ApiResponse(responseCode = "4200",description = "BAD_REQUEST , 전화번호를 잘못 전달했거나, 인증요청을 하지않은 상태로 확인버튼을 누른 경우"),
-            @ApiResponse(responseCode = "4201",description = "BAD_REQUEST, 인증 번호가 옳지 않습니다."),
-            @ApiResponse(responseCode = "4202",description = "BAD_REQUEST, 인증 시간(5분)이 지난 경우"),
+            @ApiResponse(responseCode = "4056",description = "BAD_REQUEST , 전화번호를 잘못 전달했거나, 인증요청을 하지않은 상태로 확인버튼을 누른 경우"),
+            @ApiResponse(responseCode = "4057",description = "BAD_REQUEST, 인증 번호가 옳지 않습니다."),
+            @ApiResponse(responseCode = "4058",description = "BAD_REQUEST, 인증 시간(5분)이 지난 경우"),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @PostMapping("/members/phone/auth")
@@ -182,8 +182,8 @@ public class MemberRestController {
 
     @Operation(summary = "🎪[figma 회원가입까지 - 닉네임 입력 1,2,3] 닉네임 중복검사 API ✔️", description = "닉네임 중복검사 API입니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "2010",description = "OK 성공 , 닉네임 존재함 다시 시도하세요"),
-            @ApiResponse(responseCode = "2011",description = "OK 성공 , 닉네임 사용 가능"),
+            @ApiResponse(responseCode = "2052",description = "OK 성공 , 닉네임 존재함 다시 시도하세요"),
+            @ApiResponse(responseCode = "2053",description = "OK 성공 , 닉네임 사용 가능"),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @GetMapping("/members/exist-nickname")
@@ -200,7 +200,7 @@ public class MemberRestController {
     @Operation(summary = "리프레쉬 토큰을 이용해 accessToken 재발급 API ✔️", description = "리프레쉬 토큰을 이용해 accessToken 재발급하는 API입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
-            @ApiResponse(responseCode = "4014",description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4050",description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping("/members/new-token")
@@ -218,7 +218,7 @@ public class MemberRestController {
     @Operation(summary = "🎪figma[회원가입 까지 페이지 - 이용약관] 이용약관 조회 API ✔️", description = "이용약관 조회 API입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
-            @ApiResponse(responseCode = "4014",description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4050",description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @GetMapping("/members/terms")

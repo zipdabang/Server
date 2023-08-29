@@ -13,7 +13,7 @@ spring:
 
 ##  # local redis
 #  redis:
-#    host:localhost
+#    host: localhost
 
   redis:
     host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com
