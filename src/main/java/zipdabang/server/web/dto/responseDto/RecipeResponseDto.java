@@ -46,6 +46,7 @@ public class RecipeResponseDto {
         private Long recipeId;
         List<Long> categoryId;
         private String recipeName;
+        private String ownerImage;
         private String nickname;
         private String thumbnailUrl;
         private String time;
@@ -88,7 +89,6 @@ public class RecipeResponseDto {
     public static class RecipeInfoDto {
         private RecipeDto recipeInfo;
         private boolean isOwner;
-        private String ownerImage;
         private List<StepDto> steps;
         private List<IngredientDto> ingredients;
     }
