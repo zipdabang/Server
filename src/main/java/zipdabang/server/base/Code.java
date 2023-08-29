@@ -49,7 +49,7 @@ public enum Code {
     MEMBER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 4052,"해당 사용자가 존재하지 않습니다"),
     NO_CATEGORY_EXIST(HttpStatus.BAD_REQUEST, 4053, "선호하는 음료 카테고리가 잘못 되었습니다."),
 
-    UNDER_PAGE_INDEX_ERROR(HttpStatus.BAD_REQUEST, 4054, "페이지 번호는 0 이상이여야 합니다."),
+    UNDER_PAGE_INDEX_ERROR(HttpStatus.BAD_REQUEST, 4054, "페이지 번호는 1 이상이여야 합니다."),
     OVER_PAGE_INDEX_ERROR(HttpStatus.BAD_REQUEST, 4055, "페이지 번호가 페이징 범위를 초과했습니다."),
 
     PHONE_AUTH_NOT_FOUND(HttpStatus.BAD_REQUEST, 4056, "인증 번호 요청이 필요합니다."),

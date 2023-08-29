@@ -128,10 +128,11 @@ public class RecipeConverter {
     }
 
 
-    public static RecipeResponseDto.RecipeInfoDto toRecipeInfoDto(Recipe recipe, Boolean isOwner, Boolean isLiked, Boolean isScrapped) {
+    public static RecipeResponseDto.RecipeInfoDto toRecipeInfoDto(Recipe recipe, Boolean isOwner, Boolean isLiked, Boolean isScrapped, Member member) {
         return RecipeResponseDto.RecipeInfoDto.builder()
                 .recipeInfo(toResponseRecipeDto(recipe, isLiked, isScrapped))
                 .isOwner(isOwner)
+                .ownerImage(member.getProfileUrl())
                 .steps(toResponseStepDto(recipe))
                 .ingredients(toResponseIngredientDto(recipe))
                 .build();

@@ -88,6 +88,7 @@ public class RecipeResponseDto {
     public static class RecipeInfoDto {
         private RecipeDto recipeInfo;
         private boolean isOwner;
+        private String ownerImage;
         private List<StepDto> steps;
         private List<IngredientDto> ingredients;
     }
@@ -121,4 +122,22 @@ public class RecipeResponseDto {
         private LocalDate createdAt;
     }
 
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RecipeBannerDto{
+        private Integer order;
+        private String imageUrl;
+        private String searchKeyword;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RecipeBannerImageDto {
+        List<RecipeBannerDto> bannerList;
+        Integer size;
+    }
 }

@@ -44,9 +44,13 @@ public class RootController {
         return ResponseDto.of(RootConverter.toBeverageCategoryListDto(allCategories));
     }
 
-    @Operation(summary = "배너 이미지 APII️", description = "홈 화면의 배너 이미지를 가져옵니다. order는 배너 순서를 의미합니다.")
+    @Operation(summary = "배너 이미지 API 🔑", description = "홈 화면의 배너 이미지를 가져옵니다. order는 배너 순서를 의미합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
+            @ApiResponse(responseCode = "2000",description = "OK 성공"),
+            @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @GetMapping("/banners")
