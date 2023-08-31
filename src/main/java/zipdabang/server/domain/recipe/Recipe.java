@@ -90,4 +90,14 @@ public class Recipe extends BaseEntity {
         this.thumbnailUrl = imageUrl;
         return this;
     }
+
+    public Recipe updateToTalLike(Integer i){
+        this.totalLike += i;
+        return this;
+    }
+
+    public Recipe updateToTalScrap(Integer i){
+        this.totalScrap += i;
+        return this;
+    }
 }

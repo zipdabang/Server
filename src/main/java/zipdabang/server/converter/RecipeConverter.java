@@ -9,10 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.Member;
-import zipdabang.server.domain.recipe.Ingredient;
-import zipdabang.server.domain.recipe.Recipe;
-import zipdabang.server.domain.recipe.RecipeCategoryMapping;
-import zipdabang.server.domain.recipe.Step;
+import zipdabang.server.domain.recipe.*;
 import zipdabang.server.repository.CategoryRepository;
 import zipdabang.server.repository.recipeRepositories.LikesRepository;
 import zipdabang.server.repository.recipeRepositories.RecipeCategoryMappingRepository;
@@ -258,6 +255,20 @@ public class RecipeConverter {
                 .name(ingredient.getIngredientName())
                 .quantity(ingredient.getQuantity())
                 .recipe(recipe)
+                .build();
+    }
+
+    public static Likes toLikes(Recipe recipe, Member member) {
+        return Likes.builder()
+                .recipe(recipe)
+                .member(member)
+                .build();
+    }
+
+    public static Scrap toScrap(Recipe recipe, Member member) {
+        return Scrap.builder()
+                .recipe(recipe)
+                .member(member)
                 .build();
     }
 }

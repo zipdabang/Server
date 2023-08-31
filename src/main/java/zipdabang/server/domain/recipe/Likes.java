@@ -28,4 +28,23 @@ public class Likes extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
+
+    public Likes deleteLikes(Recipe recipe){
+        if(this.recipe != null)
+            recipe.getLikesList().remove(this);
+        recipe.updateToTalLike(-1);
+        return this;
+    }
+
+    public Likes setRecipe(Recipe recipe){
+
+        recipe.updateToTalLike(1);
+
+        if(this.recipe != null)
+            recipe.getLikesList().remove(this);
+        this.recipe = recipe;
+        recipe.getLikesList().add(this);
+
+        return this;
+    }
 }
