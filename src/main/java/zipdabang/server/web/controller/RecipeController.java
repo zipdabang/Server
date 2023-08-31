@@ -238,7 +238,7 @@ RecipeController {
         return null;
     }
 
-    @Operation(summary = "레시피 스크랩/취소 API 🔑", description = "레시피 스크랩/취소 API입니다.")
+    @Operation(summary = "레시피 스크랩/취소 API 🔑 ✔", description = "레시피 스크랩/취소 API입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000"),
             @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -253,10 +253,12 @@ RecipeController {
     })
     @PostMapping(value = "/members/recipes/{recipeId}/scrap")
     public ResponseDto<RecipeResponseDto.RecipeStatusDto> recipeScrapOrCancel(@PathVariable Long recipeId, @AuthMember Member member){
-        return null;
+        Recipe recipe = recipeService.updateScrapOnRecipe(recipeId, member);
+
+        return ResponseDto.of(RecipeConverter.toRecipeStatusDto(recipe));
     }
 
-    @Operation(summary = "레시피 좋아요/취소 API 🔑", description = "레시피 좋아요/취소 API입니다.")
+    @Operation(summary = "레시피 좋아요/취소 API 🔑 ✔", description = "레시피 좋아요/취소 API입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000"),
             @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -271,7 +273,10 @@ RecipeController {
     })
     @PostMapping(value = "/members/recipes/{recipeId}/likes")
     public ResponseDto<RecipeResponseDto.RecipeStatusDto> recipeLikeOrCancel(@PathVariable Long recipeId, @AuthMember Member member){
-        return null;
+
+        Recipe recipe = recipeService.updateLikeOnRecipe(recipeId, member);
+
+        return ResponseDto.of(RecipeConverter.toRecipeStatusDto(recipe));
     }
 
     @Operation(summary = "레시피 배너 이미지 API 🔑", description = "레시피 화면의 배너 이미지를 가져옵니다. order는 배너 순서를 의미합니다.")

@@ -16,7 +16,9 @@ import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.BlockedMember;
 import zipdabang.server.domain.member.Member;
+import zipdabang.server.domain.recipe.Likes;
 import zipdabang.server.domain.recipe.Recipe;
+import zipdabang.server.domain.recipe.Scrap;
 import zipdabang.server.repository.memberRepositories.BlockedMemberRepository;
 import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.service.RecipeService;
@@ -167,5 +169,43 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         return recipeList;
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public Recipe updateLikeOnRecipe(Long recipeId, Member member) {
+        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(Code.NO_RECIPE_EXIST));
+
+        Optional<Likes> likesExist = likesRepository.findByRecipeAndMember(recipe,member);
+
+        if(likesExist.isEmpty()) {
+            Likes savedLikes = likesRepository.save(RecipeConverter.toLikes(recipe, member));
+            savedLikes.setRecipe(recipe);
+        }
+        else{
+            likesExist.get().deleteLikes(recipe);
+            likesRepository.deleteById(likesExist.get().getId());
+        }
+
+        return recipe;
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public Recipe updateScrapOnRecipe(Long recipeId, Member member) {
+        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(Code.NO_RECIPE_EXIST));
+
+        Optional<Scrap> scrapExist = scrapRepository.findByRecipeAndMember(recipe,member);
+
+        if(scrapExist.isEmpty()) {
+            Scrap savedScrap = scrapRepository.save(RecipeConverter.toScrap(recipe, member));
+            savedScrap.setRecipe(recipe);
+        }
+        else {
+            scrapExist.get().deleteScrap(recipe);
+            scrapRepository.deleteById(scrapExist.get().getId());
+        }
+
+        return recipe;
     }
 }

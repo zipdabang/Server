@@ -28,4 +28,23 @@ public class Scrap extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
+
+    public Scrap deleteScrap(Recipe recipe){
+        if(this.recipe != null)
+            recipe.getScrapList().remove(this);
+        recipe.updateToTalScrap(-1);
+        return this;
+    }
+
+    public Scrap setRecipe(Recipe recipe){
+
+        recipe.updateToTalScrap(1);
+
+        if(this.recipe != null)
+            recipe.getScrapList().remove(this);
+        this.recipe = recipe;
+        recipe.getScrapList().add(this);
+
+        return this;
+    }
 }

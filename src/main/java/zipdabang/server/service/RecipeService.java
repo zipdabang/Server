@@ -24,4 +24,8 @@ public interface RecipeService {
     Page<Recipe> searchRecipe(String keyword, Integer pageIndex, Member member);
 
     List<Recipe> getWrittenByRecipePreview(String writtenby, Member member);
+
+     Recipe updateLikeOnRecipe(Long recipeId, Member member);
+
+    Recipe updateScrapOnRecipe(Long recipeId, Member member);
 }
