@@ -18,6 +18,7 @@ import zipdabang.server.domain.member.BlockedMember;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.Likes;
 import zipdabang.server.domain.recipe.Recipe;
+import zipdabang.server.domain.recipe.RecipeCategory;
 import zipdabang.server.domain.recipe.Scrap;
 import zipdabang.server.repository.memberRepositories.BlockedMemberRepository;
 import zipdabang.server.repository.recipeRepositories.*;
@@ -38,6 +39,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     private final RecipeRepository recipeRepository;
     private final RecipeCategoryMappingRepository recipeCategoryMappingRepository;
+    private final RecipeCategoryRepository recipeCategoryRepository;
     private final StepRepository stepRepository;
     private final IngredientRepository ingredientRepository;
     private final LikesRepository likesRepository;
@@ -57,7 +59,7 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe buildRecipe = RecipeConverter.toRecipe(request, thumbnail, member);
         Recipe recipe = recipeRepository.save(buildRecipe);
 
-        RecipeConverter.toCategory(request,recipe).stream()
+        RecipeConverter.toRecipeCategory(request,recipe).stream()
                 .map(categoryMapping -> recipeCategoryMappingRepository.save(categoryMapping))
                 .collect(Collectors.toList())
                 .stream()
@@ -207,5 +209,16 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         return recipe;
+    }
+
+    @Override
+    public List<RecipeCategory> getAllRecipeCategories() {
+        return recipeCategoryRepository.findAll();
+    }
+
+    @Override
+    public Page<Recipe> recipeListByCategory(Long categoryId, Integer pageIndex, Member member) {
+
+        return null;
     }
 }

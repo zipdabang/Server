@@ -140,4 +140,23 @@ public class RecipeResponseDto {
         List<RecipeBannerDto> bannerList;
         Integer size;
     }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RecipeCategoryDto{
+        private Long id;
+        private String categoryName;
+        private String imageUrl;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RecipeCategoryListDto{
+        List<RecipeCategoryDto> beverageCategoryList;
+        Integer size;
+    }
 }

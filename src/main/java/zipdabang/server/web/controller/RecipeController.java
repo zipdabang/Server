@@ -19,9 +19,12 @@ import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
+import zipdabang.server.converter.RootConverter;
+import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.Likes;
 import zipdabang.server.domain.recipe.Recipe;
+import zipdabang.server.domain.recipe.RecipeCategory;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
@@ -171,6 +174,24 @@ RecipeController {
     })
     @GetMapping(value = "/members/recipes/categories/{categoryId}")
     public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@PathVariable Long categoryId, @RequestParam(name = "order") String order, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member){
+        if(pageIndex == null)
+            pageIndex =1;
+        else if (pageIndex < 1)
+            throw new RecipeException(Code.UNDER_PAGE_INDEX_ERROR);
+
+        pageIndex -= 1;
+
+//        Page<Recipe> recipes= recipeService.recipeListByCategory(categoryId,pageIndex,member);
+//
+//        log.info(recipes.toString());
+//
+//        if(recipes.getTotalElements() == 0)
+//            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+//        if(pageIndex >= recipes.getTotalPages())
+//            throw  new RecipeException(Code.OVER_PAGE_INDEX_ERROR);
+//
+//        return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
+
         return null;
     }
 
@@ -291,5 +312,20 @@ RecipeController {
     @GetMapping("/members/recipes/banners")
     public ResponseDto<RecipeResponseDto.RecipeBannerImageDto> showBanners() {
         return null;
+    }
+
+    @Operation(summary = "레시피 카테고리 조회 API 🔑 ✔️", description = "레시피 카테고리 조회 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공"),
+            @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/members/recipes/categories")
+    public ResponseDto<RecipeResponseDto.RecipeCategoryListDto> showCategoryList(){
+        List<RecipeCategory> allCategories = recipeService.getAllRecipeCategories();
+        return ResponseDto.of(RecipeConverter.RecipeCategoryListDto(allCategories));
     }
 }

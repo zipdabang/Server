@@ -7,16 +7,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 //import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.aws.s3.AmazonS3Manager;
+import zipdabang.server.domain.Category;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
 import zipdabang.server.repository.CategoryRepository;
-import zipdabang.server.repository.recipeRepositories.LikesRepository;
-import zipdabang.server.repository.recipeRepositories.RecipeCategoryMappingRepository;
-import zipdabang.server.repository.recipeRepositories.RecipeRepository;
-import zipdabang.server.repository.recipeRepositories.ScrapRepository;
+import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
+import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -32,7 +31,8 @@ public class RecipeConverter {
     private final RecipeCategoryMappingRepository recipeCategoryMappingRepository;
     private final LikesRepository likesRepository;
     private final ScrapRepository scrapRepository;
-    private final CategoryRepository categoryRepository;
+//    private final CategoryRepository categoryRepository;
+    private final RecipeCategoryRepository recipeCategoryRepository;
     private final AmazonS3Manager amazonS3Manager;
 
     private static RecipeRepository staticRecipeRepository;
@@ -41,7 +41,8 @@ public class RecipeConverter {
     private static LikesRepository staticLikesRepository;
     private static ScrapRepository staticScrapRepository;
 
-    private static CategoryRepository staticCategoryRepository;
+//    private static CategoryRepository staticCategoryRepository;
+    private static RecipeCategoryRepository staticRecipeCategoryRepository;
     private static AmazonS3Manager staticAmazonS3Manager;
 
 
@@ -49,7 +50,8 @@ public class RecipeConverter {
     public void init() {
         this.staticRecipeRepository = this.recipeRepository;
         this.staticRecipeCategoryMappingRepository = this.recipeCategoryMappingRepository;
-        this.staticCategoryRepository = this.categoryRepository;
+//        this.staticCategoryRepository = this.categoryRepository;
+        this.staticRecipeCategoryRepository = this.recipeCategoryRepository;
         this.staticAmazonS3Manager = this.amazonS3Manager;
         this.staticLikesRepository = this.likesRepository;
         this.staticScrapRepository = this.scrapRepository;
@@ -105,9 +107,9 @@ public class RecipeConverter {
                 .collect(Collectors.toList());
     }
 
-    public static List<RecipeCategoryMapping> toCategory(RecipeRequestDto.CreateRecipeDto request, Recipe recipe) {
+    public static List<RecipeCategoryMapping> toRecipeCategory(RecipeRequestDto.CreateRecipeDto request, Recipe recipe) {
         return request.getCategoryId().stream()
-                .map(categoryId -> toRecipeCategoryMappingDto(categoryId, recipe))
+                .map(recipeCategoryId -> toRecipeCategoryMappingDto(recipeCategoryId, recipe))
                 .collect(Collectors.toList());
     }
 
@@ -211,7 +213,7 @@ public class RecipeConverter {
 
     private static RecipeCategoryMapping toRecipeCategoryMappingDto(Long categoryId, Recipe recipe) {
         return RecipeCategoryMapping.builder()
-                .category(staticCategoryRepository.findById(categoryId).get())
+                .category(staticRecipeCategoryRepository.findById(categoryId).get())
                 .recipe(recipe)
                 .build();
     }
@@ -271,4 +273,21 @@ public class RecipeConverter {
                 .member(member)
                 .build();
     }
+    public static RecipeResponseDto.RecipeCategoryListDto RecipeCategoryListDto(List<RecipeCategory> categoryList) {
+        List<RecipeResponseDto.RecipeCategoryDto> recipeCategoryDtoList = categoryList.stream()
+                .map(category -> toRecipeCategoryDto(category)).collect(Collectors.toList());
+
+        return RecipeResponseDto.RecipeCategoryListDto.builder()
+                .beverageCategoryList(recipeCategoryDtoList)
+                .size(recipeCategoryDtoList.size())
+                .build();
+    }
+    public static RecipeResponseDto.RecipeCategoryDto toRecipeCategoryDto (RecipeCategory category){
+        return RecipeResponseDto.RecipeCategoryDto.builder()
+                .categoryName(category.getName())
+                .imageUrl(category.getImageUrl())
+                .id(category.getId())
+                .build();
+    }
+
 }
