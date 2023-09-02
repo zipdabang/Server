@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,9 +20,12 @@ import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
+import zipdabang.server.converter.RootConverter;
+import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.Likes;
 import zipdabang.server.domain.recipe.Recipe;
+import zipdabang.server.domain.recipe.RecipeCategory;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
@@ -89,6 +93,8 @@ RecipeController {
         Boolean isOwner = recipeService.checkOwner(recipe, member);
         Boolean isLiked = recipeService.getLike(recipe, member);
         Boolean isScrapped = recipeService.getScrap(recipe, member);
+
+        recipe.updateTotalView();
 
         return ResponseDto.of(RecipeConverter.toRecipeInfoDto(recipe, isOwner, isLiked, isScrapped, member));
     }
@@ -160,18 +166,36 @@ RecipeController {
             @ApiResponse(responseCode = "4008",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4053",description = "BAD_REQUEST, 넘겨받은 categoryId와 일치하는 카테고리 없음. 1~6 사이로 보내세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4054",description = "BAD_REQUEST, 페이지 번호 -1 이하입니다. 0 이상으로 주세요.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4049",description = "BAD_REQUEST, 페이지 인덱스 범위 초과함",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4054",description = "BAD_REQUEST, 페이지 번호 0 이하입니다. 1 이상으로 주세요.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055",description = "BAD_REQUEST, 페이지 인덱스 범위 초과함",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4104",description = "BAD_REQUEST, 조회 방식 타입이 잘못되었습니다. likes, views, lastest중 하나로 보내주세요.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 안주면 0으로(최초 페이지) 설정함, -1 이런거 주면 에러 뱉음"),
-            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 조회순: views, 최신순: latest로 넘겨주세요")
+            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 조회순: views, 최신순: latest로 넘겨주세요, 기본값 latest")
     })
     @GetMapping(value = "/members/recipes/categories/{categoryId}")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@PathVariable Long categoryId, @RequestParam(name = "order") String order, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member){
-        return null;
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@PathVariable Long categoryId, @RequestParam(name = "order", required = false) String order, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member){
+        if(pageIndex == null)
+            pageIndex =1;
+        else if (pageIndex < 1)
+            throw new RecipeException(Code.UNDER_PAGE_INDEX_ERROR);
+
+        pageIndex -= 1;
+
+        Page<Recipe> recipes = recipeService.recipeListByCategory(categoryId,pageIndex,member,order);
+
+
+        log.info(recipes.toString());
+
+        if(recipes.getTotalElements() == 0)
+            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+        if(pageIndex >= recipes.getTotalPages())
+            throw  new RecipeException(Code.OVER_PAGE_INDEX_ERROR);
+
+        return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
     }
 
     @Operation(summary = "🍹figma 레시피1, 모든사람/인플루언서/우리들의 레시피 미리보기 API 🔑 ✔", description = "5개씩 미리보기로 가져오는 API입니다.")
@@ -205,8 +229,8 @@ RecipeController {
             @ApiResponse(responseCode = "4008",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4053",description = "BAD_REQUEST, 넘겨받은 categoryId와 일치하는 카테고리 없음. 1~6 사이로 보내세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4054",description = "BAD_REQUEST, 페이지 번호 -1 이하입니다. 0 이상으로 주세요.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4049",description = "BAD_REQUEST, 페이지 인덱스 범위 초과함",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4054",description = "BAD_REQUEST, 페이지 번호 0 이하입니다. 1 이상으로 주세요.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055",description = "BAD_REQUEST, 페이지 인덱스 범위 초과함",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
@@ -291,5 +315,20 @@ RecipeController {
     @GetMapping("/members/recipes/banners")
     public ResponseDto<RecipeResponseDto.RecipeBannerImageDto> showBanners() {
         return null;
+    }
+
+    @Operation(summary = "레시피 카테고리 조회 API 🔑 ✔️", description = "레시피 카테고리 조회 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공"),
+            @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/members/recipes/categories")
+    public ResponseDto<RecipeResponseDto.RecipeCategoryListDto> showCategoryList(){
+        List<RecipeCategory> allCategories = recipeService.getAllRecipeCategories();
+        return ResponseDto.of(RecipeConverter.RecipeCategoryListDto(allCategories));
     }
 }

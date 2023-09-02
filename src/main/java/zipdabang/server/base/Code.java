@@ -22,7 +22,7 @@ public enum Code {
 
 
     //recipe response
-    RECIPE_NOT_FOUND(HttpStatus.OK, 2100, "검색어와 일치하는 레시피가 없습니다"),
+    RECIPE_NOT_FOUND(HttpStatus.OK, 2100, "조회된 목록이 없습니다"),
 
     // market response
 
@@ -63,7 +63,7 @@ public enum Code {
     NO_RECIPE_EXIST(HttpStatus.BAD_REQUEST, 4101, "해당 레시피가 존재하지 않습니다."),
     BLOCKED_USER_RECIPE(HttpStatus.BAD_REQUEST, 4102, "차단한 사용자의 레시피입니다."),
     WRITTEN_BY_TYPE_ERROR(HttpStatus.BAD_REQUEST, 4103, "레시피 작성자 타입이 잘못되었습니다. all, influencer, common중 하나로 보내주세요."),
-
+    ORDER_BY_TYPE_ERROR(HttpStatus.BAD_REQUEST, 4104, "조회 방식 타입이 잘못되었습니다. likes, views, latest중 하나로 보내주세요."),
 
 
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),

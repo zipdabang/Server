@@ -100,4 +100,9 @@ public class Recipe extends BaseEntity {
         this.totalScrap += i;
         return this;
     }
+
+    public Recipe updateTotalView(){
+        this.totalLike += 1;
+        return this;
+    }
 }

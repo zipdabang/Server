@@ -1,6 +1,7 @@
 package zipdabang.server.repository.recipeRepositories;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import zipdabang.server.domain.member.Member;
@@ -23,4 +24,8 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     List<Recipe> findTop5ByIsInfluencerTrueOrderByCreatedAtDesc();
 
     List<Recipe> findTop5ByIsInfluencerFalseOrderByCreatedAtDesc();
+
+    Page<Recipe> findByIdIn(List<Long> recipeIdList, PageRequest createdAt);
+
+    Page<Recipe> findByIdInAndMemberNotIn(List<Long> recipeIdList, List<Member> blockedMember, PageRequest createdAt);
 }

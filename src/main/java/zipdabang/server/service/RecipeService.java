@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.Recipe;
+import zipdabang.server.domain.recipe.RecipeCategory;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 
 import java.io.IOException;
@@ -28,4 +29,12 @@ public interface RecipeService {
      Recipe updateLikeOnRecipe(Long recipeId, Member member);
 
     Recipe updateScrapOnRecipe(Long recipeId, Member member);
+
+    Page<Recipe> recipeListByCategory(Long categoryId, Integer pageIndex, Member member, String order);
+
+    List<RecipeCategory> getAllRecipeCategories();
+
+//    Page<Recipe> recipeListByCategoryAndLikes(Long categoryId, Integer pageIndex, Member member);
+
+//    Page<Recipe> recipeListByCategoryAndViews(Long categoryId, Integer pageIndex, Member member);
 }

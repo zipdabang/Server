@@ -10,14 +10,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.base.Code;
-import zipdabang.server.base.ResponseDto;
-import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.BlockedMember;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.Likes;
 import zipdabang.server.domain.recipe.Recipe;
+import zipdabang.server.domain.recipe.RecipeCategory;
 import zipdabang.server.domain.recipe.Scrap;
 import zipdabang.server.repository.memberRepositories.BlockedMemberRepository;
 import zipdabang.server.repository.recipeRepositories.*;
@@ -38,6 +37,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     private final RecipeRepository recipeRepository;
     private final RecipeCategoryMappingRepository recipeCategoryMappingRepository;
+    private final RecipeCategoryRepository recipeCategoryRepository;
     private final StepRepository stepRepository;
     private final IngredientRepository ingredientRepository;
     private final LikesRepository likesRepository;
@@ -57,7 +57,7 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe buildRecipe = RecipeConverter.toRecipe(request, thumbnail, member);
         Recipe recipe = recipeRepository.save(buildRecipe);
 
-        RecipeConverter.toCategory(request,recipe).stream()
+        RecipeConverter.toRecipeCategory(request,recipe).stream()
                 .map(categoryMapping -> recipeCategoryMappingRepository.save(categoryMapping))
                 .collect(Collectors.toList())
                 .stream()
@@ -207,5 +207,88 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         return recipe;
+    }
+
+    @Override
+    public List<RecipeCategory> getAllRecipeCategories() {
+        return recipeCategoryRepository.findAll();
+    }
+
+    /*
+    @Override
+    public Page<Recipe> recipeListByCategoryAndLikes(Long categoryId, Integer pageIndex, Member member) {
+
+        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
+                .map(blockedInfo -> blockedInfo.getBlocked())
+                .collect(Collectors.toList());
+
+        List<Long> recipeIdList  = recipeCategoryMappingRepository.findByCategory(categoryId).stream()
+                .map(categoryMapping -> categoryMapping.getRecipe().getId())
+                .collect(Collectors.toList());
+
+        if(blockedMember.isEmpty())
+            return recipeRepository.findByIdIn(recipeIdList,
+                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "totalLike")));
+        else
+            return recipeRepository.findByIdInAndMemberNotIn(recipeIdList,blockedMember,
+                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "totalLike")));
+    }
+
+
+    @Override
+    public Page<Recipe> recipeListByCategoryAndViews(Long categoryId, Integer pageIndex, Member member) {
+
+        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
+                .map(blockedInfo -> blockedInfo.getBlocked())
+                .collect(Collectors.toList());
+
+        List<Long> recipeIdList  = recipeCategoryMappingRepository.findByCategory(categoryId).stream()
+                .map(categoryMapping -> categoryMapping.getRecipe().getId())
+                .collect(Collectors.toList());
+
+        if(blockedMember.isEmpty())
+            return recipeRepository.findByIdIn(recipeIdList,
+                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "totalView")));
+        else
+            return recipeRepository.findByIdInAndMemberNotIn(recipeIdList,blockedMember,
+                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "totalView")));
+    }
+*/
+    @Override
+    public Page<Recipe> recipeListByCategory(Long categoryId, Integer pageIndex, Member member, String order) {
+
+        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
+                .map(blockedInfo -> blockedInfo.getBlocked())
+                .collect(Collectors.toList());
+
+        List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
+
+        if(recipeCategory.isEmpty())
+            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+
+        List<Long> recipeIdList  = recipeCategoryMappingRepository.findByCategoryIn(recipeCategory).stream()
+                .map(categoryMapping -> categoryMapping.getRecipe().getId())
+                .collect(Collectors.toList());
+
+        String orderBy = null;
+
+        if(order == null)
+            order = "latest";
+
+        if(order.equals("likes"))
+            orderBy = "totalLike";
+        else if(order.equals("views"))
+            orderBy = "totalView";
+        else if(order.equals("latest"))
+            orderBy = "createdAt";
+        else
+            throw new RecipeException(Code.ORDER_BY_TYPE_ERROR);
+
+        if(blockedMember.isEmpty())
+            return recipeRepository.findByIdIn(recipeIdList,
+                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, orderBy)));
+        else
+            return recipeRepository.findByIdInAndMemberNotIn(recipeIdList,blockedMember,
+                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, orderBy)));
     }
 }

@@ -25,8 +25,8 @@ public class RecipeCategoryMapping {
     private Recipe recipe;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+    @JoinColumn(name = "recipe_category_id", nullable = false)
+    private RecipeCategory category;
 
     public RecipeCategoryMapping setRecipe(Recipe recipe){
         if(this.recipe != null)
