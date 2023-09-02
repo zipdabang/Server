@@ -30,7 +30,11 @@ public interface RecipeService {
 
     Recipe updateScrapOnRecipe(Long recipeId, Member member);
 
-    Page<Recipe> recipeListByCategory(Long categoryId, Integer pageIndex, Member member);
+    Page<Recipe> recipeListByCategory(Long categoryId, Integer pageIndex, Member member, String order);
 
     List<RecipeCategory> getAllRecipeCategories();
+
+//    Page<Recipe> recipeListByCategoryAndLikes(Long categoryId, Integer pageIndex, Member member);
+
+//    Page<Recipe> recipeListByCategoryAndViews(Long categoryId, Integer pageIndex, Member member);
 }
