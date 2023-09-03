@@ -71,6 +71,7 @@ public class MemberConverter {
                 .email(request.getEmail())
                 .profileUrl(request.getProfileUrl())
                 .nickname(request.getNickname())
+                .birth(request.getBirth())
                 .gender(gender)
                 .name(request.getName())
                 .phoneNum(request.getPhoneNum())
