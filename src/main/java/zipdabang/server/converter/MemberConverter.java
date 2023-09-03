@@ -71,12 +71,9 @@ public class MemberConverter {
                 .email(request.getEmail())
                 .profileUrl(request.getProfileUrl())
                 .nickname(request.getNickname())
-                .address(request.getAddress())
-                .detailAddress(request.getDetailAddress())
                 .gender(gender)
                 .name(request.getName())
                 .phoneNum(request.getPhoneNum())
-                .zipCode(request.getZipCode())
                 .termsAgree(new ArrayList<>())
                 .build();
         return staticMemberRepository.save(member);

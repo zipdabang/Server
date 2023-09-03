@@ -70,12 +70,6 @@ public class MemberRequestDto {
         @NotBlank
         private String gender;
         @NotBlank
-        private String zipCode;
-        @NotBlank
-        private String address;
-        @NotBlank
-        private String detailAddress;
-        @NotBlank
         private String nickname;
         @NotBlank
         private String phoneNum;
