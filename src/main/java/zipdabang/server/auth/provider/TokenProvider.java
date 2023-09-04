@@ -84,6 +84,18 @@ public class TokenProvider implements InitializingBean {
                 .compact();
     }
 
+    public String createTempAccessToken(Collection<? extends GrantedAuthority> authorities){
+        long now = (new Date()).getTime();
+        Date validity = new Date(now + this.accessTokenValidityInMilliseconds);
+
+        return Jwts.builder()
+                .setSubject(String.valueOf(0L))
+                .claim(AUTHORITIES_KEY, authorities)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .setExpiration(validity)
+                .compact();
+    }
+
     public Authentication getAuthentication(String token){
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -114,7 +126,7 @@ public class TokenProvider implements InitializingBean {
         }
     }
 
-    public Long validateAndReturnId(String token) throws JwtAuthenticationException{
+    public Long validateAndReturnSubject(String token) throws JwtAuthenticationException{
         try{
             Claims body = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
             return Long.valueOf(body.getSubject());

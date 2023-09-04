@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,21 +19,16 @@ import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
-import zipdabang.server.converter.RootConverter;
-import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Member;
-import zipdabang.server.domain.recipe.Likes;
 import zipdabang.server.domain.recipe.Recipe;
 import zipdabang.server.domain.recipe.RecipeCategory;
 import zipdabang.server.service.RecipeService;
+import zipdabang.server.validation.annotation.CheckTempMember;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
-import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -296,7 +290,7 @@ RecipeController {
             @Parameter(name = "member", hidden = true),
     })
     @PostMapping(value = "/members/recipes/{recipeId}/likes")
-    public ResponseDto<RecipeResponseDto.RecipeStatusDto> recipeLikeOrCancel(@PathVariable Long recipeId, @AuthMember Member member){
+    public ResponseDto<RecipeResponseDto.RecipeStatusDto> recipeLikeOrCancel(@PathVariable Long recipeId, @CheckTempMember @AuthMember Member member){
 
         Recipe recipe = recipeService.updateLikeOnRecipe(recipeId, member);
 

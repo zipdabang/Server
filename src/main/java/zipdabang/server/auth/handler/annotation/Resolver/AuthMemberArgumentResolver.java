@@ -1,4 +1,4 @@
-package zipdabang.server.auth.handler.annotation;
+package zipdabang.server.auth.handler.annotation.Resolver;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.converter.MemberConverter;
@@ -41,7 +42,12 @@ public class AuthMemberArgumentResolver implements HandlerMethodArgumentResolver
         }
 
         UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) authentication;
-        Member member = MemberConverter.toMember(Long.valueOf(authenticationToken.getName()));
-        return member;
+        Long memberId = Long.valueOf(authentication.getName());
+        if(memberId.equals(0L))
+            return MemberConverter.toMemberTemp(memberId);
+        else {
+            Member member = MemberConverter.toMember(memberId);
+            return member;
+        }
     }
 }

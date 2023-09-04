@@ -55,6 +55,7 @@ public enum Code {
     PHONE_AUTH_NOT_FOUND(HttpStatus.BAD_REQUEST, 4056, "인증 번호 요청이 필요합니다."),
     PHONE_AUTH_ERROR(HttpStatus.BAD_REQUEST, 4057, "잘못된 인증 번호 입니다."),
     PHONE_AUTH_TIMEOUT(HttpStatus.BAD_REQUEST, 4058, "인증 시간이 초과되었습니다."),
+    TEMP_MEMBER_FORBIDDEN(HttpStatus.FORBIDDEN, 4059, "해당 기능은 로그인을 해야 합니다."),
 
     // market error
 
