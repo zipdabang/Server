@@ -128,6 +128,11 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public String tempLoginService() {
+        return tokenProvider.createTempAccessToken(Arrays.asList(new SimpleGrantedAuthority("GUEST")));
+    }
+
+    @Override
     @Transactional(readOnly = false)
     public OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type){
         List<Terms> termsList = termsRepository.findByIdIn(request.getAgreeTermsIdList());

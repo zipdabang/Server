@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import zipdabang.server.auth.provider.TokenProvider;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.base.exception.handler.RefreshTokenExceptionHandler;
@@ -31,6 +32,8 @@ public class RedisServiceImpl implements RedisService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     private final LoginStatusRepository loginStatusRepository;
+    
+    private final TokenProvider tokenProvider;
 
     Logger logger = LoggerFactory.getLogger(RedisServiceImpl.class);
 
@@ -113,6 +116,9 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Boolean validateLoginToken(String accessToken) {
+        Long aLong = tokenProvider.validateAndReturnSubject(accessToken);
+        if(aLong == 0L)
+            return true;
         return loginStatusRepository.findById(accessToken).isPresent();
     }
 }
