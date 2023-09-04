@@ -1,6 +1,7 @@
 package zipdabang.server.web.dto.responseDto;
 
 import lombok.*;
+import zipdabang.server.domain.enums.GenderType;
 
 
 import java.time.LocalDateTime;
@@ -43,11 +44,43 @@ public class MemberResponseDto {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class MemberProfileDto {
 
-        //        private String name;
         private String nickname;
         private String email;
         private String phoneNum;
         private String profileUrl;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class MemberBasicInfoDto{
+        private String name;
+        private String birth;
+        private GenderType genderType;
+        private String phoneNum;
+    }
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class MemberDetailInfoDto{
+        private String zipCode;
+        private String address;
+        private String detailAddress;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class MemberInfoDto {
+        private String profileUrl;
+        private String email;
+        private MemberBasicInfoDto memberBasicInfoDto;
+        private MemberDetailInfoDto memberDetailInfoDto;
+        private String nickname;
+
     }
 
 
