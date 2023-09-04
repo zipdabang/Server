@@ -27,4 +27,6 @@ public interface MemberService {
     String regenerateAccessToken(RefreshToken refreshToken);
 
     List<Terms> getAllTerms();
+
+    String tempLoginService();
 }

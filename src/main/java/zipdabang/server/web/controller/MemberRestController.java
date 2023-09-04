@@ -239,4 +239,14 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toTermsDto(memberService.getAllTerms()));
     }
 
+
+    @Operation(summary = "🎪figma[온보딩1] 나중에 로그인하기 API ✔️", description = "나중에 로그인하기 API 입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token 하나만 반환함"),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @PostMapping("/members/temp-login")
+    public ResponseDto<MemberResponseDto.TempLoginDto> tempLogin(){
+        return ResponseDto.of(MemberConverter.toTempLoginDto(memberService.tempLoginService()));
+    }
 }

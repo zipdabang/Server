@@ -134,6 +134,12 @@ public class MemberConverter {
         return staticMemberRepository.findById(memberId).orElseThrow(()->new MemberException(Code.MEMBER_NOT_FOUND));
     }
 
+    public static Member toMemberTemp(Long memberId){
+        return Member.builder()
+                .memberId(memberId)
+                .build();
+    }
+
     public static Member toOAuthMember(String email, String profileUrl){
         return Member.builder()
                 .socialType(SocialType.KAKAO)
@@ -186,6 +192,12 @@ public class MemberConverter {
         return MemberResponseDto.TermsListDto.builder()
                 .termsList(termsBodyList)
                 .size(termsBodyList.size())
+                .build();
+    }
+
+    public static MemberResponseDto.TempLoginDto toTempLoginDto(String token){
+        return MemberResponseDto.TempLoginDto.builder()
+                .accessToken(token)
                 .build();
     }
 }

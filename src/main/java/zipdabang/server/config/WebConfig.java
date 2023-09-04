@@ -8,7 +8,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import zipdabang.server.auth.handler.annotation.AuthMemberArgumentResolver;
+import zipdabang.server.auth.handler.annotation.Resolver.AuthMemberArgumentResolver;
 
 import java.util.Arrays;
 import java.util.List;
