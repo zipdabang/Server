@@ -103,6 +103,33 @@ public class MemberConverter {
                 .build();
     }
 
+    public static MemberResponseDto.MemberBasicInfoDto memberBasicInfoDto(Member member) {
+        return MemberResponseDto.MemberBasicInfoDto.builder()
+                .name(member.getName())
+                .birth(member.getBirth())
+                .genderType(member.getGender())
+                .phoneNum(member.getPhoneNum())
+                .build();
+    }
+
+    public static MemberResponseDto.MemberDetailInfoDto memberDetailInfoDto(Member member) {
+        return MemberResponseDto.MemberDetailInfoDto.builder()
+                .zipCode(member.getZipCode())
+                .address(member.getAddress())
+                .detailAddress(member.getDetailAddress())
+                .build();
+    }
+
+    public static MemberResponseDto.MemberInfoDto toMemberInfoDto(Member member) {
+        return MemberResponseDto.MemberInfoDto.builder()
+                .profileUrl(member.getProfileUrl())
+                .email(member.getEmail())
+                .memberBasicInfoDto(memberBasicInfoDto(member))
+                .memberDetailInfoDto(memberDetailInfoDto(member))
+                .nickname(member.getNickname())
+                .build();
+    }
+
     public static Member toMember(Long memberId){
         return staticMemberRepository.findById(memberId).orElseThrow(()->new MemberException(Code.MEMBER_NOT_FOUND));
     }
