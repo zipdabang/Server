@@ -37,18 +37,16 @@ public class MemberConverter {
                     .memberId(member.getMemberId())
                     .nickname(member.getNickname()).build();
 //                .accessToken()
-        }
+    }
 
-    public static Member toSocialMember(MemberRequestDto.MemberInfoDto request, String type) {
-
-        // 생년월일 문자열을 LocalDate로 변환
-        String birth = request.getBirth().substring(0,2);
+    public static int calculateAge(String birth) {
+        String year = birth.substring(0,2);
 
         // 현재 날짜를 가져옴
         LocalDate currentDate = LocalDate.now();
 
         // 생년월일과 현재 날짜를 기준으로 만 나이 계산
-        int age = currentDate.getYear() % 100 - Integer.valueOf(birth)- 1;
+        int age = currentDate.getYear() % 100 - Integer.valueOf(year)- 1;
 
         if (age < 0)
             age += 100;
@@ -57,12 +55,42 @@ public class MemberConverter {
         int currentYear = LocalDate.now().getYear();
 
         // 날짜 문자열을 LocalDate로 변환
-        LocalDate date = LocalDate.parse(request.getBirth(), DateTimeFormatter.ofPattern("yyMMdd"));
+        LocalDate date = LocalDate.parse(birth, DateTimeFormatter.ofPattern("yyMMdd"));
 
         // 생년월일에 현재 연도를 설정하여 완전한 날짜로 만듦
         LocalDate completeDate = date.withYear(currentYear);
 
         age = ChronoUnit.DAYS.between(completeDate, currentDate) >= 0 ? age + 1 : age;
+        return age;
+    }
+
+
+
+    public static Member toSocialMember(MemberRequestDto.MemberInfoDto request, String type) {
+
+        int age = calculateAge(request.getBirth());
+        // 생년월일 문자열을 LocalDate로 변환
+//        String birth = request.getBirth().substring(0,2);
+//
+//        // 현재 날짜를 가져옴
+//        LocalDate currentDate = LocalDate.now();
+//
+//        // 생년월일과 현재 날짜를 기준으로 만 나이 계산
+//        int age = currentDate.getYear() % 100 - Integer.valueOf(birth)- 1;
+//
+//        if (age < 0)
+//            age += 100;
+//
+//        // 현재 연도를 가져옴
+//        int currentYear = LocalDate.now().getYear();
+//
+//        // 날짜 문자열을 LocalDate로 변환
+//        LocalDate date = LocalDate.parse(request.getBirth(), DateTimeFormatter.ofPattern("yyMMdd"));
+//
+//        // 생년월일에 현재 연도를 설정하여 완전한 날짜로 만듦
+//        LocalDate completeDate = date.withYear(currentYear);
+//
+//        age = ChronoUnit.DAYS.between(completeDate, currentDate) >= 0 ? age + 1 : age;
         GenderType gender = Integer.valueOf(request.getGender()) % 2 == 0 ? GenderType.WOMAN : GenderType.MAN;
 
         Member member = Member.builder()

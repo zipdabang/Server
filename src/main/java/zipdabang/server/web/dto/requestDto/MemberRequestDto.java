@@ -130,6 +130,11 @@ public class MemberRequestDto {
     }
 
     @Getter @Setter
+    public static class changeProfileDto {
+        private MultipartFile newProfile;
+    }
+
+    @Getter @Setter
     public static class IssueTokenDto{
         String refreshToken;
     }
@@ -139,4 +144,5 @@ public class MemberRequestDto {
         String fcmToken;
         String serialNumber;
     }
+
 }

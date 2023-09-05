@@ -37,6 +37,10 @@ public class AmazonS3Manager {
         amazonS3.deleteObject(amazonConfig.getBucket(),keyname);
     }
 
+    public String generateMemberKeyName(Uuid uuid, String originalFilename) {
+        return amazonConfig.getUserProfile() + '/' + uuid.getUuid();
+    }
+
     public String generateRecipeKeyName(Uuid uuid, String originalFilename) {
         return amazonConfig.getRecipeThumbnail() + '/' + uuid.getUuid();
     }

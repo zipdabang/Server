@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.dto.OAuthResult;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
@@ -64,7 +65,7 @@ public class MemberRestController {
             @Parameter(name = "Authorization", description = "swagger에서 나오는 이건 무시하고 오른쪽 위의 자물쇠에 토큰 넣어서 테스트 하세요")
     })
     @ApiResponses({
-            @ApiResponse(responseCode = "2000", description = "OK 성공, 로그아웃, access toekn + refresh 토큰 버려주세요"),
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 로그아웃, access token + refresh 토큰 버려주세요"),
             @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
 
     })
@@ -177,6 +178,12 @@ public class MemberRestController {
         return null;
     }
 
+
+
+
+    // 회원정보 조회 및 수정 APIs
+
+
     @Operation(summary = "[figma 더보기 - 회원 정보 1] 회원정보 조회 API ✔️", description = "회원정보 조회 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
@@ -189,6 +196,69 @@ public class MemberRestController {
     public ResponseDto<MemberResponseDto.MemberInfoResponseDto> showMyInfo(@AuthMember Member member) {
         return ResponseDto.of(MemberConverter.toMemberInfoDto(member));
     }
+
+    @Operation(summary = "[figma 더보기 - 회원 정보 1] 프로필사진 수정 API ", description = "프로필사진 수정 API입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 프로필사진 수정 완료"),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @PatchMapping(value = "/myInfo/profileImage",consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateProfileImage(@AuthMember Member member, @ModelAttribute MemberRequestDto.changeProfileDto request) throws IOException {
+        memberService.updateMemberProfileImage(member, request);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateProfileImage"));
+    }
+
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 1] 기본정보 수정 API ", description = "기본정보 수정 API입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 기본정보 수정 완료"),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @PatchMapping("/myInfo/basicInfo")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateBasicInfo(@AuthMember Member member, @RequestBody MemberResponseDto.MemberBasicInfoDto request) {
+        memberService.updateMemberBasicInfo(member, request);
+
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateBasicInfo"));
+    }
+
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 2] 상세정보 수정 API ", description = "상세정보 수정 API입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 상세정보 수정 완료"),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @PatchMapping("/myInfo/detailInfo")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateDetailInfo(@AuthMember Member member, @RequestBody MemberResponseDto.MemberDetailInfoDto request) {
+        memberService.updateMemberDetailInfo(member, request);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateDetailInfo"));
+    }
+
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ", description = "닉네임 수정 API입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 닉네임 수정 완료"),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @PatchMapping("/myInfo/nickname")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateNickname(@AuthMember Member member, @RequestBody String request) {
+        memberService.updateMemberNickname(member, request);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateNickname"));
+    }
+
+
+
+
+
+
 
     //닉네임 중복검사
     @Operation(summary = "🎪[figma 회원가입까지 - 닉네임 입력 1,2,3] 닉네임 중복검사 API ✔️", description = "닉네임 중복검사 API입니다.")
