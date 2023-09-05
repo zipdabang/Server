@@ -86,3 +86,5 @@ naver-sms:
   secretKey: ${NAVER_SMS_SECRET}
   serviceId: ${NAVER_SMS_SERVICEID}
   senderPhone: ${NAVER_SMS_PHONE}
+
+
