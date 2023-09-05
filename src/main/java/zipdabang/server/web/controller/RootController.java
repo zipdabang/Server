@@ -11,11 +11,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.service.RootService;
+import zipdabang.server.web.dto.common.BaseDto;
 import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
 import java.util.List;
@@ -56,5 +59,28 @@ public class RootController {
     @GetMapping("/banners")
     public ResponseDto<RootResponseDto.BannerImageDto> showBanners() {
         return null;
+    }
+
+
+    @Operation(summary = "자동 로그인 API ✔️", description = "자동 로그인 API 입니다. 스웨거에 authorizationHeader는 무시해주세요 스웨거에서는 옆 자물쇠에 토큰 넣어주세요! 평소대로 헤더에 토큰 넣어서 주시면 됩니다")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2055",description = "OK , 홈 화면으로 이동해도 됨",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "2056",description = "OK , 로그인을 다시 진행 해야 함",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4000",description = "FORBIDDEN, 이미 로그아웃 한 토큰, 로그인 다시 하세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "user", hidden = true)
+    })
+    @GetMapping("/auto-login")
+    public ResponseDto<BaseDto.BaseResponseDto> autoLogin(@RequestHeader(value = "Authorization", required = false) String authorizationHeader){
+        Boolean autoResult = rootService.autoLoginService(authorizationHeader);
+        if(autoResult)
+            return ResponseDto.of(Code.AUTO_LOGIN_MAIN,null);
+        else
+            return ResponseDto.of(Code.AUTO_LOGIN_NOT_MAIN,null);
     }
 }
