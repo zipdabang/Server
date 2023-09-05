@@ -120,8 +120,8 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.MemberInfoDto toMemberInfoDto(Member member) {
-        return MemberResponseDto.MemberInfoDto.builder()
+    public static MemberResponseDto.MemberInfoResponseDto toMemberInfoDto(Member member) {
+        return MemberResponseDto.MemberInfoResponseDto.builder()
                 .profileUrl(member.getProfileUrl())
                 .email(member.getEmail())
                 .memberBasicInfoDto(memberBasicInfoDto(member))

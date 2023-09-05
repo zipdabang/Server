@@ -17,11 +17,11 @@ spring:
 
   redis:
     host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com
-    batch:
-      jdbc:
-        initialize-schema: always
-      job:
-        names: myJob
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      names: myJob
 
   jpa:
     properties:

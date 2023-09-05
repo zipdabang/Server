@@ -186,10 +186,9 @@ public class MemberRestController {
             @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @GetMapping("/myInfo")
-    public ResponseDto<MemberResponseDto.MemberInfoDto> showMyInfo(@AuthMember Member member) {
+    public ResponseDto<MemberResponseDto.MemberInfoResponseDto> showMyInfo(@AuthMember Member member) {
         return ResponseDto.of(MemberConverter.toMemberInfoDto(member));
     }
-
 
     //닉네임 중복검사
     @Operation(summary = "🎪[figma 회원가입까지 - 닉네임 입력 1,2,3] 닉네임 중복검사 API ✔️", description = "닉네임 중복검사 API입니다.")
@@ -238,6 +237,7 @@ public class MemberRestController {
     public ResponseDto<MemberResponseDto.TermsListDto> showTerms() {
         return ResponseDto.of(MemberConverter.toTermsDto(memberService.getAllTerms()));
     }
+
 
     @Operation(summary = "🎪figma[온보딩1] 나중에 로그인하기 API ✔️", description = "나중에 로그인하기 API 입니다.")
     @ApiResponses({
