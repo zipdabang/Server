@@ -74,7 +74,7 @@ public class MemberResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class MemberInfoDto {
+    public static class MemberInfoResponseDto {
         private String profileUrl;
         private String email;
         private MemberBasicInfoDto memberBasicInfoDto;

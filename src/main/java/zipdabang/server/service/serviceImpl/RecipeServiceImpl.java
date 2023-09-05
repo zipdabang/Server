@@ -14,10 +14,7 @@ import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.BlockedMember;
 import zipdabang.server.domain.member.Member;
-import zipdabang.server.domain.recipe.Likes;
-import zipdabang.server.domain.recipe.Recipe;
-import zipdabang.server.domain.recipe.RecipeCategory;
-import zipdabang.server.domain.recipe.Scrap;
+import zipdabang.server.domain.recipe.*;
 import zipdabang.server.repository.memberRepositories.BlockedMemberRepository;
 import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.service.RecipeService;
@@ -38,6 +35,7 @@ public class RecipeServiceImpl implements RecipeService {
     private final RecipeRepository recipeRepository;
     private final RecipeCategoryMappingRepository recipeCategoryMappingRepository;
     private final RecipeCategoryRepository recipeCategoryRepository;
+    private final RecipeBannerRepository recipeBannerRepository;
     private final StepRepository stepRepository;
     private final IngredientRepository ingredientRepository;
     private final LikesRepository likesRepository;
@@ -268,22 +266,26 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<Recipe> searchRecipePreview(Long categoryId, String keyword, Member member) {
-        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
+        List<Member> blockedMember = blockedMemberRepository.findByOwner(member).stream()
                 .map(blockedInfo -> blockedInfo.getBlocked())
                 .collect(Collectors.toList());
 
         List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
 
-        if(recipeCategory.isEmpty())
+        if (recipeCategory.isEmpty())
             throw new RecipeException(Code.RECIPE_NOT_FOUND);
 
-        List<Long> recipeIdList  = recipeCategoryMappingRepository.findByCategoryIn(recipeCategory).stream()
+        List<Long> recipeIdList = recipeCategoryMappingRepository.findByCategoryIn(recipeCategory).stream()
                 .map(categoryMapping -> categoryMapping.getRecipe().getId())
                 .collect(Collectors.toList());
 
-        if(blockedMember.isEmpty())
+        if (blockedMember.isEmpty())
             return recipeRepository.findTop5ByIdInAndNameContainingOrderByCreatedAtDesc(recipeIdList, keyword);
         else
-            return recipeRepository.findTop5ByIdInAndNameContainingAndMemberNotInOrderByCreatedAtDesc(recipeIdList,keyword,blockedMember);
+            return recipeRepository.findTop5ByIdInAndNameContainingAndMemberNotInOrderByCreatedAtDesc(recipeIdList, keyword, blockedMember);
+    }
+
+    public List<RecipeBanner> getRecipeBannerList() {
+        return recipeBannerRepository.findAll();
     }
 }

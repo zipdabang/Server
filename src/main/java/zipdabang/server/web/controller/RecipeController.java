@@ -21,6 +21,7 @@ import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.Recipe;
+import zipdabang.server.domain.recipe.RecipeBanner;
 import zipdabang.server.domain.recipe.RecipeCategory;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.validation.annotation.CheckTempMember;
@@ -340,7 +341,7 @@ RecipeController {
         return ResponseDto.of(RecipeConverter.toRecipeStatusDto(recipe));
     }
 
-    @Operation(summary = "레시피 배너 이미지 API 🔑", description = "레시피 화면의 배너 이미지를 가져옵니다. order는 배너 순서를 의미합니다.")
+    @Operation(summary = "레시피 배너 이미지 API 🔑 ✔", description = "레시피 화면의 배너 이미지를 가져옵니다. order는 배너 순서를 의미합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK 성공"),
             @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -351,7 +352,8 @@ RecipeController {
     })
     @GetMapping("/members/recipes/banners")
     public ResponseDto<RecipeResponseDto.RecipeBannerImageDto> showBanners() {
-        return null;
+        List<RecipeBanner> recipeBannerList = recipeService.getRecipeBannerList();
+        return ResponseDto.of(RecipeConverter.toRecipeBannerImageDto(recipeBannerList));
     }
 
     @Operation(summary = "레시피 카테고리 조회 API 🔑 ✔️", description = "레시피 카테고리 조회 API입니다.")
