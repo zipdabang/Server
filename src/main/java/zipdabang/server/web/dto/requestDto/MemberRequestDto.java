@@ -130,6 +130,11 @@ public class MemberRequestDto {
     }
 
     @Getter @Setter
+    public static class changeNicknameDto{
+        String nickname;
+    }
+
+    @Getter @Setter
     public static class changeProfileDto {
         private MultipartFile newProfile;
     }

@@ -245,8 +245,8 @@ public class MemberRestController {
             @ApiResponse(responseCode = "2000", description = "OK 성공 , 닉네임 수정 완료"),
     })
     @PatchMapping("/myInfo/nickname")
-    public ResponseDto<MemberResponseDto.MemberStatusDto> updateNickname(@AuthMember Member member, @RequestBody String request) {
-        memberService.updateMemberNickname(member, request);
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateNickname(@AuthMember Member member, @RequestBody MemberRequestDto.changeNicknameDto request) {
+        memberService.updateMemberNickname(member, request.getNickname());
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateNickname"));
     }
 
