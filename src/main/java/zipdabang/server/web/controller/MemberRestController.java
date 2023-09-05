@@ -190,7 +190,6 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberInfoDto(member));
     }
 
-
     //닉네임 중복검사
     @Operation(summary = "🎪[figma 회원가입까지 - 닉네임 입력 1,2,3] 닉네임 중복검사 API ✔️", description = "닉네임 중복검사 API입니다.")
     @ApiResponses({
