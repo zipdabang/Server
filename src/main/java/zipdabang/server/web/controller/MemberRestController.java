@@ -186,7 +186,7 @@ public class MemberRestController {
             @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @GetMapping("/myInfo")
-    public ResponseDto<MemberResponseDto.MemberInfoDto> showMyInfo(@AuthMember Member member) {
+    public ResponseDto<MemberResponseDto.MemberInfoResponseDto> showMyInfo(@AuthMember Member member) {
         return ResponseDto.of(MemberConverter.toMemberInfoDto(member));
     }
 
