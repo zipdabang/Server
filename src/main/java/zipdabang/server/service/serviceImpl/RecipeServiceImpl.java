@@ -14,10 +14,7 @@ import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.BlockedMember;
 import zipdabang.server.domain.member.Member;
-import zipdabang.server.domain.recipe.Likes;
-import zipdabang.server.domain.recipe.Recipe;
-import zipdabang.server.domain.recipe.RecipeCategory;
-import zipdabang.server.domain.recipe.Scrap;
+import zipdabang.server.domain.recipe.*;
 import zipdabang.server.repository.memberRepositories.BlockedMemberRepository;
 import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.service.RecipeService;
@@ -38,6 +35,7 @@ public class RecipeServiceImpl implements RecipeService {
     private final RecipeRepository recipeRepository;
     private final RecipeCategoryMappingRepository recipeCategoryMappingRepository;
     private final RecipeCategoryRepository recipeCategoryRepository;
+    private final RecipeBannerRepository recipeBannerRepository;
     private final StepRepository stepRepository;
     private final IngredientRepository ingredientRepository;
     private final LikesRepository likesRepository;
@@ -214,46 +212,6 @@ public class RecipeServiceImpl implements RecipeService {
         return recipeCategoryRepository.findAll();
     }
 
-    /*
-    @Override
-    public Page<Recipe> recipeListByCategoryAndLikes(Long categoryId, Integer pageIndex, Member member) {
-
-        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
-                .map(blockedInfo -> blockedInfo.getBlocked())
-                .collect(Collectors.toList());
-
-        List<Long> recipeIdList  = recipeCategoryMappingRepository.findByCategory(categoryId).stream()
-                .map(categoryMapping -> categoryMapping.getRecipe().getId())
-                .collect(Collectors.toList());
-
-        if(blockedMember.isEmpty())
-            return recipeRepository.findByIdIn(recipeIdList,
-                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "totalLike")));
-        else
-            return recipeRepository.findByIdInAndMemberNotIn(recipeIdList,blockedMember,
-                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "totalLike")));
-    }
-
-
-    @Override
-    public Page<Recipe> recipeListByCategoryAndViews(Long categoryId, Integer pageIndex, Member member) {
-
-        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
-                .map(blockedInfo -> blockedInfo.getBlocked())
-                .collect(Collectors.toList());
-
-        List<Long> recipeIdList  = recipeCategoryMappingRepository.findByCategory(categoryId).stream()
-                .map(categoryMapping -> categoryMapping.getRecipe().getId())
-                .collect(Collectors.toList());
-
-        if(blockedMember.isEmpty())
-            return recipeRepository.findByIdIn(recipeIdList,
-                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "totalView")));
-        else
-            return recipeRepository.findByIdInAndMemberNotIn(recipeIdList,blockedMember,
-                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "totalView")));
-    }
-*/
     @Override
     public Page<Recipe> recipeListByCategory(Long categoryId, Integer pageIndex, Member member, String order) {
 
@@ -290,5 +248,10 @@ public class RecipeServiceImpl implements RecipeService {
         else
             return recipeRepository.findByIdInAndMemberNotIn(recipeIdList,blockedMember,
                     PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, orderBy)));
+    }
+
+    @Override
+    public List<RecipeBanner> getRecipeBannerList() {
+        return recipeBannerRepository.findAll();
     }
 }

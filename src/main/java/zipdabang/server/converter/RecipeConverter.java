@@ -7,15 +7,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 //import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.aws.s3.AmazonS3Manager;
-import zipdabang.server.domain.Category;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
-import zipdabang.server.repository.CategoryRepository;
 import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
-import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -33,6 +30,7 @@ public class RecipeConverter {
     private final ScrapRepository scrapRepository;
 //    private final CategoryRepository categoryRepository;
     private final RecipeCategoryRepository recipeCategoryRepository;
+    private final RecipeBannerRepository recipeBannerRepository;
     private final AmazonS3Manager amazonS3Manager;
 
     private static RecipeRepository staticRecipeRepository;
@@ -43,6 +41,7 @@ public class RecipeConverter {
 
 //    private static CategoryRepository staticCategoryRepository;
     private static RecipeCategoryRepository staticRecipeCategoryRepository;
+    private static RecipeBannerRepository staticRecipeBannerRepository;
     private static AmazonS3Manager staticAmazonS3Manager;
 
 
@@ -52,6 +51,7 @@ public class RecipeConverter {
         this.staticRecipeCategoryMappingRepository = this.recipeCategoryMappingRepository;
 //        this.staticCategoryRepository = this.categoryRepository;
         this.staticRecipeCategoryRepository = this.recipeCategoryRepository;
+        this.staticRecipeBannerRepository = this.recipeBannerRepository;
         this.staticAmazonS3Manager = this.amazonS3Manager;
         this.staticLikesRepository = this.likesRepository;
         this.staticScrapRepository = this.scrapRepository;
@@ -290,4 +290,20 @@ public class RecipeConverter {
                 .build();
     }
 
+    public static RecipeResponseDto.RecipeBannerImageDto toRecipeBannerImageDto(List<RecipeBanner> recipeBannerList) {
+        return RecipeResponseDto.RecipeBannerImageDto.builder()
+                .bannerList(toRecipeBannerDto(recipeBannerList))
+                .size(recipeBannerList.size())
+                .build();
+    }
+
+    private static List<RecipeResponseDto.RecipeBannerDto> toRecipeBannerDto(List<RecipeBanner> recipeBannerList) {
+        return recipeBannerList.stream()
+                .map(recipeBanner -> RecipeResponseDto.RecipeBannerDto.builder()
+                        .order(recipeBanner.getInOrder())
+                        .imageUrl(recipeBanner.getImageUrl())
+                        .searchKeyword(recipeBanner.getSearchKeyword())
+                        .build())
+                .collect(Collectors.toList());
+    }
 }
