@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.Recipe;
+import zipdabang.server.domain.recipe.RecipeBanner;
 import zipdabang.server.domain.recipe.RecipeCategory;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 
@@ -11,6 +12,8 @@ import java.io.IOException;
 import java.util.List;
 
 public interface RecipeService {
+
+    List<RecipeBanner> getRecipeBannerList();
 
     Recipe create(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member)throws IOException;
 
