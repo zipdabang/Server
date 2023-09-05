@@ -111,8 +111,37 @@ RecipeController {
         return null;
     }
 
+    @Operation(summary = "🍹figma 레시피2, 레시피 검색 카테고리 별 preview 화면 API 🔑 ✔", description = "검색한 레시피 카테고리별 조회 화면 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK, 목록이 있을 땐 이 응답임"),
+            @ApiResponse(responseCode = "2100",description = "OK, 목록이 없을 경우",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4105",description = "BAD_REQUEST, 해당 id를 가진 레시피 카테고리가 없습니다. 잘못 보내줬어요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "keyword", description = "query string 검색할 단어")
+    })
+    @GetMapping(value = "/members/recipes/search/prieview/{categoryId}")
+    public ResponseDto<RecipeResponseDto.RecipeListDto> searchRecipePreview(@PathVariable Long categoryId, @RequestParam(name = "keyword", required = false) String keyword, @AuthMember Member member) {
 
-    @Operation(summary = "🍹figma 레시피2, 레시피 검색 목록조회 화면 API 🔑 ✔", description = "검색한 레시피 조회 화면 API입니다. pageIndex로 페이징")
+        if (recipeService.checkRecipeCategoryExist(categoryId) == false)
+            throw new RecipeException(Code.NO_RECIPE_CATEGORY_EXIST);
+
+        List<Recipe> recipes = recipeService.searchRecipePreview(categoryId, keyword, member);
+
+        log.info(recipes.toString());
+
+        if(recipes.size() == 0)
+            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+
+        return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
+    }
+        @Operation(summary = "🍹figma 레시피2, 레시피 검색 목록조회 화면 API 🔑 ✔", description = "검색한 레시피 조회 화면 API입니다. pageIndex로 페이징")
     @ApiResponses({
             @ApiResponse(responseCode = "2000",description = "OK, 목록이 있을 땐 이 응답임"),
             @ApiResponse(responseCode = "2100",description = "OK, 목록이 없을 경우",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -122,6 +151,7 @@ RecipeController {
             @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4054",description = "BAD_REQUEST, 페이지 번호 0 이하입니다. 1 이상으로 주세요.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4055",description = "BAD_REQUEST, 페이지 인덱스 범위 초과함",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4105",description = "BAD_REQUEST, 해당 id를 가진 레시피 카테고리가 없습니다. 잘못 보내줬어요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
@@ -129,8 +159,11 @@ RecipeController {
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 안주면 1으로(최초 페이지) 설정함, 0 이런거 주면 에러 뱉음"),
             @Parameter(name = "keyword", description = "query string 검색할 단어")
     })
-    @GetMapping(value = "/members/recipes/search")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@RequestParam(name = "keyword", required = false) String keyword, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member){
+    @GetMapping(value = "/members/recipes/search/{categoryId}")
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@PathVariable Long categoryId, @RequestParam(name = "keyword", required = false) String keyword, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member){
+
+        if (recipeService.checkRecipeCategoryExist(categoryId) == false)
+            throw new RecipeException(Code.NO_RECIPE_CATEGORY_EXIST);
 
         if(pageIndex == null)
             pageIndex =1;
@@ -139,7 +172,7 @@ RecipeController {
 
         pageIndex -= 1;
 
-        Page<Recipe> recipes= recipeService.searchRecipe(keyword,pageIndex,member);
+        Page<Recipe> recipes= recipeService.searchRecipe(categoryId, keyword,pageIndex,member);
 
         log.info(recipes.toString());
 
@@ -163,6 +196,7 @@ RecipeController {
             @ApiResponse(responseCode = "4054",description = "BAD_REQUEST, 페이지 번호 0 이하입니다. 1 이상으로 주세요.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4055",description = "BAD_REQUEST, 페이지 인덱스 범위 초과함",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4104",description = "BAD_REQUEST, 조회 방식 타입이 잘못되었습니다. likes, views, lastest중 하나로 보내주세요.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4105",description = "BAD_REQUEST, 해당 id를 가진 레시피 카테고리가 없습니다. 잘못 보내줬어요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
@@ -172,6 +206,10 @@ RecipeController {
     })
     @GetMapping(value = "/members/recipes/categories/{categoryId}")
     public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@PathVariable Long categoryId, @RequestParam(name = "order", required = false) String order, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member){
+
+        if (recipeService.checkRecipeCategoryExist(categoryId) == false)
+            throw new RecipeException(Code.NO_RECIPE_CATEGORY_EXIST);
+
         if(pageIndex == null)
             pageIndex =1;
         else if (pageIndex < 1)
@@ -210,6 +248,11 @@ RecipeController {
     @GetMapping(value = "/members/recipes/types/preview")
     public ResponseDto<RecipeResponseDto.RecipeListDto> recipeListPreviewWrittenBy(@RequestParam(name = "writtenby") String writtenby, @AuthMember Member member){
         List<Recipe> recipes = recipeService.getWrittenByRecipePreview(writtenby, member);
+
+        log.info(recipes.toString());
+
+        if(recipes.size() == 0)
+            throw new RecipeException(Code.RECIPE_NOT_FOUND);
 
         return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
     }

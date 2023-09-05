@@ -118,17 +118,26 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public Page<Recipe> searchRecipe(String keyword, Integer pageIndex, Member member) {
+    public Page<Recipe> searchRecipe(Long categoryId, String keyword, Integer pageIndex, Member member) {
 
         List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
                 .map(blockedInfo -> blockedInfo.getBlocked())
                 .collect(Collectors.toList());
 
+        List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
+
+        if(recipeCategory.isEmpty())
+            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+
+        List<Long> recipeIdList  = recipeCategoryMappingRepository.findByCategoryIn(recipeCategory).stream()
+                .map(categoryMapping -> categoryMapping.getRecipe().getId())
+                .collect(Collectors.toList());
+
         if(blockedMember.isEmpty())
-            return recipeRepository.findByNameContaining(keyword,
+            return recipeRepository.findByIdInAndNameContaining(recipeIdList, keyword,
                     PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
         else
-            return recipeRepository.findByNameContainingAndMemberNotIn(keyword,blockedMember,
+            return recipeRepository.findByIdInAndNameContainingAndMemberNotIn(recipeIdList, keyword,blockedMember,
                 PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
 
     }
@@ -214,46 +223,6 @@ public class RecipeServiceImpl implements RecipeService {
         return recipeCategoryRepository.findAll();
     }
 
-    /*
-    @Override
-    public Page<Recipe> recipeListByCategoryAndLikes(Long categoryId, Integer pageIndex, Member member) {
-
-        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
-                .map(blockedInfo -> blockedInfo.getBlocked())
-                .collect(Collectors.toList());
-
-        List<Long> recipeIdList  = recipeCategoryMappingRepository.findByCategory(categoryId).stream()
-                .map(categoryMapping -> categoryMapping.getRecipe().getId())
-                .collect(Collectors.toList());
-
-        if(blockedMember.isEmpty())
-            return recipeRepository.findByIdIn(recipeIdList,
-                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "totalLike")));
-        else
-            return recipeRepository.findByIdInAndMemberNotIn(recipeIdList,blockedMember,
-                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "totalLike")));
-    }
-
-
-    @Override
-    public Page<Recipe> recipeListByCategoryAndViews(Long categoryId, Integer pageIndex, Member member) {
-
-        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
-                .map(blockedInfo -> blockedInfo.getBlocked())
-                .collect(Collectors.toList());
-
-        List<Long> recipeIdList  = recipeCategoryMappingRepository.findByCategory(categoryId).stream()
-                .map(categoryMapping -> categoryMapping.getRecipe().getId())
-                .collect(Collectors.toList());
-
-        if(blockedMember.isEmpty())
-            return recipeRepository.findByIdIn(recipeIdList,
-                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "totalView")));
-        else
-            return recipeRepository.findByIdInAndMemberNotIn(recipeIdList,blockedMember,
-                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "totalView")));
-    }
-*/
     @Override
     public Page<Recipe> recipeListByCategory(Long categoryId, Integer pageIndex, Member member, String order) {
 
@@ -290,5 +259,31 @@ public class RecipeServiceImpl implements RecipeService {
         else
             return recipeRepository.findByIdInAndMemberNotIn(recipeIdList,blockedMember,
                     PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, orderBy)));
+    }
+
+    @Override
+    public boolean checkRecipeCategoryExist(Long categoryId) {
+        return recipeCategoryRepository.existsById(categoryId);
+    }
+
+    @Override
+    public List<Recipe> searchRecipePreview(Long categoryId, String keyword, Member member) {
+        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
+                .map(blockedInfo -> blockedInfo.getBlocked())
+                .collect(Collectors.toList());
+
+        List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
+
+        if(recipeCategory.isEmpty())
+            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+
+        List<Long> recipeIdList  = recipeCategoryMappingRepository.findByCategoryIn(recipeCategory).stream()
+                .map(categoryMapping -> categoryMapping.getRecipe().getId())
+                .collect(Collectors.toList());
+
+        if(blockedMember.isEmpty())
+            return recipeRepository.findTop5ByIdInAndNameContainingOrderByCreatedAtDesc(recipeIdList, keyword);
+        else
+            return recipeRepository.findTop5ByIdInAndNameContainingAndMemberNotInOrderByCreatedAtDesc(recipeIdList,keyword,blockedMember);
     }
 }
