@@ -7,4 +7,6 @@ import java.util.List;
 public interface RootService {
 
     List<Category> getAllCategories();
+
+    Boolean autoLoginService(String authorizationHeader);
 }

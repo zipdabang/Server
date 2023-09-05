@@ -19,6 +19,8 @@ public enum Code {
     NICKNAME_EXIST(HttpStatus.OK,2052, "닉네임이 이미 존재합니다."),
     NICKNAME_OK(HttpStatus.OK,2053, "사용 가능한 닉네임 입니다."),
     PHONE_NUMBER_EXIST(HttpStatus.OK, 2054, "이미 인증된 전화번호입니다."),
+    AUTO_LOGIN_MAIN(HttpStatus.OK, 2055, "홈 화면으로 이동하세요"),
+    AUTO_LOGIN_NOT_MAIN(HttpStatus.OK, 2056, "로그인 화면으로 이동하세요"),
 
 
     //recipe response
