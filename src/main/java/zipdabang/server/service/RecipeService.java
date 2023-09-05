@@ -25,7 +25,7 @@ public interface RecipeService {
 
     Boolean checkOwner(Recipe recipe, Member member);
 
-    Page<Recipe> searchRecipe(String keyword, Integer pageIndex, Member member);
+    Page<Recipe> searchRecipe(Long categoryId, String keyword, Integer pageIndex, Member member);
 
     List<Recipe> getWrittenByRecipePreview(String writtenby, Member member);
 
@@ -37,7 +37,8 @@ public interface RecipeService {
 
     List<RecipeCategory> getAllRecipeCategories();
 
-//    Page<Recipe> recipeListByCategoryAndLikes(Long categoryId, Integer pageIndex, Member member);
+    List<Recipe> searchRecipePreview(Long categoryId, String keyword, Member member);
 
-//    Page<Recipe> recipeListByCategoryAndViews(Long categoryId, Integer pageIndex, Member member);
+
+    boolean checkRecipeCategoryExist(Long categoryId);
 }
