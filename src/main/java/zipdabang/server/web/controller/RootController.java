@@ -26,6 +26,14 @@ import java.util.List;
 @RestController
 @Validated
 @RequiredArgsConstructor
+@ApiResponses({
+        @ApiResponse(responseCode = "2000",description = "OK 성공"),
+        @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "4005",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "4008",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+})
 @Tag(name = "홈 API", description = "홈 화면, 그리고 기타 API 모음집입니다.")
 public class RootController {
 
@@ -38,8 +46,7 @@ public class RootController {
 
     @Operation(summary = "음료 카테고리 조회 API ✔️", description = "음료 카테고리 조회 API입니다. 추후 응답에 있는 id는 회원가입 때 사용됩니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
-            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "2000", description = "OK 성공, access Token과 refresh 토큰을 반환함"),
     })
     @GetMapping("/categories")
     public ResponseDto<RootResponseDto.BeverageCategoryListDto> showCategoryList(){
@@ -48,14 +55,6 @@ public class RootController {
     }
 
     @Operation(summary = "배너 이미지 API 🔑", description = "홈 화면의 배너 이미지를 가져옵니다. order는 배너 순서를 의미합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "2000",description = "OK 성공"),
-            @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4005",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4008",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-    })
     @GetMapping("/banners")
     public ResponseDto<RootResponseDto.BannerImageDto> showBanners() {
         return null;
@@ -63,15 +62,7 @@ public class RootController {
 
 
     @Operation(summary = "자동 로그인 API ✔️", description = "자동 로그인 API 입니다. 스웨거에 authorizationHeader는 무시해주세요 스웨거에서는 옆 자물쇠에 토큰 넣어주세요! 평소대로 헤더에 토큰 넣어서 주시면 됩니다")
-    @ApiResponses({
-            @ApiResponse(responseCode = "2055",description = "OK , 홈 화면으로 이동해도 됨",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "2056",description = "OK , 로그인을 다시 진행 해야 함",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4000",description = "FORBIDDEN, 이미 로그아웃 한 토큰, 로그인 다시 하세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4005",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-    })
+
     @Parameters({
             @Parameter(name = "user", hidden = true)
     })

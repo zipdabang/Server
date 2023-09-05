@@ -7,7 +7,9 @@ import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.utils.dto.OAuthResult;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
+import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +23,11 @@ public interface MemberService {
     OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type);
 
     List<Category> getCategoryList();
+    public String updateMemberProfileImage(Member member, MemberRequestDto.changeProfileDto profileDto) throws IOException;
+    public void updateMemberBasicInfo(Member member, MemberResponseDto.MemberBasicInfoDto memberBasicInfoDto);
+
+    public void updateMemberDetailInfo(Member member, MemberResponseDto.MemberDetailInfoDto memberDetailInfoDto);
+    public void updateMemberNickname(Member member, String newNickname);
 
     void logout(String accessToken, MemberRequestDto.LogoutDto request);
 

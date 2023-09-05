@@ -14,6 +14,7 @@ import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.StatusType;
 import zipdabang.server.domain.recipe.Comment;
 import zipdabang.server.domain.recipe.Likes;
+import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 
 import java.util.List;
@@ -103,4 +104,25 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<FcmToken> fcmTokenList;
 
+
+    public void setProfileUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
+    }
+    public void setBasicInfo(int age, MemberResponseDto.MemberBasicInfoDto memberBasicInfoDto) {
+        this.age=age;
+        this.name = memberBasicInfoDto.getName();
+        this.birth = memberBasicInfoDto.getBirth();
+        this.gender = memberBasicInfoDto.getGenderType();
+        this.phoneNum = memberBasicInfoDto.getPhoneNum();
+    }
+
+    public void setDetailInfo(MemberResponseDto.MemberDetailInfoDto memberDetailInfoDto) {
+        this.zipCode = memberDetailInfoDto.getZipCode();
+        this.address = memberDetailInfoDto.getAddress();
+        this.detailAddress = memberDetailInfoDto.getDetailAddress();
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }

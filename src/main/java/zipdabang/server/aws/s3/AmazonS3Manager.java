@@ -37,12 +37,16 @@ public class AmazonS3Manager {
         amazonS3.deleteObject(amazonConfig.getBucket(),keyname);
     }
 
+    public String generateMemberKeyName(Uuid uuid, String originalFilename) {
+        return amazonConfig.getUserProfile() + '/' + uuid.getUuid() + originalFilename;
+    }
+
     public String generateRecipeKeyName(Uuid uuid, String originalFilename) {
-        return amazonConfig.getRecipeThumbnail() + '/' + uuid.getUuid();
+        return amazonConfig.getRecipeThumbnail() + '/' + uuid.getUuid() + originalFilename;
     }
 
     public String generateStepKeyName(Uuid uuid, String originalFilename) {
-        return amazonConfig.getRecipeStep() + '/' + uuid.getUuid();
+        return amazonConfig.getRecipeStep() + '/' + uuid.getUuid() + originalFilename;
     }
 
     // 중복된 UUID가 있다면 중복이 없을때까지 재귀적으로 동작
