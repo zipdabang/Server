@@ -17,6 +17,8 @@ import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -77,6 +79,26 @@ public class RecipeConverter {
                         .map(recipe -> toResponseRecipeSimpleDto(recipe,member))
                         .collect(Collectors.toList()))
                 .totalElements(recipes.size())
+                .build();
+    }
+
+    public static RecipeResponseDto.SearchRecipePreviewListDto toSearchRecipePreviewListDto(List<List<Recipe>> recipeLists, Member member) {
+        AtomicLong index = new AtomicLong(1);
+
+        return RecipeResponseDto.SearchRecipePreviewListDto.builder()
+                .recipeList(recipeLists.stream()
+                        .map(recipeList -> toSearchRecipePreviewByCategoryDto(index.getAndIncrement(), recipeList, member))
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    private static RecipeResponseDto.SearchRecipePreviewByCategoryDto toSearchRecipePreviewByCategoryDto(Long index, List<Recipe> recipeList, Member member) {
+        return RecipeResponseDto.SearchRecipePreviewByCategoryDto.builder()
+                .recipeList(recipeList.stream()
+                        .map(recipe -> toResponseRecipeSimpleDto(recipe, member))
+                        .collect(Collectors.toList()))
+                .categoryId(index)
+                .elements(recipeList.size())
                 .build();
     }
 
