@@ -37,7 +37,7 @@ public interface RecipeService {
 
     List<RecipeCategory> getAllRecipeCategories();
 
-    List<Recipe> searchRecipePreview(Long categoryId, String keyword, Member member);
+    List<List<Recipe>> searchRecipePreview(String keyword, Member member);
 
 
     boolean checkRecipeCategoryExist(Long categoryId);

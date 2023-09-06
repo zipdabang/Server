@@ -265,24 +265,29 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public List<Recipe> searchRecipePreview(Long categoryId, String keyword, Member member) {
+    public List<List<Recipe>> searchRecipePreview(String keyword, Member member) {
+        Long recipeCategorySize = recipeCategoryRepository.count();
+
         List<Member> blockedMember = blockedMemberRepository.findByOwner(member).stream()
                 .map(blockedInfo -> blockedInfo.getBlocked())
                 .collect(Collectors.toList());
 
-        List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
+        List<List<Recipe>> recipeList = new ArrayList<>();
 
-        if (recipeCategory.isEmpty())
-            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+        for(Long categoryId = 1L; categoryId <= recipeCategorySize; categoryId++) {
+            List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
 
-        List<Long> recipeIdList = recipeCategoryMappingRepository.findByCategoryIn(recipeCategory).stream()
-                .map(categoryMapping -> categoryMapping.getRecipe().getId())
-                .collect(Collectors.toList());
+            List<Long> recipeIdList = recipeCategoryMappingRepository.findByCategoryIn(recipeCategory).stream()
+                    .map(categoryMapping -> categoryMapping.getRecipe().getId())
+                    .collect(Collectors.toList());
 
-        if (blockedMember.isEmpty())
-            return recipeRepository.findTop5ByIdInAndNameContainingOrderByCreatedAtDesc(recipeIdList, keyword);
-        else
-            return recipeRepository.findTop5ByIdInAndNameContainingAndMemberNotInOrderByCreatedAtDesc(recipeIdList, keyword, blockedMember);
+            if (blockedMember.isEmpty())
+                recipeList.add(recipeRepository.findTop5ByIdInAndNameContainingOrderByCreatedAtDesc(recipeIdList, keyword));
+            else
+                recipeList.add(recipeRepository.findTop5ByIdInAndNameContainingAndMemberNotInOrderByCreatedAtDesc(recipeIdList, keyword, blockedMember));
+        }
+
+        return recipeList;
     }
 
     public List<RecipeBanner> getRecipeBannerList() {

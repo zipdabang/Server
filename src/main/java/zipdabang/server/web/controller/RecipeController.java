@@ -119,7 +119,6 @@ RecipeController {
             @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4005",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4008",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4105",description = "BAD_REQUEST, 해당 id를 가진 레시피 카테고리가 없습니다. 잘못 보내줬어요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
@@ -127,20 +126,15 @@ RecipeController {
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "keyword", description = "query string 검색할 단어")
     })
-    @GetMapping(value = "/members/recipes/search/prieview/{categoryId}")
-    public ResponseDto<RecipeResponseDto.RecipeListDto> searchRecipePreview(@PathVariable Long categoryId, @RequestParam(name = "keyword", required = false) String keyword, @AuthMember Member member) {
+    @GetMapping(value = "/members/recipes/search/prieview")
+    public ResponseDto<RecipeResponseDto.SearchRecipePreviewListDto> searchRecipePreview(@RequestParam(name = "keyword", required = false) String keyword, @AuthMember Member member) {
 
-        if (recipeService.checkRecipeCategoryExist(categoryId) == false)
-            throw new RecipeException(Code.NO_RECIPE_CATEGORY_EXIST);
 
-        List<Recipe> recipes = recipeService.searchRecipePreview(categoryId, keyword, member);
+        List<List<Recipe>> recipeLists = recipeService.searchRecipePreview(keyword, member);
 
-        log.info(recipes.toString());
+        log.info(recipeLists.toString());
 
-        if(recipes.size() == 0)
-            throw new RecipeException(Code.RECIPE_NOT_FOUND);
-
-        return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
+        return ResponseDto.of(RecipeConverter.toSearchRecipePreviewListDto(recipeLists, member));
     }
         @Operation(summary = "🍹figma 레시피2, 레시피 검색 목록조회 화면 API 🔑 ✔", description = "검색한 레시피 조회 화면 API입니다. pageIndex로 페이징")
     @ApiResponses({

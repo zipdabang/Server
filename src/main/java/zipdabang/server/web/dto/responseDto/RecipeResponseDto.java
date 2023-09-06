@@ -86,6 +86,24 @@ public class RecipeResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class SearchRecipePreviewListDto {
+        private List<SearchRecipePreviewByCategoryDto> recipeList;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class SearchRecipePreviewByCategoryDto {
+        private List<RecipeSimpleDto> recipeList;
+        Long categoryId;
+        Integer elements;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class RecipeInfoDto {
         private RecipeDto recipeInfo;
         private boolean isOwner;
