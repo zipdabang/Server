@@ -38,6 +38,7 @@ public class AmazonConfig {
     @Value("${cloud.aws.s3.folder.zipdabang-proifile}")
     private String userProfile;
 
+
     private AWSCredentials awsCredentials;
 
     @PostConstruct

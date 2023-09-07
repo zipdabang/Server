@@ -32,13 +32,13 @@ public class Scrap extends BaseEntity {
     public Scrap deleteScrap(Recipe recipe){
         if(this.recipe != null)
             recipe.getScrapList().remove(this);
-        recipe.updateToTalScrap(-1);
+        recipe.updateScrap(-1);
         return this;
     }
 
     public Scrap setRecipe(Recipe recipe){
 
-        recipe.updateToTalScrap(1);
+        recipe.updateScrap(1);
 
         if(this.recipe != null)
             recipe.getScrapList().remove(this);

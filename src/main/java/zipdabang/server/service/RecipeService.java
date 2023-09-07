@@ -41,4 +41,6 @@ public interface RecipeService {
 
 
     boolean checkRecipeCategoryExist(Long categoryId);
+
+    Boolean deleteRecipe(Long recipeId, Member member);
 }

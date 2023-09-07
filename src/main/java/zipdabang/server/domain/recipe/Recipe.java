@@ -3,6 +3,7 @@ package zipdabang.server.domain.recipe;
 import javax.persistence.*;
 
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
@@ -10,6 +11,7 @@ import zipdabang.server.domain.member.Member;
 
 import java.util.List;
 
+@Slf4j
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
@@ -73,7 +75,7 @@ public class Recipe extends BaseEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     private List<Likes> likesList;
 
-    @OneToMany(mappedBy = "recipe")
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     private List<Scrap> scrapList;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
@@ -91,18 +93,22 @@ public class Recipe extends BaseEntity {
         return this;
     }
 
-    public Recipe updateToTalLike(Integer i){
+    public Recipe updateLike(Integer i){
+        this.weekLike += i;
         this.totalLike += i;
         return this;
     }
 
-    public Recipe updateToTalScrap(Integer i){
+    public Recipe updateScrap(Integer i){
+        this.weekScrap += i;
         this.totalScrap += i;
         return this;
     }
 
-    public Recipe updateTotalView(){
-        this.totalLike += 1;
+    public Recipe updateView(){
+        this.weekView += 1;
+        this.totalView += 1;
+        log.info("totalLike= ", this.totalView, ", weekView= ", this.weekView);
         return this;
     }
 }
