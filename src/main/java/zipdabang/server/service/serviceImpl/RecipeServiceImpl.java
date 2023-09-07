@@ -9,8 +9,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.RecipeException;
+import zipdabang.server.config.AmazonConfig;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.BlockedMember;
 import zipdabang.server.domain.member.Member;
@@ -20,6 +22,7 @@ import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +43,8 @@ public class RecipeServiceImpl implements RecipeService {
     private final IngredientRepository ingredientRepository;
     private final LikesRepository likesRepository;
     private final ScrapRepository scrapRepository;
+    private final AmazonS3Manager amazonS3Manager;
+    private final AmazonConfig amazonConfig;
 
     private final BlockedMemberRepository blockedMemberRepository;
 
@@ -77,6 +82,7 @@ public class RecipeServiceImpl implements RecipeService {
         return recipe;
     }
 
+    @Transactional(readOnly = false)
     @Override
     public Recipe getRecipe(Long recipeId, Member member) {
 
@@ -87,13 +93,9 @@ public class RecipeServiceImpl implements RecipeService {
             throw new RecipeException(Code.BLOCKED_USER_RECIPE);
         }
         else {
+            findRecipe.updateView();
             return findRecipe;
         }
-
-//        List<Member> blockedMemberList = blockedInfos.stream()
-//                .map(blockedMember -> blockedMember.getBlocked())
-//                .collect(Collectors.toList());
-//        Recipe findRecipe = recipeRepository.findById(recipeId).get();
 
     }
 
@@ -292,5 +294,22 @@ public class RecipeServiceImpl implements RecipeService {
 
     public List<RecipeBanner> getRecipeBannerList() {
         return recipeBannerRepository.findAll();
+    }
+
+    @Transactional(readOnly = false)
+    @Override
+    public Boolean deleteRecipe(Long recipeId, Member member) {
+        Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(Code.NO_RECIPE_EXIST));
+
+        if (findRecipe.getMember().equals(member)) {
+            amazonS3Manager.deleteFile(RecipeConverter.toKeyName(findRecipe.getThumbnailUrl()).substring(1));
+            stepRepository.findAllByRecipeId(recipeId).stream()
+                    .forEach(step -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(step.getImageUrl()).substring(1)));
+            recipeRepository.deleteById(recipeId);
+        }
+        else
+            throw new RecipeException(Code.NOT_RECIPE_OWNER);
+
+        return recipeRepository.existsById(recipeId) == false;
     }
 }

@@ -37,7 +37,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "레시피 관련 API", description = "레시피 관련 API 모음입니다.")
 public class
-RecipeController {
+RecipeRestController {
 
     private final RecipeService recipeService;
 
@@ -89,12 +89,10 @@ RecipeController {
         Boolean isLiked = recipeService.getLike(recipe, member);
         Boolean isScrapped = recipeService.getScrap(recipe, member);
 
-        recipe.updateTotalView();
-
         return ResponseDto.of(RecipeConverter.toRecipeInfoDto(recipe, isOwner, isLiked, isScrapped, member));
     }
 
-    @Operation(summary = "🍹figma 나의 레시피 삭제_알럿, 레시피 삭제 API 🔑", description = "레시피 삭제 API입니다.")
+    @Operation(summary = "🍹figma 나의 레시피 삭제_알럿, 레시피 삭제 API 🔑 ✔", description = "레시피 삭제 API입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000", description = "OK, 삭제처리 되었습니다."),
             @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -102,14 +100,20 @@ RecipeController {
             @ApiResponse(responseCode = "4008",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4101",description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4106",description = "BAD_REQUEST, 본인이 작성한 레시피가 아닙니다. 삭제할 수 없습니다",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
     @DeleteMapping("/members/recipes/{recipeId}")
-    public ResponseDto<RecipeResponseDto.RecipeStatusDto> deleteRecipe(@PathVariable(name = "recipeId") Long recipeId, @AuthMember Member member){
-        return null;
+    public ResponseDto<String> deleteRecipe(@PathVariable(name = "recipeId") Long recipeId, @AuthMember Member member){
+        Boolean reicpeDeleteBoolean = recipeService.deleteRecipe(recipeId, member);
+
+        if (reicpeDeleteBoolean)
+            return ResponseDto.of(recipeId+" 레시피 삭제 완료");
+        else
+             throw new RecipeException(Code.INTERNAL_ERROR);
     }
 
     @Operation(summary = "🍹figma 레시피2, 레시피 검색 카테고리 별 preview 화면 API 🔑 ✔", description = "검색한 레시피 카테고리별 조회 화면 API입니다.")
@@ -126,7 +130,7 @@ RecipeController {
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "keyword", description = "query string 검색할 단어")
     })
-    @GetMapping(value = "/members/recipes/search/prieview")
+    @GetMapping(value = "/members/recipes/search/preview")
     public ResponseDto<RecipeResponseDto.SearchRecipePreviewListDto> searchRecipePreview(@RequestParam(name = "keyword", required = false) String keyword, @AuthMember Member member) {
 
 

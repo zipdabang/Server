@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,6 +47,7 @@ public class RecipeConverter {
     private static RecipeCategoryRepository staticRecipeCategoryRepository;
     private static RecipeBannerRepository staticRecipeBannerRepository;
     private static AmazonS3Manager staticAmazonS3Manager;
+
 
 
     @PostConstruct
@@ -227,7 +230,7 @@ public class RecipeConverter {
 
     private static String uploadThumbnail(MultipartFile thumbnail) throws IOException {
         Uuid uuid = staticAmazonS3Manager.createUUID();
-        String keyName = staticAmazonS3Manager.generateRecipeKeyName(uuid, thumbnail.getOriginalFilename());
+        String keyName = staticAmazonS3Manager.generateRecipeKeyName(uuid);
         String fileUrl = staticAmazonS3Manager.uploadFile(keyName, thumbnail);
         log.info("S3에 업로드 한 recipe thumbnail 파일의 url : {}", fileUrl);
         return fileUrl;
@@ -267,7 +270,7 @@ public class RecipeConverter {
 
     private static String uploadStepImage(MultipartFile stepImage) throws IOException {
         Uuid uuid = staticAmazonS3Manager.createUUID();
-        String keyName = staticAmazonS3Manager.generateStepKeyName(uuid, stepImage.getOriginalFilename());
+        String keyName = staticAmazonS3Manager.generateStepKeyName(uuid);
         String fileUrl = staticAmazonS3Manager.uploadFile(keyName, stepImage);
         log.info("S3에 업로드 한 recipe step 파일의 url : {}", fileUrl);
         return fileUrl;
@@ -327,5 +330,18 @@ public class RecipeConverter {
                         .searchKeyword(recipeBanner.getSearchKeyword())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    public static String toKeyName(String imageUrl) {
+        String input = imageUrl;
+
+        Pattern regex = Pattern.compile(staticAmazonS3Manager.getPattern());
+        Matcher matcher = regex.matcher(input);
+        String extractedString = null;
+        if (matcher.find())
+            extractedString = matcher.group(1);
+
+        return extractedString;
+
     }
 }

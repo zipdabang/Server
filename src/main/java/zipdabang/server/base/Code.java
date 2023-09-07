@@ -68,7 +68,7 @@ public enum Code {
     WRITTEN_BY_TYPE_ERROR(HttpStatus.BAD_REQUEST, 4103, "레시피 작성자 타입이 잘못되었습니다. all, influencer, common중 하나로 보내주세요."),
     ORDER_BY_TYPE_ERROR(HttpStatus.BAD_REQUEST, 4104, "조회 방식 타입이 잘못되었습니다. likes, views, latest중 하나로 보내주세요."),
     NO_RECIPE_CATEGORY_EXIST(HttpStatus.BAD_REQUEST, 4105, "해당 id를 가진 레시피 카테고리가 없습니다. 잘못 보내줬어요"),
-
+    NOT_RECIPE_OWNER(HttpStatus.BAD_REQUEST, 4106, "본인이 작성한 레시피가 아닙니다. 삭제할 수 없습니다"),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),
     FEIGN_CLIENT_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "Inter server Error in feign client");
 
