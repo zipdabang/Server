@@ -60,4 +60,12 @@ public class RootConverter {
                 .size(noticeSummaryDtoList.size())
                 .build();
     }
+
+    public static RootResponseDto.NoticeSpecDto toNoticeSpecDto(Notification notification){
+        return RootResponseDto.NoticeSpecDto.builder()
+                .description(notification.getDescription())
+                .title(notification.getName())
+                .createdAt(staticTimeConverter.ConvertTime(notification.getCreatedAt()))
+                .build();
+    }
 }

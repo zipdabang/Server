@@ -12,4 +12,6 @@ public interface RootService {
     Boolean autoLoginService(String authorizationHeader);
 
     List<Notification> notificationList();
+
+    Notification findNotification(Long notificationId);
 }

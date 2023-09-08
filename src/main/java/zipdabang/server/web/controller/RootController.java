@@ -20,6 +20,7 @@ import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.inform.Notification;
 import zipdabang.server.service.RootService;
+import zipdabang.server.validation.annotation.ExistNotification;
 import zipdabang.server.web.dto.common.BaseDto;
 import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
@@ -78,8 +79,9 @@ public class RootController {
     }
 
     @GetMapping("/notices/{noticeId}")
-    public ResponseDto<RootResponseDto.NoticeSpecDto> showNotification(@PathVariable(name = "noticeId") String noticeId){
-        return null;
+    public ResponseDto<RootResponseDto.NoticeSpecDto> showNotification(@PathVariable(name = "noticeId") @ExistNotification Long noticeId){
+        Notification notification = rootService.findNotification(noticeId);
+        return ResponseDto.of(RootConverter.toNoticeSpecDto(notification));
     }
 
     @Operation(summary = "[🎪figma 더보기-공지사항1] 공지 목록 조회 API",description = "공지사항 목록 조회 API 입니다.")

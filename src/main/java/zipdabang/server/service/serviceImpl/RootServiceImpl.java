@@ -63,4 +63,9 @@ public class RootServiceImpl implements RootService {
     public List<Notification> notificationList() {
         return notificationRepository.findAllByOrderByCreatedAtDesc();
     }
+
+    @Override
+    public Notification findNotification(Long notificationId) {
+        return notificationRepository.findById(notificationId).get();
+    }
 }
