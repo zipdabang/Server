@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import zipdabang.server.base.Code;
@@ -73,5 +74,15 @@ public class RootController {
             return ResponseDto.of(Code.AUTO_LOGIN_MAIN,null);
         else
             return ResponseDto.of(Code.AUTO_LOGIN_NOT_MAIN,null);
+    }
+
+    @GetMapping("/notices/{noticeId}")
+    public ResponseDto<RootResponseDto.NoticeSpecDto> showNotification(@PathVariable(name = "noticeId") String noticeId){
+        return null;
+    }
+
+    @GetMapping("/notices")
+    public ResponseDto<RootResponseDto.NoticeListDto> getNoticeList(){
+        return null;
     }
 }

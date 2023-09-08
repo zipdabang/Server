@@ -42,4 +42,31 @@ public class RootResponseDto {
         List<BannerDto> bannerList;
         Integer size;
     }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class NoticeSpecDto{
+        String title;
+        String description;
+        String createdAt;
+    }
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class NoticeSummaryDto{
+        Long noticeId;
+        String title;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class NoticeListDto{
+        List<NoticeSummaryDto> noticeList;
+        Integer size;
+    }
 }
