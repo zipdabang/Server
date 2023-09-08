@@ -11,13 +11,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.inform.Notification;
 import zipdabang.server.service.RootService;
+import zipdabang.server.validation.annotation.ExistNotification;
 import zipdabang.server.web.dto.common.BaseDto;
 import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
@@ -73,5 +76,22 @@ public class RootController {
             return ResponseDto.of(Code.AUTO_LOGIN_MAIN,null);
         else
             return ResponseDto.of(Code.AUTO_LOGIN_NOT_MAIN,null);
+    }
+
+    @GetMapping("/notices/{noticeId}")
+    public ResponseDto<RootResponseDto.NoticeSpecDto> showNotification(@PathVariable(name = "noticeId") @ExistNotification Long noticeId){
+        Notification notification = rootService.findNotification(noticeId);
+        return ResponseDto.of(RootConverter.toNoticeSpecDto(notification));
+    }
+
+    @Operation(summary = "[🎪figma 더보기-공지사항1] 공지 목록 조회 API",description = "공지사항 목록 조회 API 입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 공지를 최신순으로 보여줌"),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/notices")
+    public ResponseDto<RootResponseDto.NoticeListDto> getNoticeList(){
+        List<Notification> notificationList = rootService.notificationList();
+        return ResponseDto.of(RootConverter.toNoticeListDto(notificationList));
     }
 }

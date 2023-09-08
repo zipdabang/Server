@@ -44,6 +44,7 @@ public enum Code {
     JWT_UNSUPPORTED_TOKEN(HttpStatus.UNAUTHORIZED, 4007,"지원하지 않는 JWT 토큰입니다."),
     JWT_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 4008,"유효한 JWT 토큰이 없습니다."),
     FEIGN_CLIENT_ERROR_400(HttpStatus.BAD_REQUEST, 4009, "feign에서 400번대 에러가 발생했습니다."),
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, 4010, "공지를 찾을 수 없습니다."),
 
 
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, 4050,"refresh token이 필요합니다."),

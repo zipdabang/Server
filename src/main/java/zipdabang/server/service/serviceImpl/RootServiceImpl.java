@@ -8,8 +8,10 @@ import zipdabang.server.auth.provider.TokenProvider;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.RootException;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.inform.Notification;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.repository.CategoryRepository;
+import zipdabang.server.repository.NotificationRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.service.RootService;
 
@@ -24,6 +26,8 @@ public class RootServiceImpl implements RootService {
     private final CategoryRepository categoryRepository;
 
     private final MemberRepository memberRepository;
+
+    private final NotificationRepository notificationRepository;
 
     private final TokenProvider tokenProvider;
 
@@ -53,5 +57,15 @@ public class RootServiceImpl implements RootService {
         }
 
         return result;
+    }
+
+    @Override
+    public List<Notification> notificationList() {
+        return notificationRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    @Override
+    public Notification findNotification(Long notificationId) {
+        return notificationRepository.findById(notificationId).get();
     }
 }
