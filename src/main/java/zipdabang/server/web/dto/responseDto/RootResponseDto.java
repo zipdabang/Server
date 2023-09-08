@@ -59,6 +59,7 @@ public class RootResponseDto {
     public static class NoticeSummaryDto{
         Long noticeId;
         String title;
+        String createdAt;
     }
 
     @Builder

@@ -18,6 +18,7 @@ import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.inform.Notification;
 import zipdabang.server.service.RootService;
 import zipdabang.server.web.dto.common.BaseDto;
 import zipdabang.server.web.dto.responseDto.RootResponseDto;
@@ -83,6 +84,7 @@ public class RootController {
 
     @GetMapping("/notices")
     public ResponseDto<RootResponseDto.NoticeListDto> getNoticeList(){
-        return null;
+        List<Notification> notificationList = rootService.notificationList();
+        return ResponseDto.of(RootConverter.toNoticeListDto(notificationList));
     }
 }
