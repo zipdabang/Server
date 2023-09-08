@@ -3,6 +3,7 @@ package zipdabang.server.service;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.domain.member.Member;
+import zipdabang.server.domain.recipe.Comment;
 import zipdabang.server.domain.recipe.Recipe;
 import zipdabang.server.domain.recipe.RecipeBanner;
 import zipdabang.server.domain.recipe.RecipeCategory;
@@ -43,4 +44,8 @@ public interface RecipeService {
     boolean checkRecipeCategoryExist(Long categoryId);
 
     Boolean deleteRecipe(Long recipeId, Member member);
+
+    Comment createComment(String content, Long recipeId, Member member);
+
+    Page<Comment> commentList(Integer pageIndex, Long recipeId, Member member);
 }
