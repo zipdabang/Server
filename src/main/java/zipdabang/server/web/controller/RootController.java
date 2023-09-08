@@ -82,6 +82,11 @@ public class RootController {
         return null;
     }
 
+    @Operation(summary = "[🎪figma 더보기-공지사항1] 공지 목록 조회 API",description = "공지사항 목록 조회 API 입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 공지를 최신순으로 보여줌"),
+            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
     @GetMapping("/notices")
     public ResponseDto<RootResponseDto.NoticeListDto> getNoticeList(){
         List<Notification> notificationList = rootService.notificationList();
