@@ -44,9 +44,10 @@ public class RecipeServiceImpl implements RecipeService {
     private final LikesRepository likesRepository;
     private final ScrapRepository scrapRepository;
     private final AmazonS3Manager amazonS3Manager;
-    private final AmazonConfig amazonConfig;
 
     private final BlockedMemberRepository blockedMemberRepository;
+    private final CommentRepository commentRepository;
+    private final BlockedCommentRepository blockedCommentRepository;
 
     @Value("${paging.size}")
     Integer pageSize;
@@ -120,9 +121,7 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Page<Recipe> searchRecipe(Long categoryId, String keyword, Integer pageIndex, Member member) {
 
-        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
-                .map(blockedInfo -> blockedInfo.getBlocked())
-                .collect(Collectors.toList());
+        List<Member> blockedMember = getBlockedMembers(member);
 
         List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
 
@@ -146,9 +145,7 @@ public class RecipeServiceImpl implements RecipeService {
     public List<Recipe> getWrittenByRecipePreview(String writtenby, Member member) {
         List<Recipe> recipeList = new ArrayList<>();
 
-        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
-                .map(blockedInfo -> blockedInfo.getBlocked())
-                .collect(Collectors.toList());
+        List<Member> blockedMember = getBlockedMembers(member);
 
         if (!blockedMember.isEmpty()) {
             if (writtenby.equals("all")) {
@@ -226,18 +223,25 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Page<Recipe> recipeListByCategory(Long categoryId, Integer pageIndex, Member member, String order) {
 
-        List<Member> blockedMember= blockedMemberRepository.findByOwner(member).stream()
-                .map(blockedInfo -> blockedInfo.getBlocked())
-                .collect(Collectors.toList());
+        List<Member> blockedMember = getBlockedMembers(member);
 
-        List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
+        List<Long> recipeIdList = new ArrayList<>();
 
-        if(recipeCategory.isEmpty())
-            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+        if (categoryId == 0){
+            recipeIdList = recipeRepository.findAll().stream()
+                    .map(recipe -> recipe.getId())
+                    .collect(Collectors.toList());
+        }
+        else{
+            List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
 
-        List<Long> recipeIdList  = recipeCategoryMappingRepository.findByCategoryIn(recipeCategory).stream()
-                .map(categoryMapping -> categoryMapping.getRecipe().getId())
-                .collect(Collectors.toList());
+            if(recipeCategory.isEmpty())
+                throw new RecipeException(Code.RECIPE_NOT_FOUND);
+
+            recipeIdList = recipeCategoryMappingRepository.findByCategoryIn(recipeCategory).stream()
+                    .map(categoryMapping -> categoryMapping.getRecipe().getId())
+                    .collect(Collectors.toList());
+        }
 
         String orderBy = null;
 
@@ -268,11 +272,9 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<List<Recipe>> searchRecipePreview(String keyword, Member member) {
-        Long recipeCategorySize = recipeCategoryRepository.count();
+        Long recipeCategorySize = recipeCategoryRepository.count()-1;
 
-        List<Member> blockedMember = blockedMemberRepository.findByOwner(member).stream()
-                .map(blockedInfo -> blockedInfo.getBlocked())
-                .collect(Collectors.toList());
+        List<Member> blockedMember = getBlockedMembers(member);
 
         List<List<Recipe>> recipeList = new ArrayList<>();
 
@@ -290,6 +292,13 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         return recipeList;
+    }
+
+    private List<Member> getBlockedMembers(Member member) {
+        List<Member> blockedMember = blockedMemberRepository.findByOwner(member).stream()
+                .map(blockedInfo -> blockedInfo.getBlocked())
+                .collect(Collectors.toList());
+        return blockedMember;
     }
 
     public List<RecipeBanner> getRecipeBannerList() {
@@ -311,5 +320,41 @@ public class RecipeServiceImpl implements RecipeService {
             throw new RecipeException(Code.NOT_RECIPE_OWNER);
 
         return recipeRepository.existsById(recipeId) == false;
+    }
+
+    @Transactional(readOnly = false)
+    @Override
+    public Comment createComment(String content, Long recipeId, Member member) {
+        Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(Code.NO_RECIPE_EXIST));
+
+        Comment buildComment = RecipeConverter.toComment(content, findRecipe, member);
+        return commentRepository.save(buildComment);
+    }
+
+    @Override
+    public Page<Comment> commentList(Integer pageIndex, Long recipeId, Member member) {
+        recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(Code.NO_RECIPE_EXIST));
+
+        List<Member> blockedMember = getBlockedMembers(member);
+        List<Long> blockedComment = getBlockedComment(member);
+
+        if(blockedMember.isEmpty() && blockedComment.isEmpty())
+            return commentRepository.findAll(
+                    PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        else if(!blockedMember.isEmpty() && blockedComment.isEmpty())
+            return commentRepository.findByMemberNotIn(blockedMember, PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        else if(blockedMember.isEmpty() && !blockedComment.isEmpty())
+            return commentRepository.findByIdNotIn(blockedComment, PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        else
+            return commentRepository.findByIdNotInAndMemberNotIn(blockedComment, blockedMember, PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+    }
+
+    private List<Long> getBlockedComment(Member member) {
+
+        List<Long> blockedCommentIdList = blockedCommentRepository.findByOwner(member).stream()
+                .map(blockedInfo -> blockedInfo.getBlocked().getId())
+                .collect(Collectors.toList());
+
+        return blockedCommentIdList;
     }
 }

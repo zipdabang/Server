@@ -35,4 +35,9 @@ public class RecipeRequestDto {
         private Integer stepNum;
         private String description;
     }
+
+    @Getter
+    public static class createCommentDto {
+        private String comment;
+    }
 }

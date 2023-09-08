@@ -35,6 +35,7 @@ public class RecipeConverter {
 //    private final CategoryRepository categoryRepository;
     private final RecipeCategoryRepository recipeCategoryRepository;
     private final RecipeBannerRepository recipeBannerRepository;
+    private final CommentRepository commentRepository;
     private final AmazonS3Manager amazonS3Manager;
 
     private static RecipeRepository staticRecipeRepository;
@@ -46,8 +47,8 @@ public class RecipeConverter {
 //    private static CategoryRepository staticCategoryRepository;
     private static RecipeCategoryRepository staticRecipeCategoryRepository;
     private static RecipeBannerRepository staticRecipeBannerRepository;
+    private static CommentRepository staticCommentRepository;
     private static AmazonS3Manager staticAmazonS3Manager;
-
 
 
     @PostConstruct
@@ -343,5 +344,36 @@ public class RecipeConverter {
 
         return extractedString;
 
+    }
+
+    public static Comment toComment(String content, Recipe findRecipe, Member member) {
+        return Comment.builder()
+                .content(content)
+                .recipe(findRecipe)
+                .member(member)
+                .build();
+    }
+
+    public static RecipeResponseDto.CommentDto toCommentDto(Comment createdComment, Member member) {
+        return RecipeResponseDto.CommentDto.builder()
+                .content(createdComment.getContent())
+                .ownerNickname(createdComment.getMember().getNickname())
+                .ownerImage(createdComment.getMember().getProfileUrl())
+                .isOwner(createdComment.getMember() == member)
+                .createdAt(createdComment.getCreatedAt().toLocalDate())
+                .build();
+    }
+
+    public static RecipeResponseDto.CommentPageListDto toPagingCommentDtoList(Page<Comment> comments, Member member) {
+        return RecipeResponseDto.CommentPageListDto.builder()
+                .CommentList(comments.stream()
+                        .map(comment -> toCommentDto(comment,member))
+                        .collect(Collectors.toList()))
+                .totalElements(comments.getTotalElements())
+                .currentPageElements(comments.getNumberOfElements())
+                .totalPage(comments.getTotalPages())
+                .isFirst(comments.isFirst())
+                .isLast(comments.isLast())
+                .build();
     }
 }

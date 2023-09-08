@@ -135,7 +135,9 @@ public class RecipeResponseDto {
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class CommentDto{
-        private String owner;
+        private String ownerNickname;
+        private String ownerImage;
+        private Boolean isOwner;
         private String content;
         private LocalDate createdAt;
     }
@@ -176,5 +178,18 @@ public class RecipeResponseDto {
     public static class RecipeCategoryListDto{
         List<RecipeCategoryDto> beverageCategoryList;
         Integer size;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class CommentPageListDto {
+        private List<CommentDto> CommentList;
+        Long totalElements;
+        Integer currentPageElements;
+        Integer totalPage;
+        Boolean isFirst;
+        Boolean isLast;
     }
 }
