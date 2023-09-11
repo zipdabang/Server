@@ -48,4 +48,9 @@ public interface RecipeService {
     Comment createComment(String content, Long recipeId, Member member);
 
     Page<Comment> commentList(Integer pageIndex, Long recipeId, Member member);
+
+    Boolean deleteComment(Long recipeId, Long commentId, Member member);
+
+    Comment updateComment(RecipeRequestDto.updateCommentDto request, Long recipeId, Long commentId, Member member);
+
 }

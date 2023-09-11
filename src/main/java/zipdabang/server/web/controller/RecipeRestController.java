@@ -428,4 +428,51 @@ RecipeRestController {
 
         return ResponseDto.of(RecipeConverter.toPagingCommentDtoList(comments, member));
     }
+
+    @Operation(summary = "댓글 삭제 API 🔑 ✔", description = "댓글 삭제 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK, 삭제처리 되었습니다."),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4107", description = "BAD_REQUEST, 해당 commentId를 가진 댓글이 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4108", description = "BAD_REQUEST, 본인이 작성한 댓글이 아닙니다. 삭제할 수 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @DeleteMapping("/members/recipes/{recipeId}/{commentId}")
+    public ResponseDto<String> deleteComment(@PathVariable(name = "recipeId") Long recipeId, @PathVariable(name = "commentId") Long commentId, @CheckTempMember @AuthMember Member member) {
+        Boolean commentDeleteBoolean = recipeService.deleteComment(recipeId,commentId, member);
+
+        if (commentDeleteBoolean)
+            return ResponseDto.of(commentId + " 댓글 삭제 완료");
+        else
+            throw new RecipeException(Code.INTERNAL_ERROR);
+    }
+
+    @Operation(summary = "댓글 수정 API 🔑 ✔", description = "댓글 수정 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK, 댓글이 수정 되었습니다."),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4107", description = "BAD_REQUEST, 해당 commentId를 가진 댓글이 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4108", description = "BAD_REQUEST, 본인이 작성한 댓글이 아닙니다. 수정할 수 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @PatchMapping("/members/recipes/{recipeId}/{commentId}")
+    public ResponseDto<RecipeResponseDto.CommentDto> updateComment(@RequestBody RecipeRequestDto.updateCommentDto request, @PathVariable(name = "recipeId") Long recipeId, @PathVariable(name = "commentId") Long commentId, @CheckTempMember @AuthMember Member member) {
+        Comment updateComment = recipeService.updateComment(request, recipeId,commentId, member);
+
+        return ResponseDto.of(RecipeConverter.toCommentDto(updateComment, member));
+    }
 }

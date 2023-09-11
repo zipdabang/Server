@@ -357,4 +357,33 @@ public class RecipeServiceImpl implements RecipeService {
 
         return blockedCommentIdList;
     }
+
+    @Transactional(readOnly = false)
+    @Override
+    public Boolean deleteComment(Long recipeId, Long commentId, Member member) {
+        Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(Code.NO_RECIPE_EXIST));
+        Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new RecipeException(Code.NO_COMMENT_EXIST));
+
+        if (findComment.getMember().equals(member) && findComment.getRecipe().equals(findRecipe)) {
+            commentRepository.deleteById(commentId);
+        }
+        else
+            throw new RecipeException(Code.NOT_COMMENT_OWNER);
+
+        return commentRepository.existsById(recipeId) == false;
+    }
+
+    @Transactional(readOnly = false)
+    @Override
+    public Comment updateComment(RecipeRequestDto.updateCommentDto request, Long recipeId, Long commentId, Member member) {
+        Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(Code.NO_RECIPE_EXIST));
+        Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new RecipeException(Code.NO_COMMENT_EXIST));
+
+
+        if (findComment.getMember().equals(member) && findComment.getRecipe().equals(findRecipe)) {
+            return findComment.updateContent(request.getComment());
+        }
+        else
+            throw new RecipeException(Code.NOT_COMMENT_OWNER);
+    }
 }

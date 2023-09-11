@@ -40,4 +40,9 @@ public class RecipeRequestDto {
     public static class createCommentDto {
         private String comment;
     }
+
+    @Getter
+    public static class updateCommentDto {
+        private String comment;
+    }
 }
