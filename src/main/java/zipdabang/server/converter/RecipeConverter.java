@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 //import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.aws.s3.AmazonS3Manager;
+import zipdabang.server.domain.Report;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
@@ -18,7 +19,6 @@ import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -384,6 +384,21 @@ public class RecipeConverter {
                 .totalPage(comments.getTotalPages())
                 .isFirst(comments.isFirst())
                 .isLast(comments.isLast())
+                .build();
+    }
+
+    public static ReportedComment toCommentReport(Report report, Comment comment, Member member) {
+        return ReportedComment.builder()
+                .reportId(report)
+                .reported(comment)
+                .owner(member)
+                .build();
+    }
+
+    public static BlockedComment toCommentBlock(Comment comment, Member member) {
+        return BlockedComment.builder()
+                .blocked(comment)
+                .owner(member)
                 .build();
     }
 }

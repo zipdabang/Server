@@ -12,17 +12,17 @@ import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.RecipeException;
-import zipdabang.server.config.AmazonConfig;
 import zipdabang.server.converter.RecipeConverter;
+import zipdabang.server.domain.Report;
 import zipdabang.server.domain.member.BlockedMember;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
+import zipdabang.server.repository.ReportRepository;
 import zipdabang.server.repository.memberRepositories.BlockedMemberRepository;
 import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +48,8 @@ public class RecipeServiceImpl implements RecipeService {
     private final BlockedMemberRepository blockedMemberRepository;
     private final CommentRepository commentRepository;
     private final BlockedCommentRepository blockedCommentRepository;
+    private final ReportRepository reportRepository;
+    private final ReportedCommentRepository reportedCommentRepository;
 
     @Value("${paging.size}")
     Integer pageSize;
@@ -385,5 +387,38 @@ public class RecipeServiceImpl implements RecipeService {
         }
         else
             throw new RecipeException(Code.NOT_COMMENT_OWNER);
+    }
+
+    @Transactional(readOnly = false)
+    @Override
+    public Long reportComment(RecipeRequestDto.reportCommentDto request, Long recipeId, Long commentId, Member member) {
+        Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(Code.NO_RECIPE_EXIST));
+        Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new RecipeException(Code.NO_COMMENT_EXIST));
+        Report findReport = reportRepository.findById(request.getReportId()).orElseThrow(() -> new RecipeException(Code.NO_REPORT_EXIST));
+
+        if (!findComment.getMember().equals(member) && findComment.getRecipe().equals(findRecipe)) {
+            ReportedComment mapping = RecipeConverter.toCommentReport(findReport, findComment, member);
+            reportedCommentRepository.save(mapping);
+
+            return findComment.getId();
+        }
+        else
+            throw new RecipeException(Code.COMMENT_OWNER);
+    }
+
+    @Transactional(readOnly = false)
+    @Override
+    public Long blockComment(Long recipeId, Long commentId, Member member) {
+        Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(Code.NO_RECIPE_EXIST));
+        Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new RecipeException(Code.NO_COMMENT_EXIST));
+
+        if (!findComment.getMember().equals(member) && findComment.getRecipe().equals(findRecipe)) {
+            BlockedComment mapping = RecipeConverter.toCommentBlock(findComment, member);
+            blockedCommentRepository.save(mapping);
+
+            return findComment.getId();
+        }
+        else
+            throw new RecipeException(Code.COMMENT_OWNER);
     }
 }

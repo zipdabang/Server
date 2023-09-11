@@ -3,6 +3,7 @@ package zipdabang.server.converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.Report;
 import zipdabang.server.domain.inform.Notification;
 import zipdabang.server.utils.converter.TimeConverter;
 import zipdabang.server.web.dto.responseDto.RootResponseDto;
@@ -66,6 +67,22 @@ public class RootConverter {
                 .description(notification.getDescription())
                 .title(notification.getName())
                 .createdAt(staticTimeConverter.ConvertTime(notification.getCreatedAt()))
+                .build();
+    }
+
+    public static RootResponseDto.ReportListDto toReportListDto(List<Report> allReports) {
+        return RootResponseDto.ReportListDto.builder()
+                .reportList(allReports.stream()
+                        .map(report -> toReportDto(report))
+                        .collect(Collectors.toList()))
+                .size(allReports.size())
+                .build();
+    }
+
+    private static RootResponseDto.ReportDto toReportDto(Report report) {
+        return RootResponseDto.ReportDto.builder()
+                .id(report.getId())
+                .reportName(report.getName())
                 .build();
     }
 }

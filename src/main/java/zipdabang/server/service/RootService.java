@@ -1,6 +1,7 @@
 package zipdabang.server.service;
 
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.Report;
 import zipdabang.server.domain.inform.Notification;
 
 import java.util.List;
@@ -14,4 +15,6 @@ public interface RootService {
     List<Notification> notificationList();
 
     Notification findNotification(Long notificationId);
+
+    List<Report> getAllReports();
 }

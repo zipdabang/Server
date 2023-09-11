@@ -59,6 +59,7 @@ public enum Code {
     PHONE_AUTH_ERROR(HttpStatus.BAD_REQUEST, 4057, "잘못된 인증 번호 입니다."),
     PHONE_AUTH_TIMEOUT(HttpStatus.BAD_REQUEST, 4058, "인증 시간이 초과되었습니다."),
     TEMP_MEMBER_FORBIDDEN(HttpStatus.FORBIDDEN, 4059, "해당 기능은 로그인을 해야 합니다."),
+    NO_REPORT_EXIST(HttpStatus.BAD_REQUEST, 4060, "해당 id를 가진 신고 목록이 없습니다. 잘못 보내줬어요"),
 
     // market error
 
@@ -72,6 +73,8 @@ public enum Code {
     NOT_RECIPE_OWNER(HttpStatus.BAD_REQUEST, 4106, "본인이 작성한 레시피가 아닙니다. 변경할 수 없습니다"),
     NO_COMMENT_EXIST(HttpStatus.BAD_REQUEST, 4107, "해당 댓글이 존재하지 않습니다."),
     NOT_COMMENT_OWNER(HttpStatus.BAD_REQUEST, 4108, "본인이 작성한 댓글이 아닙니다. 변경할 수 없습니다"),
+    RECIPE_OWNER(HttpStatus.BAD_REQUEST, 4109, "본인의 레시피입니다. 신고/차단할 수 없습니다"),
+    COMMENT_OWNER(HttpStatus.BAD_REQUEST, 4110, "본인의 댓글입니다. 신고/차단할 수 없습니다"),
 
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),
     FEIGN_CLIENT_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "Inter server Error in feign client");

@@ -70,4 +70,22 @@ public class RootResponseDto {
         List<NoticeSummaryDto> noticeList;
         Integer size;
     }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class ReportDto{
+        private Long id;
+        private String reportName;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class ReportListDto{
+        List<ReportDto> reportList;
+        Integer size;
+    }
 }
