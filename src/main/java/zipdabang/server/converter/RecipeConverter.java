@@ -11,6 +11,7 @@ import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
 import zipdabang.server.repository.recipeRepositories.*;
+import zipdabang.server.utils.converter.TimeConverter;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
@@ -37,9 +38,11 @@ public class RecipeConverter {
     private final RecipeBannerRepository recipeBannerRepository;
     private final CommentRepository commentRepository;
     private final AmazonS3Manager amazonS3Manager;
+    private final TimeConverter timeConverter;
 
     private static RecipeRepository staticRecipeRepository;
     private static RecipeCategoryMappingRepository staticRecipeCategoryMappingRepository;
+
 
     private static LikesRepository staticLikesRepository;
     private static ScrapRepository staticScrapRepository;
@@ -49,6 +52,7 @@ public class RecipeConverter {
     private static RecipeBannerRepository staticRecipeBannerRepository;
     private static CommentRepository staticCommentRepository;
     private static AmazonS3Manager staticAmazonS3Manager;
+    private static TimeConverter staticTimeConverter;
 
 
     @PostConstruct
@@ -61,6 +65,7 @@ public class RecipeConverter {
         this.staticAmazonS3Manager = this.amazonS3Manager;
         this.staticLikesRepository = this.likesRepository;
         this.staticScrapRepository = this.scrapRepository;
+        this.staticTimeConverter = this.timeConverter;
     }
 
     public static RecipeResponseDto.RecipePageListDto toPagingRecipeDtoList(Page<Recipe> recipes, Member member) {
@@ -113,7 +118,8 @@ public class RecipeConverter {
                 .recipeName(recipe.getName())
                 .nickname(recipe.getMember().getNickname())
                 .thumbnailUrl(recipe.getThumbnailUrl())
-                .createdAt(recipe.getCreatedAt().toLocalDate())
+                .createdAt(staticTimeConverter.ConvertTime(recipe.getCreatedAt()))
+                .updatedAt(staticTimeConverter.ConvertTime(recipe.getUpdatedAt()))
                 .likes(recipe.getTotalLike())
                 .scraps(recipe.getTotalScrap())
                 .isLiked(staticLikesRepository.findByRecipeAndMember(recipe, member).isPresent())
@@ -148,7 +154,7 @@ public class RecipeConverter {
     public static RecipeResponseDto.RecipeStatusDto toRecipeStatusDto(Recipe recipe) {
         return RecipeResponseDto.RecipeStatusDto.builder()
                 .recipeId(recipe.getId())
-                .calledAt(recipe.getCreatedAt())
+                .calledAt(staticTimeConverter.ConvertTime(recipe.getCreatedAt()))
                 .build();
     }
 
@@ -200,7 +206,8 @@ public class RecipeConverter {
                 .time(recipe.getTime())
                 .intro(recipe.getIntro())
                 .recipeTip(recipe.getRecipeTip())
-                .createdAt(recipe.getCreatedAt().toLocalDate())
+                .createdAt(staticTimeConverter.ConvertTime(recipe.getCreatedAt()))
+                .updatedAt(staticTimeConverter.ConvertTime(recipe.getUpdatedAt()))
                 .likes(recipe.getTotalLike())
                 .comments(Long.valueOf(recipe.getCommentList().size()))
                 .scraps(recipe.getTotalScrap())
@@ -360,7 +367,8 @@ public class RecipeConverter {
                 .ownerNickname(createdComment.getMember().getNickname())
                 .ownerImage(createdComment.getMember().getProfileUrl())
                 .isOwner(createdComment.getMember() == member)
-                .createdAt(createdComment.getCreatedAt().toLocalDate())
+                .createdAt(staticTimeConverter.ConvertTime(createdComment.getCreatedAt()))
+                .updatedAt(staticTimeConverter.ConvertTime(createdComment.getUpdatedAt()))
                 .ownerId(createdComment.getMember().getMemberId())
                 .commentId(createdComment.getId())
                 .build();

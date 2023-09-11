@@ -109,9 +109,9 @@ RecipeRestController {
     })
     @DeleteMapping("/members/recipes/{recipeId}")
     public ResponseDto<String> deleteRecipe(@PathVariable(name = "recipeId") Long recipeId, @CheckTempMember @AuthMember Member member) {
-        Boolean reicpeDeleteBoolean = recipeService.deleteRecipe(recipeId, member);
+        Boolean recipeDeleteBoolean = recipeService.deleteRecipe(recipeId, member);
 
-        if (reicpeDeleteBoolean)
+        if (recipeDeleteBoolean)
             return ResponseDto.of(recipeId + " 레시피 삭제 완료");
         else
             throw new RecipeException(Code.INTERNAL_ERROR);

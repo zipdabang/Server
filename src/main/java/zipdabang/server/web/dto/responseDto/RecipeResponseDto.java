@@ -17,7 +17,7 @@ public class RecipeResponseDto {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class RecipeStatusDto{
         private Long recipeId;
-        private LocalDateTime calledAt;
+        private String calledAt;
     }
 
     @Builder
@@ -30,7 +30,8 @@ public class RecipeResponseDto {
         private String recipeName;
         private String nickname;
         private String thumbnailUrl;
-        private LocalDate createdAt;
+        private String createdAt;
+        private String updatedAt;
         private Long likes;
         private Long comments;
         private Long scraps;
@@ -52,7 +53,8 @@ public class RecipeResponseDto {
         private String time;
         private String intro;
         private String recipeTip;
-        private LocalDate createdAt;
+        private String createdAt;
+        private String updatedAt;
         private Long likes;
         private Long comments;
         private Long scraps;
@@ -139,7 +141,8 @@ public class RecipeResponseDto {
         private String ownerImage;
         private Boolean isOwner;
         private String content;
-        private LocalDate createdAt;
+        private String createdAt;
+        private String updatedAt;
         private Long ownerId;
         private Long commentId;
     }
