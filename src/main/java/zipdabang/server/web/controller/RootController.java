@@ -18,6 +18,7 @@ import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.Report;
 import zipdabang.server.domain.inform.Notification;
 import zipdabang.server.service.RootService;
 import zipdabang.server.validation.annotation.ExistNotification;
@@ -93,5 +94,19 @@ public class RootController {
     public ResponseDto<RootResponseDto.NoticeListDto> getNoticeList(){
         List<Notification> notificationList = rootService.notificationList();
         return ResponseDto.of(RootConverter.toNoticeListDto(notificationList));
+    }
+
+    @Operation(summary = "신고 목록 조회 API 🔑 ✔", description = "신고 목록 조회 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/reports")
+    public ResponseDto<RootResponseDto.ReportListDto> showReportList(){
+        List<Report> allReports = rootService.getAllReports();
+        return ResponseDto.of(RootConverter.toReportListDto(allReports));
     }
 }
