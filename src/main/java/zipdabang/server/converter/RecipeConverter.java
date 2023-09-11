@@ -194,7 +194,7 @@ public class RecipeConverter {
                 .recipeId(recipe.getId())
                 .categoryId(getCategoryIds(recipe))
                 .recipeName(recipe.getName())
-                .ownerImage(member.getProfileUrl())
+                .ownerImage(recipe.getMember().getProfileUrl())
                 .nickname(recipe.getMember().getNickname())
                 .thumbnailUrl(recipe.getThumbnailUrl())
                 .time(recipe.getTime())
@@ -361,6 +361,8 @@ public class RecipeConverter {
                 .ownerImage(createdComment.getMember().getProfileUrl())
                 .isOwner(createdComment.getMember() == member)
                 .createdAt(createdComment.getCreatedAt().toLocalDate())
+                .ownerId(createdComment.getMember().getMemberId())
+                .commentId(createdComment.getId())
                 .build();
     }
 

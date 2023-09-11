@@ -7,6 +7,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.common.BaseEntity;
+import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 
 @Entity
 @Getter
@@ -31,4 +32,9 @@ public class Comment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
+
+    public Comment updateContent(String content) {
+        this.content = content;
+        return this;
+    }
 }

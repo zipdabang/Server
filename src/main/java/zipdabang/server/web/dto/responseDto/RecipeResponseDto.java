@@ -140,6 +140,8 @@ public class RecipeResponseDto {
         private Boolean isOwner;
         private String content;
         private LocalDate createdAt;
+        private Long ownerId;
+        private Long commentId;
     }
 
     @Builder
