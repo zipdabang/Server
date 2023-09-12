@@ -35,6 +35,7 @@ import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -196,5 +197,16 @@ public class MemberServiceImpl implements MemberService {
                 .refreshToken(redisService.generateRefreshToken(request.getEmail()).getToken())
                 .accessToken(redisService.saveLoginStatus(joinUser.getMemberId(), tokenProvider.createAccessToken(joinUser.getMemberId(), type.equals("kakao") ? SocialType.KAKAO.toString() : SocialType.GOOGLE.toString(),request.getEmail(),Arrays.asList(new SimpleGrantedAuthority("USER")))))
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public List<Category> findMemberPreferCategories(Member member) {
+        List<MemberPreferCategory> categories = preferCategoryRepository.findByMember(member);
+        List<Category> categoryList = new ArrayList<>();
+        for (MemberPreferCategory memberPreferCategory : categories) {
+            categoryList.add(memberPreferCategory.getCategory());
+        }
+        return categoryList;
     }
 }

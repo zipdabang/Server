@@ -1,6 +1,7 @@
 package zipdabang.server.web.dto.responseDto;
 
 import lombok.*;
+import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.GenderType;
 
 
@@ -88,7 +89,7 @@ public class MemberResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class     MemberStatusDto{
+    public static class MemberStatusDto{
         private Long memberId;
         private String status;
         private LocalDateTime calledAt;
@@ -130,4 +131,26 @@ public class MemberResponseDto {
     public static class TempLoginDto{
         String accessToken;
     }
+
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class CategoryDto{
+        private String name;
+
+        private String imageUrl;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class MemberPreferCategoryDto{
+        List<CategoryDto> categories;
+        Integer size;
+    }
+
+
 }

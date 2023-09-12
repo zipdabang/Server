@@ -23,6 +23,7 @@ import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.MemberConverter;
+import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.redis.domain.RefreshToken;
@@ -36,6 +37,7 @@ import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 import org.springframework.web.bind.annotation.*;
 import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.dto.OAuthResult;
+import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -172,7 +174,16 @@ public class MemberRestController {
         return null;
     }
 
+    // 내 선호 음료 조회
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @GetMapping("/members/category")
+    public ResponseDto<MemberResponseDto.MemberPreferCategoryDto> memberPreferCategories(@AuthMember Member member) {
+        List<Category> categories = memberService.findMemberPreferCategories(member);
 
+        return ResponseDto.of(MemberConverter.toMemberPreferCategoryDto(categories));
+    }
 
 
     // 회원정보 조회 및 수정 APIs
@@ -190,7 +201,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberInfoDto(member));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 1] 프로필사진 수정 API ", description = "프로필사진 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 1] 프로필사진 수정 API ✔️", description = "프로필사진 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -203,7 +214,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateProfileImage"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 1] 기본정보 수정 API ", description = "기본정보 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 1] 기본정보 수정 API ✔️", description = "기본정보 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -217,7 +228,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateBasicInfo"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 2] 상세정보 수정 API ", description = "상세정보 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 2] 상세정보 수정 API ✔️", description = "상세정보 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -230,7 +241,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateDetailInfo"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ", description = "닉네임 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ✔️", description = "닉네임 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })

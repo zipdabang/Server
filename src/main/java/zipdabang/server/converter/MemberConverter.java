@@ -167,6 +167,23 @@ public class MemberConverter {
                 .build();
     }
 
+    public static MemberResponseDto.CategoryDto toMemberPreferCategoryDto(Category category) {
+        return MemberResponseDto.CategoryDto.builder()
+                .name(category.getName())
+                .imageUrl(category.getImageUrl())
+                .build();
+    }
+
+    public static MemberResponseDto.MemberPreferCategoryDto toMemberPreferCategoryDto(List<Category> categories) {
+        List<MemberResponseDto.CategoryDto> categoryDtoList = categories.stream()
+                .map(category -> toMemberPreferCategoryDto(category)).collect(Collectors.toList());
+
+        return MemberResponseDto.MemberPreferCategoryDto.builder()
+                .categories(categoryDtoList)
+                .size(categories.size())
+                .build();
+    }
+
     public static MemberResponseDto.MemberStatusDto toMemberStatusDto(Long memberId, String status){
         return MemberResponseDto.MemberStatusDto.builder()
                 .memberId(memberId)

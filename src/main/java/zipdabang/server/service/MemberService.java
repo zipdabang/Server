@@ -21,6 +21,7 @@ public interface MemberService {
     public void existByPhoneNumber(String phoneNum);
     
     OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type);
+    public List<Category> findMemberPreferCategories(Member member);
 
     public String updateMemberProfileImage(Member member, MemberRequestDto.changeProfileDto profileDto) throws IOException;
     public void updateMemberBasicInfo(Member member, MemberResponseDto.MemberBasicInfoDto memberBasicInfoDto);
