@@ -12,9 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
-    Page<Recipe> findByNameContainingAndMemberNotIn(String keyword, List<Member> members, Pageable pageable);
-    Page<Recipe> findByNameContaining(String keyword, Pageable pageable);
-
     List<Recipe> findTop5ByMemberNotInOrderByCreatedAtDesc(List<Member> members);
     List<Recipe> findTop5ByIsInfluencerTrueAndMemberNotInOrderByCreatedAtDesc(List<Member> members);
     List<Recipe> findTop5ByIsInfluencerFalseAndMemberNotInOrderByCreatedAtDesc(List<Member> members);
@@ -28,4 +25,12 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     Page<Recipe> findByIdIn(List<Long> recipeIdList, PageRequest createdAt);
 
     Page<Recipe> findByIdInAndMemberNotIn(List<Long> recipeIdList, List<Member> blockedMember, PageRequest createdAt);
+
+    List<Recipe> findTop5ByIdInAndNameContainingOrderByCreatedAtDesc(List<Long> recipeIdList, String keyword);
+
+    List<Recipe> findTop5ByIdInAndNameContainingAndMemberNotInOrderByCreatedAtDesc(List<Long> recipeIdList, String keyword, List<Member> blockedMember);
+
+    Page<Recipe> findByIdInAndNameContaining(List<Long> recipeIdList, String keyword, PageRequest createdAt);
+
+    Page<Recipe> findByIdInAndNameContainingAndMemberNotIn(List<Long> recipeIdList, String keyword, List<Member> blockedMember, PageRequest createdAt);
 }

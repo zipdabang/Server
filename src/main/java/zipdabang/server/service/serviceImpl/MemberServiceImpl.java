@@ -1,16 +1,19 @@
 package zipdabang.server.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import zipdabang.server.auth.provider.TokenProvider;
+import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.AuthNumberException;
 import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.SocialType;
+import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.MemberPreferCategory;
 import zipdabang.server.domain.member.Terms;
@@ -28,7 +31,9 @@ import zipdabang.server.service.MemberService;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.utils.dto.OAuthResult;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
+import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +41,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MemberServiceImpl implements MemberService {
@@ -54,6 +60,7 @@ public class MemberServiceImpl implements MemberService {
     private final RedisService redisService;
 
     private final FcmTokenRepository fcmTokenRepository;
+    private final AmazonS3Manager s3Manager;
 
     @Override
     @Transactional
@@ -110,6 +117,34 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
+    public String updateMemberProfileImage(Member member, MemberRequestDto.changeProfileDto profileDto) throws IOException {
+        Uuid uuid = s3Manager.createUUID();
+        String KeyName = s3Manager.generateMemberKeyName(uuid, profileDto.getNewProfile().getOriginalFilename());
+        String fileUrl = s3Manager.uploadFile(KeyName, profileDto.getNewProfile());
+        member.setProfileUrl(fileUrl);
+        return fileUrl;
+    }
+
+    @Override
+    @Transactional
+    public void updateMemberBasicInfo(Member member, MemberResponseDto.MemberBasicInfoDto memberBasicInfoDto) {
+        int age = MemberConverter.calculateAge(memberBasicInfoDto.getBirth());
+        member.setBasicInfo(age,memberBasicInfoDto);
+    }
+    @Override
+    @Transactional
+    public void updateMemberDetailInfo(Member member, MemberResponseDto.MemberDetailInfoDto memberDetailInfoDto) {
+        member.setDetailInfo(memberDetailInfoDto);
+    }
+
+    @Override
+    @Transactional
+    public void updateMemberNickname(Member member, String newNickname) {
+        member.setNickname(newNickname);
+    }
+
+    @Override
+    @Transactional
     public void logout(String accessToken, MemberRequestDto.LogoutDto request) {
         redisService.resolveLogout(accessToken);
         FcmToken fcmToken = fcmTokenRepository.findByTokenAndSerialNumber(request.getFcmToken(), request.getSerialNumber()).orElseThrow(() -> new MemberException(Code.LOGOUT_FAIL));
@@ -125,6 +160,11 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public List<Terms> getAllTerms() {
         return termsRepository.findAll();
+    }
+
+    @Override
+    public String tempLoginService() {
+        return tokenProvider.createTempAccessToken(Arrays.asList(new SimpleGrantedAuthority("GUEST")));
     }
 
     @Override

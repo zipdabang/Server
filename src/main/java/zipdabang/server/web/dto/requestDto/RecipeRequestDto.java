@@ -35,4 +35,19 @@ public class RecipeRequestDto {
         private Integer stepNum;
         private String description;
     }
+
+    @Getter
+    public static class createCommentDto {
+        private String comment;
+    }
+
+    @Getter
+    public static class updateCommentDto {
+        private String comment;
+    }
+
+    @Getter
+    public static class reportCommentDto {
+        private Long reportId;
+    }
 }

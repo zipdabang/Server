@@ -1,40 +1,35 @@
 package zipdabang.server.domain.recipe;
 
-import javax.persistence.*;
-
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import zipdabang.server.domain.Report;
 import zipdabang.server.domain.member.Member;
-import zipdabang.server.domain.common.BaseEntity;
-import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
+
+import javax.persistence.*;
 
 @Entity
-@Getter
 @Builder
+@Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class Comment extends BaseEntity {
+public class ReportedRecipe {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
     private Long id;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "report_id", nullable = false)
+    private Report reportId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id", nullable = false)
-    private Recipe recipe;
+    private Recipe reported;
 
-    public Comment updateContent(String content) {
-        this.content = content;
-        return this;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private Member owner;
 }

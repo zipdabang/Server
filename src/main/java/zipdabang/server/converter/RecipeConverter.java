@@ -7,19 +7,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 //import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.aws.s3.AmazonS3Manager;
-import zipdabang.server.domain.Category;
+import zipdabang.server.domain.Report;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
-import zipdabang.server.repository.CategoryRepository;
 import zipdabang.server.repository.recipeRepositories.*;
+import zipdabang.server.utils.converter.TimeConverter;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
-import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,17 +35,24 @@ public class RecipeConverter {
     private final ScrapRepository scrapRepository;
 //    private final CategoryRepository categoryRepository;
     private final RecipeCategoryRepository recipeCategoryRepository;
+    private final RecipeBannerRepository recipeBannerRepository;
+    private final CommentRepository commentRepository;
     private final AmazonS3Manager amazonS3Manager;
+    private final TimeConverter timeConverter;
 
     private static RecipeRepository staticRecipeRepository;
     private static RecipeCategoryMappingRepository staticRecipeCategoryMappingRepository;
+
 
     private static LikesRepository staticLikesRepository;
     private static ScrapRepository staticScrapRepository;
 
 //    private static CategoryRepository staticCategoryRepository;
     private static RecipeCategoryRepository staticRecipeCategoryRepository;
+    private static RecipeBannerRepository staticRecipeBannerRepository;
+    private static CommentRepository staticCommentRepository;
     private static AmazonS3Manager staticAmazonS3Manager;
+    private static TimeConverter staticTimeConverter;
 
 
     @PostConstruct
@@ -52,9 +61,11 @@ public class RecipeConverter {
         this.staticRecipeCategoryMappingRepository = this.recipeCategoryMappingRepository;
 //        this.staticCategoryRepository = this.categoryRepository;
         this.staticRecipeCategoryRepository = this.recipeCategoryRepository;
+        this.staticRecipeBannerRepository = this.recipeBannerRepository;
         this.staticAmazonS3Manager = this.amazonS3Manager;
         this.staticLikesRepository = this.likesRepository;
         this.staticScrapRepository = this.scrapRepository;
+        this.staticTimeConverter = this.timeConverter;
     }
 
     public static RecipeResponseDto.RecipePageListDto toPagingRecipeDtoList(Page<Recipe> recipes, Member member) {
@@ -80,6 +91,26 @@ public class RecipeConverter {
                 .build();
     }
 
+    public static RecipeResponseDto.SearchRecipePreviewListDto toSearchRecipePreviewListDto(List<List<Recipe>> recipeLists, Member member) {
+        AtomicLong index = new AtomicLong(1);
+
+        return RecipeResponseDto.SearchRecipePreviewListDto.builder()
+                .recipeList(recipeLists.stream()
+                        .map(recipeList -> toSearchRecipePreviewByCategoryDto(index.getAndIncrement(), recipeList, member))
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    private static RecipeResponseDto.SearchRecipePreviewByCategoryDto toSearchRecipePreviewByCategoryDto(Long index, List<Recipe> recipeList, Member member) {
+        return RecipeResponseDto.SearchRecipePreviewByCategoryDto.builder()
+                .recipeList(recipeList.stream()
+                        .map(recipe -> toResponseRecipeSimpleDto(recipe, member))
+                        .collect(Collectors.toList()))
+                .categoryId(index)
+                .elements(recipeList.size())
+                .build();
+    }
+
     private static RecipeResponseDto.RecipeSimpleDto toResponseRecipeSimpleDto(Recipe recipe, Member member) {
         return RecipeResponseDto.RecipeSimpleDto.builder()
                 .recipeId(recipe.getId())
@@ -87,7 +118,8 @@ public class RecipeConverter {
                 .recipeName(recipe.getName())
                 .nickname(recipe.getMember().getNickname())
                 .thumbnailUrl(recipe.getThumbnailUrl())
-                .createdAt(recipe.getCreatedAt().toLocalDate())
+                .createdAt(staticTimeConverter.ConvertTime(recipe.getCreatedAt()))
+                .updatedAt(staticTimeConverter.ConvertTime(recipe.getUpdatedAt()))
                 .likes(recipe.getTotalLike())
                 .scraps(recipe.getTotalScrap())
                 .isLiked(staticLikesRepository.findByRecipeAndMember(recipe, member).isPresent())
@@ -122,7 +154,7 @@ public class RecipeConverter {
     public static RecipeResponseDto.RecipeStatusDto toRecipeStatusDto(Recipe recipe) {
         return RecipeResponseDto.RecipeStatusDto.builder()
                 .recipeId(recipe.getId())
-                .calledAt(recipe.getCreatedAt())
+                .calledAt(staticTimeConverter.ConvertTime(recipe.getCreatedAt()))
                 .build();
     }
 
@@ -168,13 +200,14 @@ public class RecipeConverter {
                 .recipeId(recipe.getId())
                 .categoryId(getCategoryIds(recipe))
                 .recipeName(recipe.getName())
-                .ownerImage(member.getProfileUrl())
+                .ownerImage(recipe.getMember().getProfileUrl())
                 .nickname(recipe.getMember().getNickname())
                 .thumbnailUrl(recipe.getThumbnailUrl())
                 .time(recipe.getTime())
                 .intro(recipe.getIntro())
                 .recipeTip(recipe.getRecipeTip())
-                .createdAt(recipe.getCreatedAt().toLocalDate())
+                .createdAt(staticTimeConverter.ConvertTime(recipe.getCreatedAt()))
+                .updatedAt(staticTimeConverter.ConvertTime(recipe.getUpdatedAt()))
                 .likes(recipe.getTotalLike())
                 .comments(Long.valueOf(recipe.getCommentList().size()))
                 .scraps(recipe.getTotalScrap())
@@ -205,7 +238,7 @@ public class RecipeConverter {
 
     private static String uploadThumbnail(MultipartFile thumbnail) throws IOException {
         Uuid uuid = staticAmazonS3Manager.createUUID();
-        String keyName = staticAmazonS3Manager.generateRecipeKeyName(uuid, thumbnail.getOriginalFilename());
+        String keyName = staticAmazonS3Manager.generateRecipeKeyName(uuid);
         String fileUrl = staticAmazonS3Manager.uploadFile(keyName, thumbnail);
         log.info("S3에 업로드 한 recipe thumbnail 파일의 url : {}", fileUrl);
         return fileUrl;
@@ -245,7 +278,7 @@ public class RecipeConverter {
 
     private static String uploadStepImage(MultipartFile stepImage) throws IOException {
         Uuid uuid = staticAmazonS3Manager.createUUID();
-        String keyName = staticAmazonS3Manager.generateStepKeyName(uuid, stepImage.getOriginalFilename());
+        String keyName = staticAmazonS3Manager.generateStepKeyName(uuid);
         String fileUrl = staticAmazonS3Manager.uploadFile(keyName, stepImage);
         log.info("S3에 업로드 한 recipe step 파일의 url : {}", fileUrl);
         return fileUrl;
@@ -290,4 +323,82 @@ public class RecipeConverter {
                 .build();
     }
 
+    public static RecipeResponseDto.RecipeBannerImageDto toRecipeBannerImageDto(List<RecipeBanner> recipeBannerList) {
+        return RecipeResponseDto.RecipeBannerImageDto.builder()
+                .bannerList(toRecipeBannerDto(recipeBannerList))
+                .size(recipeBannerList.size())
+                .build();
+    }
+
+    private static List<RecipeResponseDto.RecipeBannerDto> toRecipeBannerDto(List<RecipeBanner> recipeBannerList) {
+        return recipeBannerList.stream()
+                .map(recipeBanner -> RecipeResponseDto.RecipeBannerDto.builder()
+                        .order(recipeBanner.getInOrder())
+                        .imageUrl(recipeBanner.getImageUrl())
+                        .searchKeyword(recipeBanner.getSearchKeyword())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public static String toKeyName(String imageUrl) {
+        String input = imageUrl;
+
+        Pattern regex = Pattern.compile(staticAmazonS3Manager.getPattern());
+        Matcher matcher = regex.matcher(input);
+        String extractedString = null;
+        if (matcher.find())
+            extractedString = matcher.group(1);
+
+        return extractedString;
+
+    }
+
+    public static Comment toComment(String content, Recipe findRecipe, Member member) {
+        return Comment.builder()
+                .content(content)
+                .recipe(findRecipe)
+                .member(member)
+                .build();
+    }
+
+    public static RecipeResponseDto.CommentDto toCommentDto(Comment createdComment, Member member) {
+        return RecipeResponseDto.CommentDto.builder()
+                .content(createdComment.getContent())
+                .ownerNickname(createdComment.getMember().getNickname())
+                .ownerImage(createdComment.getMember().getProfileUrl())
+                .isOwner(createdComment.getMember() == member)
+                .createdAt(staticTimeConverter.ConvertTime(createdComment.getCreatedAt()))
+                .updatedAt(staticTimeConverter.ConvertTime(createdComment.getUpdatedAt()))
+                .ownerId(createdComment.getMember().getMemberId())
+                .commentId(createdComment.getId())
+                .build();
+    }
+
+    public static RecipeResponseDto.CommentPageListDto toPagingCommentDtoList(Page<Comment> comments, Member member) {
+        return RecipeResponseDto.CommentPageListDto.builder()
+                .CommentList(comments.stream()
+                        .map(comment -> toCommentDto(comment,member))
+                        .collect(Collectors.toList()))
+                .totalElements(comments.getTotalElements())
+                .currentPageElements(comments.getNumberOfElements())
+                .totalPage(comments.getTotalPages())
+                .isFirst(comments.isFirst())
+                .isLast(comments.isLast())
+                .build();
+    }
+
+    public static ReportedComment toCommentReport(Report report, Comment comment, Member member) {
+        return ReportedComment.builder()
+                .reportId(report)
+                .reported(comment)
+                .owner(member)
+                .build();
+    }
+
+    public static BlockedComment toCommentBlock(Comment comment, Member member) {
+        return BlockedComment.builder()
+                .blocked(comment)
+                .owner(member)
+                .build();
+    }
 }

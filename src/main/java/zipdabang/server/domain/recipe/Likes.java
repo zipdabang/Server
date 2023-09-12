@@ -32,13 +32,13 @@ public class Likes extends BaseEntity {
     public Likes deleteLikes(Recipe recipe){
         if(this.recipe != null)
             recipe.getLikesList().remove(this);
-        recipe.updateToTalLike(-1);
+        recipe.updateLike(-1);
         return this;
     }
 
     public Likes setRecipe(Recipe recipe){
 
-        recipe.updateToTalLike(1);
+        recipe.updateLike(1);
 
         if(this.recipe != null)
             recipe.getLikesList().remove(this);

@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.dto.OAuthResult;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
@@ -48,6 +49,13 @@ import java.util.Optional;
 @Validated
 @Slf4j
 @RequiredArgsConstructor
+@ApiResponses({
+        @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "4005",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "4008",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+})
 @Tag(name = "유저 관련 API", description = "로그인, 회원가입, 마이 페이지에서 필요한 API모음")
 public class MemberRestController {
 
@@ -64,14 +72,12 @@ public class MemberRestController {
             @Parameter(name = "Authorization", description = "swagger에서 나오는 이건 무시하고 오른쪽 위의 자물쇠에 토큰 넣어서 테스트 하세요")
     })
     @ApiResponses({
-            @ApiResponse(responseCode = "2000",description = "OK 성공, 로그아웃, access toekn + refresh 토큰 버려주세요"),
-            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 로그아웃, access token + refresh 토큰 버려주세요"),
     })
     @PostMapping("/members/logout")
-    public ResponseDto<MemberResponseDto.MemberStatusDto> logout(@AuthMember Member member, @RequestHeader(value = "Authorization",required = false) String authorizationHeader, @RequestBody MemberRequestDto.LogoutDto request) {
+    public ResponseDto<MemberResponseDto.MemberStatusDto> logout(@AuthMember Member member, @RequestHeader(value = "Authorization", required = false) String authorizationHeader, @RequestBody MemberRequestDto.LogoutDto request) {
         String token = authorizationHeader.substring(7);
-        memberService.logout(token,request);
+        memberService.logout(token, request);
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "logout"));
     }
 
@@ -89,19 +95,18 @@ public class MemberRestController {
 
     @Operation(summary = "🎪figma[온보딩1] 소셜로그인 API ✔️", description = "소셜로그인 API, 응답으로 로그인(메인으로 이동), 회원가입(정보 입력으로 이동) code로 구분하며 query String으로 카카오인지 구글인지 주면 됩니다.")
     @ApiResponses({
-        @ApiResponse(responseCode = "2050",description = "OK, 로그인, access Token과 refresh 토큰을 반환함"),
-        @ApiResponse(responseCode = "2051",description = "OK, 회원가입, 디비에 유저정보 저장 X, 만약 회원정보 입력하다가 도망가면 그냥 처음부터 다시 할 것"),
-        @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "2050", description = "OK, 로그인, access Token과 refresh 토큰을 반환함"),
+            @ApiResponse(responseCode = "2051", description = "OK, 회원가입, 디비에 유저정보 저장 X, 만약 회원정보 입력하다가 도망가면 그냥 처음부터 다시 할 것"),
     })
     @Parameters({
-            @Parameter(name = "type",description = "쿼리 스트링, 어떤 소셜로그인이지", required = true)
+            @Parameter(name = "type", description = "쿼리 스트링, 어떤 소셜로그인이지", required = true)
     })
     @PostMapping("/members/oauth")
     public ResponseDto<MemberResponseDto.SocialLoginDto> oauthKakao(
             @RequestBody MemberRequestDto.OAuthRequestDto oAuthRequestDto, @RequestParam(name = "type") String type) {
         OAuthResult.OAuthResultDto oAuthResultDto = memberService.SocialLogin(oAuthRequestDto, type);
-        MemberResponseDto.SocialLoginDto socialLoginDto = MemberConverter.toSocialLoginDto(oAuthResultDto.getAccessToken(),oAuthResultDto.getRefreshToken());
-        return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN,socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN,null);
+        MemberResponseDto.SocialLoginDto socialLoginDto = MemberConverter.toSocialLoginDto(oAuthResultDto.getAccessToken(), oAuthResultDto.getRefreshToken());
+        return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN, socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN, null);
     }
 
     @GetMapping("/members/category")
@@ -118,9 +123,8 @@ public class MemberRestController {
             @Parameter(name = "type", description = "kakao or google을 쿼리 스트링으로 소문자로만 필수로 주면 됨")
     })
     @ApiResponses({
-            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
-            @ApiResponse(responseCode = "4053", description = "BAD_REQEUST, 선호하는 음료 카테고리 id가 이상할 경우",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "2000", description = "OK 성공, access Token과 refresh 토큰을 반환함"),
+            @ApiResponse(responseCode = "4053", description = "BAD_REQEUST, 선호하는 음료 카테고리 id가 이상할 경우", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping("/members/oauth/info")
     public ResponseDto<MemberResponseDto.SocialJoinDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @RequestParam(name = "type", required = true) String type) {
@@ -132,9 +136,8 @@ public class MemberRestController {
     //인증번호 요청
     @Operation(summary = "🎪figma[회원가입 까지 페이지 -  회원정보 입력] 인증번호 요청 API ✔️️", description = "인증번호 요청 API입니다. 대시(-) 제외 전화번호 입력하시면 됩니다. ex) 01012345678 ")
     @ApiResponses({
-            @ApiResponse(responseCode = "2000",description = "OK 성공 , 인증번호 전송 완료"),
-            @ApiResponse(responseCode = "2054",description = "OK 성공 , 이미 회원가입된 전화번호입니다."),
-            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 인증번호 전송 완료"),
+            @ApiResponse(responseCode = "2054", description = "OK 성공 , 이미 회원가입된 전화번호입니다."),
     })
     @PostMapping("/members/phone/sms")
     public ResponseDto<SmsResponseDto.AuthNumResultDto> sendSms(@RequestBody MemberRequestDto.SmsRequestDto request) throws JsonProcessingException, RestClientException, URISyntaxException, InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException {
@@ -146,11 +149,10 @@ public class MemberRestController {
     //인증번호 검증
     @Operation(summary = "🎪figma[회원가입 까지 페이지 -  회원정보 입력] 인증번호 검증 API ✔️️", description = "인증번호 검증 API입니다. 대시(-) 제외 전화번호와 인증번호 입력하시면 됩니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "2000",description = "OK 성공 , 인증 성공"),
-            @ApiResponse(responseCode = "4056",description = "BAD_REQUEST , 전화번호를 잘못 전달했거나, 인증요청을 하지않은 상태로 확인버튼을 누른 경우"),
-            @ApiResponse(responseCode = "4057",description = "BAD_REQUEST, 인증 번호가 옳지 않습니다."),
-            @ApiResponse(responseCode = "4058",description = "BAD_REQUEST, 인증 시간(5분)이 지난 경우"),
-            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 인증 성공"),
+            @ApiResponse(responseCode = "4056", description = "BAD_REQUEST , 전화번호를 잘못 전달했거나, 인증요청을 하지않은 상태로 확인버튼을 누른 경우"),
+            @ApiResponse(responseCode = "4057", description = "BAD_REQUEST, 인증 번호가 옳지 않습니다."),
+            @ApiResponse(responseCode = "4058", description = "BAD_REQUEST, 인증 시간(5분)이 지난 경우"),
     })
     @PostMapping("/members/phone/auth")
     public ResponseDto<SmsResponseDto.AuthNumResultDto> authPhoneNum(@RequestBody MemberRequestDto.PhoneNumAuthDto request) {
@@ -160,34 +162,107 @@ public class MemberRestController {
 
 
     //프로필 수정
-    @PatchMapping(value = "/members",consumes = { MediaType.MULTIPART_FORM_DATA_VALUE } )
-    public ResponseDto<MemberResponseDto.MemberStatusDto> updateProfile (@ModelAttribute MemberRequestDto.memberProfileDto request )
-    {
+    @PatchMapping(value = "/members", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateProfile(@ModelAttribute MemberRequestDto.memberProfileDto request) {
         return null;
     }
 
     //프로필 조회
     @GetMapping("/members/{memberId}")
-    public ResponseDto<MemberResponseDto.MemberProfileDto> showProfile (@PathVariable("memberId") Long memberId){
+    public ResponseDto<MemberResponseDto.MemberProfileDto> showProfile(@PathVariable("memberId") Long memberId) {
         return null;
     }
 
     //내 프로필 조회
     @GetMapping("/members")
-    public ResponseDto<MemberResponseDto.MemberProfileDto> showMyProfile (){
+    public ResponseDto<MemberResponseDto.MemberProfileDto> showMyProfile(@AuthMember Member member) {
         return null;
     }
 
-    //닉네임 중복검사
 
+
+
+    // 회원정보 조회 및 수정 APIs
+
+
+    @Operation(summary = "[figma 더보기 - 회원 정보 1] 회원정보 조회 API ✔️", description = "회원정보 조회 API입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 회원정보 조회 완료"),
+    })
+    @GetMapping("/myInfo")
+    public ResponseDto<MemberResponseDto.MemberInfoResponseDto> showMyInfo(@AuthMember Member member) {
+        return ResponseDto.of(MemberConverter.toMemberInfoDto(member));
+    }
+
+    @Operation(summary = "[figma 더보기 - 회원 정보 1] 프로필사진 수정 API ", description = "프로필사진 수정 API입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 프로필사진 수정 완료"),
+    })
+    @PatchMapping(value = "/myInfo/profileImage",consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateProfileImage(@AuthMember Member member, @ModelAttribute MemberRequestDto.changeProfileDto request) throws IOException {
+        memberService.updateMemberProfileImage(member, request);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateProfileImage"));
+    }
+
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 1] 기본정보 수정 API ", description = "기본정보 수정 API입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 기본정보 수정 완료"),
+    })
+    @PatchMapping("/myInfo/basicInfo")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateBasicInfo(@AuthMember Member member, @RequestBody MemberResponseDto.MemberBasicInfoDto request) {
+        memberService.updateMemberBasicInfo(member, request);
+
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateBasicInfo"));
+    }
+
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 2] 상세정보 수정 API ", description = "상세정보 수정 API입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 상세정보 수정 완료"),
+    })
+    @PatchMapping("/myInfo/detailInfo")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateDetailInfo(@AuthMember Member member, @RequestBody MemberResponseDto.MemberDetailInfoDto request) {
+        memberService.updateMemberDetailInfo(member, request);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateDetailInfo"));
+    }
+
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ", description = "닉네임 수정 API입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 닉네임 수정 완료"),
+    })
+    @PatchMapping("/myInfo/nickname")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateNickname(@AuthMember Member member, @RequestBody MemberRequestDto.changeNicknameDto request) {
+        memberService.updateMemberNickname(member, request.getNickname());
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateNickname"));
+    }
+
+
+
+
+
+    //닉네임 중복검사
     @Operation(summary = "🎪[figma 회원가입까지 - 닉네임 입력 1,2,3] 닉네임 중복검사 API ✔️", description = "닉네임 중복검사 API입니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "2052",description = "OK 성공 , 닉네임 존재함 다시 시도하세요"),
-            @ApiResponse(responseCode = "2053",description = "OK 성공 , 닉네임 사용 가능"),
-            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "2052", description = "OK 성공 , 닉네임 존재함 다시 시도하세요"),
+            @ApiResponse(responseCode = "2053", description = "OK 성공 , 닉네임 사용 가능"),
     })
     @GetMapping("/members/exist-nickname")
-    public ResponseDto<String> checkExistNickname (@RequestParam String nickname){
+
+    public ResponseDto<String> checkExistNickname(@RequestParam String nickname) {
 
         log.info("넘어온 nickname 정보: {}", nickname);
 
@@ -199,30 +274,38 @@ public class MemberRestController {
 
     @Operation(summary = "리프레쉬 토큰을 이용해 accessToken 재발급 API ✔️", description = "리프레쉬 토큰을 이용해 accessToken 재발급하는 API입니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
-            @ApiResponse(responseCode = "4050",description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "2000", description = "OK 성공, access Token과 refresh 토큰을 반환함"),
+            @ApiResponse(responseCode = "4050", description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping("/members/new-token")
-    public ResponseDto<MemberResponseDto.IssueNewTokenDto> getNewToken(MemberRequestDto.IssueTokenDto request){
+    public ResponseDto<MemberResponseDto.IssueNewTokenDto> getNewToken(MemberRequestDto.IssueTokenDto request) {
         RefreshToken newRefreshToken = redisService.reGenerateRefreshToken(request);
         String accessToken = memberService.regenerateAccessToken(newRefreshToken);
         return ResponseDto.of(MemberConverter.toIssueNewTokenDto(accessToken, newRefreshToken.getToken()));
     }
 
     @GetMapping("/members/test")
-    public String test(){
+    public String test() {
         return "test!";
     }
 
     @Operation(summary = "🎪figma[회원가입 까지 페이지 - 이용약관] 이용약관 조회 API ✔️", description = "이용약관 조회 API입니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token과 refresh 토큰을 반환함"),
-            @ApiResponse(responseCode = "4050",description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "2000", description = "OK 성공, access Token과 refresh 토큰을 반환함"),
+            @ApiResponse(responseCode = "4050", description = "BAD_REQEUST , refresh token이 서버로 넘어오지 않음", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @GetMapping("/members/terms")
-    public ResponseDto<MemberResponseDto.TermsListDto> showTerms(){
+    public ResponseDto<MemberResponseDto.TermsListDto> showTerms() {
         return ResponseDto.of(MemberConverter.toTermsDto(memberService.getAllTerms()));
+    }
+
+
+    @Operation(summary = "🎪figma[온보딩1] 나중에 로그인하기 API ✔️", description = "나중에 로그인하기 API 입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token 하나만 반환함"),
+    })
+    @PostMapping("/members/temp-login")
+    public ResponseDto<MemberResponseDto.TempLoginDto> tempLogin(){
+        return ResponseDto.of(MemberConverter.toTempLoginDto(memberService.tempLoginService()));
     }
 }

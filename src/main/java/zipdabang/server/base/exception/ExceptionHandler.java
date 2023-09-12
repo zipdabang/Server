@@ -18,6 +18,8 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler
     public ResponseEntity<Object> validation(ConstraintViolationException e, WebRequest request) {
+        if(e.getConstraintViolations().size() >= 1)
+            return handleExceptionInternal(e, Code.valueOf(e.getMessage().split(":")[1].substring(1)), request);
         return handleExceptionInternal(e, Code.UNAUTHORIZED, request);
     }
 

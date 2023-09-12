@@ -12,6 +12,7 @@ import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.repository.UuidRepository;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -32,16 +33,31 @@ public class AmazonS3Manager {
         return amazonS3.getUrl(amazonConfig.getBucket(), KeyName).toString();
     }
 
+    public String getPattern(){
+        return "https://"+amazonConfig.getBucket()+"\\.s3\\."+amazonConfig.getRegion()+"\\.amazonaws\\.com(.*)";
+    }
+
     public void deleteFile(String keyname) {
         log.info("KEY NAME : " + keyname);
         amazonS3.deleteObject(amazonConfig.getBucket(),keyname);
+
+        String[] keynameSplit = keyname.split("/");
+        String getUuid = keynameSplit[keynameSplit.length-1];
+        log.info(getUuid);
+
+        uuidRepository.deleteByUuid(getUuid);
+        log.info("해당 uuid 삭제: "+ !uuidRepository.existsByUuid(getUuid));
     }
 
-    public String generateRecipeKeyName(Uuid uuid, String originalFilename) {
+    public String generateMemberKeyName(Uuid uuid, String originalFilename) {
+        return amazonConfig.getUserProfile() + '/' + uuid.getUuid() + originalFilename;
+    }
+
+    public String generateRecipeKeyName(Uuid uuid) {
         return amazonConfig.getRecipeThumbnail() + '/' + uuid.getUuid();
     }
 
-    public String generateStepKeyName(Uuid uuid, String originalFilename) {
+    public String generateStepKeyName(Uuid uuid) {
         return amazonConfig.getRecipeStep() + '/' + uuid.getUuid();
     }
 
@@ -53,6 +69,7 @@ public class AmazonS3Manager {
             savedUuid = createUUID();
         }
         savedUuid = uuidRepository.save(Uuid.builder().uuid(candidate).build());
+
         return savedUuid;
     }
 }

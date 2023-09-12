@@ -40,7 +40,7 @@ public class SecurityConfig {
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/docs/**","/members/oauth", "/members/oauth/info","/members/new-token","/members/terms","/categories","/members/exist-nickname",
-                        "/members/phone/sms","/members/phone/auth"
+                        "/members/phone/sms","/members/phone/auth","/members/temp-login","/auto-login","/notices/**"
                 );
     }
 

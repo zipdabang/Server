@@ -19,6 +19,8 @@ public enum Code {
     NICKNAME_EXIST(HttpStatus.OK,2052, "닉네임이 이미 존재합니다."),
     NICKNAME_OK(HttpStatus.OK,2053, "사용 가능한 닉네임 입니다."),
     PHONE_NUMBER_EXIST(HttpStatus.OK, 2054, "이미 인증된 전화번호입니다."),
+    AUTO_LOGIN_MAIN(HttpStatus.OK, 2055, "홈 화면으로 이동하세요"),
+    AUTO_LOGIN_NOT_MAIN(HttpStatus.OK, 2056, "로그인 화면으로 이동하세요"),
 
 
     //recipe response
@@ -42,6 +44,7 @@ public enum Code {
     JWT_UNSUPPORTED_TOKEN(HttpStatus.UNAUTHORIZED, 4007,"지원하지 않는 JWT 토큰입니다."),
     JWT_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 4008,"유효한 JWT 토큰이 없습니다."),
     FEIGN_CLIENT_ERROR_400(HttpStatus.BAD_REQUEST, 4009, "feign에서 400번대 에러가 발생했습니다."),
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, 4010, "공지를 찾을 수 없습니다."),
 
 
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, 4050,"refresh token이 필요합니다."),
@@ -55,6 +58,8 @@ public enum Code {
     PHONE_AUTH_NOT_FOUND(HttpStatus.BAD_REQUEST, 4056, "인증 번호 요청이 필요합니다."),
     PHONE_AUTH_ERROR(HttpStatus.BAD_REQUEST, 4057, "잘못된 인증 번호 입니다."),
     PHONE_AUTH_TIMEOUT(HttpStatus.BAD_REQUEST, 4058, "인증 시간이 초과되었습니다."),
+    TEMP_MEMBER_FORBIDDEN(HttpStatus.FORBIDDEN, 4059, "해당 기능은 로그인을 해야 합니다."),
+    NO_REPORT_EXIST(HttpStatus.BAD_REQUEST, 4060, "해당 id를 가진 신고 목록이 없습니다. 잘못 보내줬어요"),
 
     // market error
 
@@ -64,7 +69,12 @@ public enum Code {
     BLOCKED_USER_RECIPE(HttpStatus.BAD_REQUEST, 4102, "차단한 사용자의 레시피입니다."),
     WRITTEN_BY_TYPE_ERROR(HttpStatus.BAD_REQUEST, 4103, "레시피 작성자 타입이 잘못되었습니다. all, influencer, common중 하나로 보내주세요."),
     ORDER_BY_TYPE_ERROR(HttpStatus.BAD_REQUEST, 4104, "조회 방식 타입이 잘못되었습니다. likes, views, latest중 하나로 보내주세요."),
-
+    NO_RECIPE_CATEGORY_EXIST(HttpStatus.BAD_REQUEST, 4105, "해당 id를 가진 레시피 카테고리가 없습니다. 잘못 보내줬어요"),
+    NOT_RECIPE_OWNER(HttpStatus.BAD_REQUEST, 4106, "본인이 작성한 레시피가 아닙니다. 변경할 수 없습니다"),
+    NO_COMMENT_EXIST(HttpStatus.BAD_REQUEST, 4107, "해당 댓글이 존재하지 않습니다."),
+    NOT_COMMENT_OWNER(HttpStatus.BAD_REQUEST, 4108, "본인이 작성한 댓글이 아닙니다. 변경할 수 없습니다"),
+    RECIPE_OWNER(HttpStatus.BAD_REQUEST, 4109, "본인의 레시피입니다. 신고/차단할 수 없습니다"),
+    COMMENT_OWNER(HttpStatus.BAD_REQUEST, 4110, "본인의 댓글입니다. 신고/차단할 수 없습니다"),
 
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),
     FEIGN_CLIENT_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "Inter server Error in feign client");
