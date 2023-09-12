@@ -49,8 +49,8 @@ public class AmazonS3Manager {
         log.info("해당 uuid 삭제: "+ !uuidRepository.existsByUuid(getUuid));
     }
 
-    public String generateMemberKeyName(Uuid uuid, String originalFilename) {
-        return amazonConfig.getUserProfile() + '/' + uuid.getUuid() + originalFilename;
+    public String generateMemberKeyName(Uuid uuid) {
+        return amazonConfig.getUserProfile() + '/' + uuid.getUuid();
     }
 
     public String generateRecipeKeyName(Uuid uuid) {

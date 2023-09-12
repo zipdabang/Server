@@ -23,6 +23,7 @@ import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.MemberConverter;
+import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.redis.domain.RefreshToken;
@@ -36,6 +37,7 @@ import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 import org.springframework.web.bind.annotation.*;
 import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.dto.OAuthResult;
+import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -109,13 +111,6 @@ public class MemberRestController {
         return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN, socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN, null);
     }
 
-    @GetMapping("/members/category")
-    public ResponseDto<List<Category>> getCategoryList() {
-        List<Category> categoryList = memberService.getCategoryList();
-
-        log.info("음료 카테고리 리스트: {}", categoryList);
-        return ResponseDto.of(categoryList);
-    }
 
     //회원 정보 추가입력 = 회원가입 완료 + 로그인
     @Operation(summary = "🎪figma[회원가입 까지 페이지 -  회원가입 완료 시] 소셜 회원가입 최종 완료 API ✔️", description = "소셜로그인을 통한 회원가입 최종완료 API입니다. agreeTermsIdList는 동의 한(선택 약관 중) 약관의 Id를 주세요 약관의 Id는 약관 조회 API에서 준 데이터에서 가져오세요")
@@ -124,7 +119,7 @@ public class MemberRestController {
     })
     @ApiResponses({
             @ApiResponse(responseCode = "2000", description = "OK 성공, access Token과 refresh 토큰을 반환함"),
-            @ApiResponse(responseCode = "4053", description = "BAD_REQEUST, 선호하는 음료 카테고리 id가 이상할 경우", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4053", description = "BAD_REQUEST, 선호하는 음료 카테고리 id가 이상할 경우", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping("/members/oauth/info")
     public ResponseDto<MemberResponseDto.SocialJoinDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @RequestParam(name = "type", required = true) String type) {
@@ -179,7 +174,16 @@ public class MemberRestController {
         return null;
     }
 
+    // 내 선호 음료 조회
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @GetMapping("/members/category")
+    public ResponseDto<MemberResponseDto.MemberPreferCategoryDto> memberPreferCategories(@AuthMember Member member) {
+        List<Category> categories = memberService.findMemberPreferCategories(member);
 
+        return ResponseDto.of(MemberConverter.toMemberPreferCategoryDto(categories));
+    }
 
 
     // 회원정보 조회 및 수정 APIs
@@ -197,7 +201,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberInfoDto(member));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 1] 프로필사진 수정 API ", description = "프로필사진 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 1] 프로필사진 수정 API ✔️", description = "프로필사진 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -210,7 +214,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateProfileImage"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 1] 기본정보 수정 API ", description = "기본정보 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 1] 기본정보 수정 API ✔️", description = "기본정보 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -224,7 +228,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateBasicInfo"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 2] 상세정보 수정 API ", description = "상세정보 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 2] 상세정보 수정 API ✔️", description = "상세정보 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -237,7 +241,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateDetailInfo"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ", description = "닉네임 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ✔️", description = "닉네임 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
