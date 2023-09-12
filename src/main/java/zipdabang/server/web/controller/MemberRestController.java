@@ -109,13 +109,6 @@ public class MemberRestController {
         return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN, socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN, null);
     }
 
-    @GetMapping("/members/category")
-    public ResponseDto<List<Category>> getCategoryList() {
-        List<Category> categoryList = memberService.getCategoryList();
-
-        log.info("음료 카테고리 리스트: {}", categoryList);
-        return ResponseDto.of(categoryList);
-    }
 
     //회원 정보 추가입력 = 회원가입 완료 + 로그인
     @Operation(summary = "🎪figma[회원가입 까지 페이지 -  회원가입 완료 시] 소셜 회원가입 최종 완료 API ✔️", description = "소셜로그인을 통한 회원가입 최종완료 API입니다. agreeTermsIdList는 동의 한(선택 약관 중) 약관의 Id를 주세요 약관의 Id는 약관 조회 API에서 준 데이터에서 가져오세요")
@@ -124,7 +117,7 @@ public class MemberRestController {
     })
     @ApiResponses({
             @ApiResponse(responseCode = "2000", description = "OK 성공, access Token과 refresh 토큰을 반환함"),
-            @ApiResponse(responseCode = "4053", description = "BAD_REQEUST, 선호하는 음료 카테고리 id가 이상할 경우", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4053", description = "BAD_REQUEST, 선호하는 음료 카테고리 id가 이상할 경우", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping("/members/oauth/info")
     public ResponseDto<MemberResponseDto.SocialJoinDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @RequestParam(name = "type", required = true) String type) {

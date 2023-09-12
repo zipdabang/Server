@@ -58,15 +58,12 @@ public class MemberRequestDto {
     @Setter
     public static class MemberInfoDto{
 
-
         @NotBlank
         private String name;
         @NotBlank
         private String birth;
         @NotBlank
         private String email;
-        @NotBlank
-        private String profileUrl;
         @NotBlank
         private String gender;
         @NotBlank

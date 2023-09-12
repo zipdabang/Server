@@ -110,16 +110,12 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    @Override
-    public List<Category> getCategoryList(){
-        return categoryRepository.findAll();
-    }
 
     @Override
     @Transactional
     public String updateMemberProfileImage(Member member, MemberRequestDto.changeProfileDto profileDto) throws IOException {
         Uuid uuid = s3Manager.createUUID();
-        String KeyName = s3Manager.generateMemberKeyName(uuid, profileDto.getNewProfile().getOriginalFilename());
+        String KeyName = s3Manager.generateMemberKeyName(uuid);
         String fileUrl = s3Manager.uploadFile(KeyName, profileDto.getNewProfile());
         member.setProfileUrl(fileUrl);
         return fileUrl;
