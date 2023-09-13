@@ -181,6 +181,9 @@ public class MemberRestController {
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 유저 선호 카테고리 조회 완료"),
+    })
     @GetMapping("/members/category")
     public ResponseDto<MemberResponseDto.MemberPreferCategoryDto> memberPreferCategories(@AuthMember Member member) {
         List<Category> categories = memberService.findMemberPreferCategories(member);
@@ -193,6 +196,10 @@ public class MemberRestController {
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 유저 선호 카테고리 수정 완료"),
+    })
+
     @PatchMapping("/members/category")
     public ResponseDto<MemberResponseDto.MemberStatusDto> updatePreferCategories(@AuthMember Member member, @RequestBody MemberRequestDto.changeCategoryDto request) {
         List<String> categories = request.getCategories();
