@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface PreferCategoryRepository extends JpaRepository<MemberPreferCategory, Long> {
     List<MemberPreferCategory> findByMember(Member member);
+
+    void deleteByMember(Member member);
 }

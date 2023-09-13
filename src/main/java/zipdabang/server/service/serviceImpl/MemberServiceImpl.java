@@ -113,6 +113,26 @@ public class MemberServiceImpl implements MemberService {
 
 
     @Override
+    public void deletePreferCategoryByMember(Member member) {
+        preferCategoryRepository.deleteByMember(member);
+    }
+    @Override
+    @Transactional
+    public void updateMemberPreferCategory(Member member, MemberRequestDto.changeCategoryDto request) {
+        deletePreferCategoryByMember(member);
+        for (String categoryName : request.getCategories()) {
+            Category category = categoryRepository.findByName(categoryName).get();
+            preferCategoryRepository.save(MemberPreferCategory.builder()
+                    .member(member)
+                    .category(category)
+                    .build()
+            );
+        }
+    }
+
+
+
+    @Override
     @Transactional
     public String updateMemberProfileImage(Member member, MemberRequestDto.changeProfileDto profileDto) throws IOException {
         Uuid uuid = s3Manager.createUUID();

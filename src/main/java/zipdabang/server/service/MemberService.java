@@ -23,6 +23,8 @@ public interface MemberService {
     OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type);
     public List<Category> findMemberPreferCategories(Member member);
 
+    public void deletePreferCategoryByMember(Member member);
+    public void updateMemberPreferCategory(Member member, MemberRequestDto.changeCategoryDto request);
     public String updateMemberProfileImage(Member member, MemberRequestDto.changeProfileDto profileDto) throws IOException;
     public void updateMemberBasicInfo(Member member, MemberResponseDto.MemberBasicInfoDto memberBasicInfoDto);
 

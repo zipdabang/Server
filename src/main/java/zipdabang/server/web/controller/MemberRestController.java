@@ -174,6 +174,8 @@ public class MemberRestController {
         return null;
     }
 
+
+
     // 내 선호 음료 조회
     @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 조회 API ✔️", description = "유저 선호 카테고리 조회 API입니다.")
     @Parameters({
@@ -185,6 +187,19 @@ public class MemberRestController {
 
         return ResponseDto.of(MemberConverter.toMemberPreferCategoryDto(categories));
     }
+
+    // 내 선호 음료 카테고리 수정
+    @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 수정 API ✔️", description = "유저 선호 카테고리 수정 API입니다. 카테고리명(커피, 차 등)을 넣으시면 됩니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @PatchMapping("/members/category")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updatePreferCategories(@AuthMember Member member, @RequestBody MemberRequestDto.changeCategoryDto request) {
+        List<String> categories = request.getCategories();
+        memberService.updateMemberPreferCategory(member, request);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updatePreferCategories"));
+    }
+
 
 
     // 회원정보 조회 및 수정 APIs
