@@ -6,6 +6,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
+import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 public class MemberRequestDto {
 
@@ -124,6 +125,12 @@ public class MemberRequestDto {
         private String email;
         private String phoneNum;
         private MultipartFile profileImage;
+    }
+
+    @Getter
+    @Setter
+    public static class changeCategoryDto {
+        List<String> categories;
     }
 
     @Getter @Setter
