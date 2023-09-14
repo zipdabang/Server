@@ -81,6 +81,7 @@ public class MemberResponseDto {
         private MemberBasicInfoDto memberBasicInfoDto;
         private MemberDetailInfoDto memberDetailInfoDto;
         private String nickname;
+        private MemberPreferCategoryDto preferCategories;
 
     }
 

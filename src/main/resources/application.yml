@@ -63,6 +63,7 @@ cloud:
         zipdabang-recipe-steps : recipe/steps
         zipdabang-proifile : user
     #        zipdabang-facilities : facilities
+      user-default-image: ${USER_DEFAULT_IMAGE}
     region:
       static: ap-northeast-2
     stack:

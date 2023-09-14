@@ -175,7 +175,6 @@ public class MemberRestController {
     }
 
 
-
     // 내 선호 음료 조회
     @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 조회 API ✔️", description = "유저 선호 카테고리 조회 API입니다.")
     @Parameters({
@@ -191,22 +190,6 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberPreferCategoryDto(categories));
     }
 
-    // 내 선호 음료 카테고리 수정
-    @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 수정 API ✔️", description = "유저 선호 카테고리 수정 API입니다. 카테고리명(커피, 차 등)을 넣으시면 됩니다.")
-    @Parameters({
-            @Parameter(name = "member", hidden = true),
-    })
-    @ApiResponses({
-            @ApiResponse(responseCode = "2000", description = "OK 성공 , 유저 선호 카테고리 수정 완료"),
-    })
-    @PatchMapping("/members/category")
-    public ResponseDto<MemberResponseDto.MemberStatusDto> updatePreferCategories(@AuthMember Member member, @RequestBody MemberRequestDto.changeCategoryDto request) {
-        List<String> categories = request.getCategories();
-        memberService.updateMemberPreferCategory(member, request);
-        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updatePreferCategories"));
-    }
-
-
 
     // 회원정보 조회 및 수정 APIs
 
@@ -220,7 +203,9 @@ public class MemberRestController {
     })
     @GetMapping("/myInfo")
     public ResponseDto<MemberResponseDto.MemberInfoResponseDto> showMyInfo(@AuthMember Member member) {
-        return ResponseDto.of(MemberConverter.toMemberInfoDto(member));
+        List<Category> memberPreferCategories = memberService.findMemberPreferCategories(member);
+        MemberResponseDto.MemberPreferCategoryDto memberPreferCategoryDto = MemberConverter.toMemberPreferCategoryDto(memberPreferCategories);
+        return ResponseDto.of(MemberConverter.toMemberInfoDto(member,memberPreferCategoryDto));
     }
 
     @Operation(summary = "[figma 더보기 - 회원 정보 1] 프로필사진 수정 API ✔️", description = "프로필사진 수정 API입니다.")
@@ -276,6 +261,21 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateNickname"));
     }
 
+
+    // 내 선호 음료 카테고리 수정
+    @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 수정 API ✔️", description = "유저 선호 카테고리 수정 API입니다. 카테고리명(커피, 차 등)을 넣으시면 됩니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공 , 유저 선호 카테고리 수정 완료"),
+    })
+    @PatchMapping("/myInfo/category")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updatePreferCategories(@AuthMember Member member, @RequestBody MemberRequestDto.changeCategoryDto request) {
+        List<String> categories = request.getCategories();
+        memberService.updateMemberPreferCategory(member, request);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updatePreferCategories"));
+    }
 
 
 

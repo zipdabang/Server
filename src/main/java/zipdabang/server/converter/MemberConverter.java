@@ -1,6 +1,7 @@
 package zipdabang.server.converter;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.MemberException;
@@ -31,6 +32,13 @@ public class MemberConverter {
     private final MemberRepository memberRepository;
 
     private static MemberRepository staticMemberRepository;
+
+    private static String defaultProfileImage;
+
+    @Value("${cloud.aws.s3.user-default-image}")
+    public void setDefaultImage(String value) {
+        defaultProfileImage=value;
+    }
 
     public static MemberResponseDto.JoinMemberDto toJoinMemberDto(Member member){
             return MemberResponseDto.JoinMemberDto.builder()
@@ -67,12 +75,13 @@ public class MemberConverter {
 
 
     public static Member toSocialMember(MemberRequestDto.MemberInfoDto request, String type) {
-
         int age = calculateAge(request.getBirth());
         GenderType gender = Integer.valueOf(request.getGender()) % 2 == 0 ? GenderType.WOMAN : GenderType.MAN;
 
+
         Member member = Member.builder()
                 .age(age)
+                .profileUrl(defaultProfileImage)
                 .socialType(type.equals("kakao") ? SocialType.KAKAO : SocialType.GOOGLE)
                 .email(request.getEmail())
                 .nickname(request.getNickname())
@@ -125,13 +134,14 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.MemberInfoResponseDto toMemberInfoDto(Member member) {
+    public static MemberResponseDto.MemberInfoResponseDto toMemberInfoDto(Member member,MemberResponseDto.MemberPreferCategoryDto preferCategories) {
         return MemberResponseDto.MemberInfoResponseDto.builder()
                 .profileUrl(member.getProfileUrl())
                 .email(member.getEmail())
                 .memberBasicInfoDto(memberBasicInfoDto(member))
                 .memberDetailInfoDto(memberDetailInfoDto(member))
                 .nickname(member.getNickname())
+                .preferCategories(preferCategories)
                 .build();
     }
 
