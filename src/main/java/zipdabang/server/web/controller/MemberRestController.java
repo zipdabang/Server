@@ -175,6 +175,7 @@ public class MemberRestController {
     }
 
 
+
     // 내 선호 음료 조회
     @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 조회 API ✔️", description = "유저 선호 카테고리 조회 API입니다.")
     @Parameters({
@@ -189,6 +190,7 @@ public class MemberRestController {
 
         return ResponseDto.of(MemberConverter.toMemberPreferCategoryDto(categories));
     }
+
 
 
     // 회원정보 조회 및 수정 APIs
