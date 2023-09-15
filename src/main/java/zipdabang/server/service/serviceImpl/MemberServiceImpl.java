@@ -35,6 +35,7 @@ import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -110,16 +111,32 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+
     @Override
-    public List<Category> getCategoryList(){
-        return categoryRepository.findAll();
+    public void deletePreferCategoryByMember(Member member) {
+        preferCategoryRepository.deleteByMember(member);
     }
+    @Override
+    @Transactional
+    public void updateMemberPreferCategory(Member member, MemberRequestDto.changeCategoryDto request) {
+        deletePreferCategoryByMember(member);
+        for (String categoryName : request.getCategories()) {
+            Category category = categoryRepository.findByName(categoryName).get();
+            preferCategoryRepository.save(MemberPreferCategory.builder()
+                    .member(member)
+                    .category(category)
+                    .build()
+            );
+        }
+    }
+
+
 
     @Override
     @Transactional
     public String updateMemberProfileImage(Member member, MemberRequestDto.changeProfileDto profileDto) throws IOException {
         Uuid uuid = s3Manager.createUUID();
-        String KeyName = s3Manager.generateMemberKeyName(uuid, profileDto.getNewProfile().getOriginalFilename());
+        String KeyName = s3Manager.generateMemberKeyName(uuid);
         String fileUrl = s3Manager.uploadFile(KeyName, profileDto.getNewProfile());
         member.setProfileUrl(fileUrl);
         return fileUrl;
@@ -145,10 +162,17 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public void logout(String accessToken, MemberRequestDto.LogoutDto request) {
+    public void logout(String accessToken, Member member) {
         redisService.resolveLogout(accessToken);
-        FcmToken fcmToken = fcmTokenRepository.findByTokenAndSerialNumber(request.getFcmToken(), request.getSerialNumber()).orElseThrow(() -> new MemberException(Code.LOGOUT_FAIL));
-        fcmTokenRepository.delete(fcmToken);
+        List<FcmToken> fcmTokenList = fcmTokenRepository.findAllByMember(member);
+        fcmTokenList.stream()
+                        .map(
+                                fcmToken ->
+                                {
+                                    fcmTokenRepository.delete(fcmToken);
+                                    return null;
+                                }
+                        ).collect(Collectors.toList());
     }
 
     @Override
@@ -200,5 +224,16 @@ public class MemberServiceImpl implements MemberService {
                 .refreshToken(redisService.generateRefreshToken(request.getEmail()).getToken())
                 .accessToken(redisService.saveLoginStatus(joinUser.getMemberId(), tokenProvider.createAccessToken(joinUser.getMemberId(), type.equals("kakao") ? SocialType.KAKAO.toString() : SocialType.GOOGLE.toString(),request.getEmail(),Arrays.asList(new SimpleGrantedAuthority("USER")))))
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public List<Category> findMemberPreferCategories(Member member) {
+        List<MemberPreferCategory> categories = preferCategoryRepository.findByMember(member);
+        List<Category> categoryList = new ArrayList<>();
+        for (MemberPreferCategory memberPreferCategory : categories) {
+            categoryList.add(memberPreferCategory.getCategory());
+        }
+        return categoryList;
     }
 }

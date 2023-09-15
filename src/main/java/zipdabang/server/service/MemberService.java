@@ -21,15 +21,17 @@ public interface MemberService {
     public void existByPhoneNumber(String phoneNum);
     
     OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type);
+    public List<Category> findMemberPreferCategories(Member member);
 
-    List<Category> getCategoryList();
+    public void deletePreferCategoryByMember(Member member);
+    public void updateMemberPreferCategory(Member member, MemberRequestDto.changeCategoryDto request);
     public String updateMemberProfileImage(Member member, MemberRequestDto.changeProfileDto profileDto) throws IOException;
     public void updateMemberBasicInfo(Member member, MemberResponseDto.MemberBasicInfoDto memberBasicInfoDto);
 
     public void updateMemberDetailInfo(Member member, MemberResponseDto.MemberDetailInfoDto memberDetailInfoDto);
     public void updateMemberNickname(Member member, String newNickname);
 
-    void logout(String accessToken, MemberRequestDto.LogoutDto request);
+    void logout(String accessToken, Member member);
 
     String regenerateAccessToken(RefreshToken refreshToken);
 

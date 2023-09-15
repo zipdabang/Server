@@ -1,6 +1,7 @@
 package zipdabang.server.converter;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.MemberException;
@@ -31,6 +32,13 @@ public class MemberConverter {
     private final MemberRepository memberRepository;
 
     private static MemberRepository staticMemberRepository;
+
+    private static String defaultProfileImage;
+
+    @Value("${cloud.aws.s3.user-default-image}")
+    public void setDefaultImage(String value) {
+        defaultProfileImage=value;
+    }
 
     public static MemberResponseDto.JoinMemberDto toJoinMemberDto(Member member){
             return MemberResponseDto.JoinMemberDto.builder()
@@ -67,37 +75,15 @@ public class MemberConverter {
 
 
     public static Member toSocialMember(MemberRequestDto.MemberInfoDto request, String type) {
-
         int age = calculateAge(request.getBirth());
-        // 생년월일 문자열을 LocalDate로 변환
-//        String birth = request.getBirth().substring(0,2);
-//
-//        // 현재 날짜를 가져옴
-//        LocalDate currentDate = LocalDate.now();
-//
-//        // 생년월일과 현재 날짜를 기준으로 만 나이 계산
-//        int age = currentDate.getYear() % 100 - Integer.valueOf(birth)- 1;
-//
-//        if (age < 0)
-//            age += 100;
-//
-//        // 현재 연도를 가져옴
-//        int currentYear = LocalDate.now().getYear();
-//
-//        // 날짜 문자열을 LocalDate로 변환
-//        LocalDate date = LocalDate.parse(request.getBirth(), DateTimeFormatter.ofPattern("yyMMdd"));
-//
-//        // 생년월일에 현재 연도를 설정하여 완전한 날짜로 만듦
-//        LocalDate completeDate = date.withYear(currentYear);
-//
-//        age = ChronoUnit.DAYS.between(completeDate, currentDate) >= 0 ? age + 1 : age;
         GenderType gender = Integer.valueOf(request.getGender()) % 2 == 0 ? GenderType.WOMAN : GenderType.MAN;
+
 
         Member member = Member.builder()
                 .age(age)
+                .profileUrl(defaultProfileImage)
                 .socialType(type.equals("kakao") ? SocialType.KAKAO : SocialType.GOOGLE)
                 .email(request.getEmail())
-                .profileUrl(request.getProfileUrl())
                 .nickname(request.getNickname())
                 .birth(request.getBirth())
                 .gender(gender)
@@ -148,13 +134,14 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.MemberInfoResponseDto toMemberInfoDto(Member member) {
+    public static MemberResponseDto.MemberInfoResponseDto toMemberInfoDto(Member member,MemberResponseDto.MemberPreferCategoryDto preferCategories) {
         return MemberResponseDto.MemberInfoResponseDto.builder()
                 .profileUrl(member.getProfileUrl())
                 .email(member.getEmail())
                 .memberBasicInfoDto(memberBasicInfoDto(member))
                 .memberDetailInfoDto(memberDetailInfoDto(member))
                 .nickname(member.getNickname())
+                .preferCategories(preferCategories)
                 .build();
     }
 
@@ -187,6 +174,23 @@ public class MemberConverter {
         return MemberPreferCategory.builder()
                 .member(member)
                 .category(category)
+                .build();
+    }
+
+    public static MemberResponseDto.CategoryDto toMemberPreferCategoryDto(Category category) {
+        return MemberResponseDto.CategoryDto.builder()
+                .name(category.getName())
+                .imageUrl(category.getImageUrl())
+                .build();
+    }
+
+    public static MemberResponseDto.MemberPreferCategoryDto toMemberPreferCategoryDto(List<Category> categories) {
+        List<MemberResponseDto.CategoryDto> categoryDtoList = categories.stream()
+                .map(category -> toMemberPreferCategoryDto(category)).collect(Collectors.toList());
+
+        return MemberResponseDto.MemberPreferCategoryDto.builder()
+                .categories(categoryDtoList)
+                .size(categories.size())
                 .build();
     }
 

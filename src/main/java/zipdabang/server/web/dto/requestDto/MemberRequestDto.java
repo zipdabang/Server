@@ -6,6 +6,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
+import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 public class MemberRequestDto {
 
@@ -58,15 +59,12 @@ public class MemberRequestDto {
     @Setter
     public static class MemberInfoDto{
 
-
         @NotBlank
         private String name;
         @NotBlank
         private String birth;
         @NotBlank
         private String email;
-        @NotBlank
-        private String profileUrl;
         @NotBlank
         private String gender;
         @NotBlank
@@ -129,6 +127,12 @@ public class MemberRequestDto {
         private MultipartFile profileImage;
     }
 
+    @Getter
+    @Setter
+    public static class changeCategoryDto {
+        List<String> categories;
+    }
+
     @Getter @Setter
     public static class changeNicknameDto{
         String nickname;
@@ -144,10 +148,5 @@ public class MemberRequestDto {
         String refreshToken;
     }
 
-    @Getter @Setter
-    public static class LogoutDto{
-        String fcmToken;
-        String serialNumber;
-    }
 
 }
