@@ -4,7 +4,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
-@RedisHash(value = "loginStatusZipdabang", timeToLive = 2400)
+@RedisHash(value = "loginStatusZipdabang", timeToLive = 1830)
 @Builder
 @Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)

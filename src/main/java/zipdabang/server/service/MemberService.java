@@ -31,7 +31,7 @@ public interface MemberService {
     public void updateMemberDetailInfo(Member member, MemberResponseDto.MemberDetailInfoDto memberDetailInfoDto);
     public void updateMemberNickname(Member member, String newNickname);
 
-    void logout(String accessToken, MemberRequestDto.LogoutDto request);
+    void logout(String accessToken, Member member);
 
     String regenerateAccessToken(RefreshToken refreshToken);
 

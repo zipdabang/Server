@@ -148,10 +148,5 @@ public class MemberRequestDto {
         String refreshToken;
     }
 
-    @Getter @Setter
-    public static class LogoutDto{
-        String fcmToken;
-        String serialNumber;
-    }
 
 }

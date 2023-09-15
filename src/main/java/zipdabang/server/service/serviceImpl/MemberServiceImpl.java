@@ -162,10 +162,17 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public void logout(String accessToken, MemberRequestDto.LogoutDto request) {
+    public void logout(String accessToken, Member member) {
         redisService.resolveLogout(accessToken);
-        FcmToken fcmToken = fcmTokenRepository.findByTokenAndSerialNumber(request.getFcmToken(), request.getSerialNumber()).orElseThrow(() -> new MemberException(Code.LOGOUT_FAIL));
-        fcmTokenRepository.delete(fcmToken);
+        List<FcmToken> fcmTokenList = fcmTokenRepository.findAllByMember(member);
+        fcmTokenList.stream()
+                        .map(
+                                fcmToken ->
+                                {
+                                    fcmTokenRepository.delete(fcmToken);
+                                    return null;
+                                }
+                        ).collect(Collectors.toList());
     }
 
     @Override
