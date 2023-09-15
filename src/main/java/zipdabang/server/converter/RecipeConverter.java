@@ -387,6 +387,14 @@ public class RecipeConverter {
                 .build();
     }
 
+    public static ReportedRecipe toRecipeReport(Report report, Recipe recipe, Member member) {
+        return ReportedRecipe.builder()
+                .reportId(report)
+                .reported(recipe)
+                .owner(member)
+                .build();
+    }
+
     public static ReportedComment toCommentReport(Report report, Comment comment, Member member) {
         return ReportedComment.builder()
                 .reportId(report)
@@ -395,10 +403,4 @@ public class RecipeConverter {
                 .build();
     }
 
-    public static BlockedComment toCommentBlock(Comment comment, Member member) {
-        return BlockedComment.builder()
-                .blocked(comment)
-                .owner(member)
-                .build();
-    }
 }

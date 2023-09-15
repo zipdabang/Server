@@ -53,7 +53,7 @@ public interface RecipeService {
 
     Comment updateComment(RecipeRequestDto.updateCommentDto request, Long recipeId, Long commentId, Member member);
 
-    Long reportComment(RecipeRequestDto.reportCommentDto request, Long recipeId, Long commentId, Member member);
+    Long reportComment(Long recipeId, Long commentId, Long reportId, Member member);
 
-    Long blockComment(Long recipeId, Long commentId, Member member);
+    Long reportRecipe(Long recipeId, Long reportId, Member member);
 }
