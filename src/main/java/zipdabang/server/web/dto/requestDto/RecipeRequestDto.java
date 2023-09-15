@@ -45,9 +45,4 @@ public class RecipeRequestDto {
     public static class updateCommentDto {
         private String comment;
     }
-
-    @Getter
-    public static class reportCommentDto {
-        private Long reportId;
-    }
 }
