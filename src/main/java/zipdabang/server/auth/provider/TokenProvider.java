@@ -131,11 +131,18 @@ public class TokenProvider implements InitializingBean {
             Claims body = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
             return Long.valueOf(body.getSubject());
         }catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e){
-            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
-        }catch (UnsupportedJwtException e){
-            throw new JwtAuthenticationException(Code.JWT_UNSUPPORTED_TOKEN);
+//            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
+            return -1L;
+        }catch(ExpiredJwtException e){
+//            throw new JwtAuthenticationException(Code.JWT_ACCESS_TOKEN_EXPIRED);
+            return -2L;
+        }
+        catch (UnsupportedJwtException e){
+//            throw new JwtAuthenticationException(Code.JWT_UNSUPPORTED_TOKEN);
+            return -3L;
         }catch (IllegalArgumentException e){
-            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
+//            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
+            return -4L;
         }
     }
 

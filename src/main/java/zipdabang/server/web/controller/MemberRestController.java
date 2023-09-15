@@ -77,9 +77,9 @@ public class MemberRestController {
             @ApiResponse(responseCode = "2000", description = "OK 성공, 로그아웃, access token + refresh 토큰 버려주세요"),
     })
     @PostMapping("/members/logout")
-    public ResponseDto<MemberResponseDto.MemberStatusDto> logout(@AuthMember Member member, @RequestHeader(value = "Authorization", required = false) String authorizationHeader, @RequestBody MemberRequestDto.LogoutDto request) {
+    public ResponseDto<MemberResponseDto.MemberStatusDto> logout(@AuthMember Member member, @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
         String token = authorizationHeader.substring(7);
-        memberService.logout(token, request);
+        memberService.logout(token, member);
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "logout"));
     }
 

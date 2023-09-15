@@ -51,6 +51,16 @@ public class RootServiceImpl implements RootService {
             Long memberId = tokenProvider.validateAndReturnSubject(token);
             if (memberId.equals(0L))
                 result = true;
+            else if (memberId < 0L){
+                if (memberId.equals(-1L))
+                    throw new RootException(Code.JWT_BAD_REQUEST);
+                else if (memberId.equals(-2L))
+                    throw new RootException(Code.JWT_ACCESS_TOKEN_EXPIRED);
+                else if (memberId.equals(-3L))
+                    throw new RootException(Code.JWT_UNSUPPORTED_TOKEN);
+                else if (memberId.equals(-4L))
+                    throw new RootException(Code.JWT_BAD_REQUEST);
+            }
             else{
                 Member member = memberRepository.findById(memberId).orElseThrow(() -> new RootException(Code.MEMBER_NOT_FOUND));
                 if(member.getAge() == null || member.getNickname() == null || member.getName() == null || member.getGender() == null)
