@@ -1,6 +1,7 @@
 package zipdabang.server.service;
 
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.enums.DeregisterType;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.Terms;
 import zipdabang.server.redis.domain.RefreshToken;
@@ -38,4 +39,10 @@ public interface MemberService {
     List<Terms> getAllTerms();
 
     String tempLoginService();
-}
+
+    public void memberDeregister(Member member, MemberRequestDto.DeregisterDto request);
+    public Long saveDeregisterInfo(String phoneNum, MemberRequestDto.DeregisterDto request);
+    public void inactivateMember(Member member);
+
+    public void saveDeregisterReasons(Long deregisterId, List<DeregisterType> deregisterTypeList);
+    }
