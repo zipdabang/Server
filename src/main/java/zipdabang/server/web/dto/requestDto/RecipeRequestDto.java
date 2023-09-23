@@ -24,6 +24,20 @@ public class RecipeRequestDto {
         List<NewIngredientDto> ingredients;
     }
 
+    @Getter @Setter
+    public static class TempRecipeDto{
+
+        String thumbnailUrl;
+        String name;
+        String time;
+        String intro;
+        String recipeTip;
+        Integer stepCount;
+        Integer ingredientCount;
+        List<TempStepDto> steps;
+        List<NewIngredientDto> ingredients;
+    }
+
     @Getter
     public static class NewIngredientDto{
         private String ingredientName;
@@ -32,6 +46,13 @@ public class RecipeRequestDto {
 
     @Getter
     public static class StepDto{
+        private Integer stepNum;
+        private String description;
+    }
+
+    @Getter
+    public static class TempStepDto{
+        private String stepUrl;
         private Integer stepNum;
         private String description;
     }

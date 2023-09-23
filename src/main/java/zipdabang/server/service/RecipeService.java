@@ -3,10 +3,7 @@ package zipdabang.server.service;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.domain.member.Member;
-import zipdabang.server.domain.recipe.Comment;
-import zipdabang.server.domain.recipe.Recipe;
-import zipdabang.server.domain.recipe.RecipeBanner;
-import zipdabang.server.domain.recipe.RecipeCategory;
+import zipdabang.server.domain.recipe.*;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 
 import java.io.IOException;
@@ -56,4 +53,8 @@ public interface RecipeService {
     Long reportComment(Long recipeId, Long commentId, Long reportId, Member member);
 
     Long reportRecipe(Long recipeId, Long reportId, Member member);
+
+    TempRecipe tempCreate(RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException;
+
+    TempRecipe tempUpdate(Long tempId, RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException;
 }

@@ -24,6 +24,15 @@ public class RecipeResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TempRecipeStatusDto{
+        private Long tempId;
+        private String calledAt;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class RecipeSimpleDto {
         private Long recipeId;
         List<Long> categoryId;

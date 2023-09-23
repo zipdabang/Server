@@ -107,6 +107,8 @@ public enum Code {
     RECIPE_OWNER(HttpStatus.OK, 4109, "본인의 레시피입니다. 신고/차단할 수 없습니다"),
     //BAD_REQUEST
     COMMENT_OWNER(HttpStatus.OK, 4110, "본인의 댓글입니다. 신고/차단할 수 없습니다"),
+    //BAD_REQUEST
+    NO_TEMP_RECIPE_EXIST(HttpStatus.OK, 4111, "해당 임시저장 Id가 존재하지 않습니다."),
     //INTERNAL_SERVER_ERROR
     INTERNAL_ERROR(HttpStatus.OK, 5000, "Internal server Error"),
     //INTERNAL_SERVER_ERROR
