@@ -57,6 +57,7 @@ public enum Code {
     //NOT_FOUND
     NOTIFICATION_NOT_FOUND(HttpStatus.OK, 4010, "공지를 찾을 수 없습니다."),
 
+
     //BAD_REQUEST
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.OK, 4050,"refresh token이 필요합니다."),
     //BAD_REQUEST
@@ -81,6 +82,8 @@ public enum Code {
     //BAD_REQUEST
     NO_REPORT_EXIST(HttpStatus.OK, 4060, "해당 id를 가진 신고 목록이 없습니다. 잘못 보내줬어요"),
 
+    //BAD_REQUEST
+    DEREGISTER_FAIL(HttpStatus.OK, 4061, "탈퇴할 수 없는 유저입니다. 탈퇴 불가 사유가 존재합니다."),
     // market error
 
     //recipe error

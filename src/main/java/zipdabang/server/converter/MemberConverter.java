@@ -8,6 +8,7 @@ import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.SocialType;
+import zipdabang.server.domain.member.Deregister;
 import zipdabang.server.domain.member.Terms;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.MemberPreferCategory;
@@ -230,6 +231,14 @@ public class MemberConverter {
     public static MemberResponseDto.TempLoginDto toTempLoginDto(String token){
         return MemberResponseDto.TempLoginDto.builder()
                 .accessToken(token)
+                .build();
+    }
+
+
+    public static Deregister toDeregister(String phoneNum, MemberRequestDto.DeregisterDto request) {
+        return Deregister.builder()
+                .phoneNum(phoneNum)
+                .feedback(request.getFeedback())
                 .build();
     }
 }
