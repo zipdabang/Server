@@ -25,19 +25,22 @@ public class Recipe extends BaseEntity {
     @Column(nullable = false)
     private Long id;
 
+    @Column(nullable = false)
     private Boolean isInfluencer;
 
+    @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String thumbnailUrl;
 
-    @Column(length = 500)
+    @Column(length = 500, nullable = false)
     private String intro;
 
-    @Column(length = 500)
+    @Column(length = 500, nullable = false)
     private String recipeTip;
 
+    @Column(nullable = false)
     private String time;
 
     @Column(columnDefinition = "FLOAT DEFAULT 0")

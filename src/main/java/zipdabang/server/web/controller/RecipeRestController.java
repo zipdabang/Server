@@ -21,10 +21,7 @@ import zipdabang.server.base.ResponseDto;
 import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.Member;
-import zipdabang.server.domain.recipe.Comment;
-import zipdabang.server.domain.recipe.Recipe;
-import zipdabang.server.domain.recipe.RecipeBanner;
-import zipdabang.server.domain.recipe.RecipeCategory;
+import zipdabang.server.domain.recipe.*;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.validation.annotation.CheckTempMember;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
@@ -67,6 +64,39 @@ RecipeRestController {
 
         Recipe recipe = recipeService.create(request, thumbnail, stepImages, member);
         return ResponseDto.of(RecipeConverter.toRecipeStatusDto(recipe));
+    }
+
+    @Operation(summary = "레시피 임시저장, 레시피 임시저장 등록 API 🔑 ✔", description = "레시피 임시저장 화면 API입니다. ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000"),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4111", description = "BAD_REQUEST, 해당 임시저장 Id가 존재하지 않습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @PostMapping(value = {"/members/recipes/temp/{tempId}", "/members/recipes/temp"})
+    public ResponseDto<RecipeResponseDto.TempRecipeStatusDto> createTempRecipe(
+            @PathVariable(required = false) Long tempId,
+            @RequestPart(value = "content") RecipeRequestDto.TempRecipeDto request,
+            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
+            @RequestPart(value = "stepImages", required = false) List<MultipartFile> stepImages,
+            @CheckTempMember @AuthMember Member member) throws IOException {
+
+        log.info("사용자가 준 정보 : {}", request.toString());
+
+        TempRecipe tempRecipe;
+
+        if (tempId==null)
+            tempRecipe = recipeService.tempCreate(request, thumbnail, stepImages, member);
+        else
+            tempRecipe = recipeService.tempUpdate(tempId, request, thumbnail, stepImages, member);
+
+        return ResponseDto.of(RecipeConverter.toTempRecipeStatusDto(tempRecipe));
     }
 
     @Operation(summary = "🍹figma 레시피 상세페이지, 레시피 상세 정보 조회 API 🔑 ✔", description = "레시피 조회 화면 API입니다. 댓글은 처음 10개만 가져오고 나머지는 댓글 page api 드림")

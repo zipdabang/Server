@@ -2,11 +2,14 @@ package zipdabang.server.converter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.loadbalancer.RetryableStatusCodeException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 //import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.aws.s3.AmazonS3Manager;
+import zipdabang.server.base.Code;
+import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.domain.Report;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.Member;
@@ -18,11 +21,15 @@ import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static org.apache.logging.log4j.ThreadContext.isEmpty;
 
 @Slf4j
 @Component
@@ -30,6 +37,7 @@ import java.util.stream.Collectors;
 public class RecipeConverter {
 
     private final RecipeRepository recipeRepository;
+    private final TempStepRepository tempStepRepository;
     private final RecipeCategoryMappingRepository recipeCategoryMappingRepository;
     private final LikesRepository likesRepository;
     private final ScrapRepository scrapRepository;
@@ -41,6 +49,7 @@ public class RecipeConverter {
     private final TimeConverter timeConverter;
 
     private static RecipeRepository staticRecipeRepository;
+    private static TempStepRepository staticTempStepRepository;
     private static RecipeCategoryMappingRepository staticRecipeCategoryMappingRepository;
 
 
@@ -66,6 +75,7 @@ public class RecipeConverter {
         this.staticLikesRepository = this.likesRepository;
         this.staticScrapRepository = this.scrapRepository;
         this.staticTimeConverter = this.timeConverter;
+        this.staticTempStepRepository = this.tempStepRepository;
     }
 
     public static RecipeResponseDto.RecipePageListDto toPagingRecipeDtoList(Page<Recipe> recipes, Member member) {
@@ -130,8 +140,22 @@ public class RecipeConverter {
     public static List<Step> toStep(RecipeRequestDto.CreateRecipeDto request, Recipe recipe, List<MultipartFile> stepImages) {
         return request.getSteps().stream()
                 .map(step-> {
+                    if (step.getDescription() == null)
+                        throw new RecipeException(Code.NULL_RECIPE_ERROR);
                     try {
                         return toStepDto(step, recipe, stepImages);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    public static List<TempStep> toTempStep(RecipeRequestDto.TempRecipeDto request, TempRecipe tempRecipe, List<MultipartFile> stepImages) {
+        return request.getSteps().stream()
+                .map(step-> {
+                    try {
+                        return toTempStepDto(step, tempRecipe, stepImages);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -151,10 +175,23 @@ public class RecipeConverter {
                 .collect(Collectors.toList());
     }
 
+    public static List<TempIngredient> toTempIngredient(RecipeRequestDto.TempRecipeDto request, TempRecipe tempRecipe) {
+        return request.getIngredients().stream()
+                .map(ingredient -> toTempIngredientDto(ingredient, tempRecipe))
+                .collect(Collectors.toList());
+    }
+
     public static RecipeResponseDto.RecipeStatusDto toRecipeStatusDto(Recipe recipe) {
         return RecipeResponseDto.RecipeStatusDto.builder()
                 .recipeId(recipe.getId())
                 .calledAt(staticTimeConverter.ConvertTime(recipe.getCreatedAt()))
+                .build();
+    }
+
+    public static RecipeResponseDto.TempRecipeStatusDto toTempRecipeStatusDto(TempRecipe tempRecipe) {
+        return RecipeResponseDto.TempRecipeStatusDto.builder()
+                .tempId(tempRecipe.getId())
+                .calledAt(staticTimeConverter.ConvertTime(tempRecipe.getCreatedAt()))
                 .build();
     }
 
@@ -230,13 +267,35 @@ public class RecipeConverter {
         String imageUrl = null;
         if(thumbnail != null)
             imageUrl = uploadThumbnail(thumbnail);
+        else
+            throw new RecipeException(Code.NULL_RECIPE_ERROR);
         recipe.setThumbnail(imageUrl);
 
         return recipe;
     }
 
+    public static TempRecipe toTempRecipe(RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, Member member) throws IOException {
 
-    private static String uploadThumbnail(MultipartFile thumbnail) throws IOException {
+        TempRecipe tempRecipe = TempRecipe.builder()
+                .isInfluencer(member.isInfluencer())
+                .name(request.getName())
+                .intro(request.getIntro())
+                .recipeTip(request.getRecipeTip())
+                .time(request.getTime())
+                .member(member)
+                .build();
+
+
+        String imageUrl = null;
+        if(thumbnail != null)
+            imageUrl = uploadThumbnail(thumbnail);
+        tempRecipe.setThumbnail(imageUrl);
+
+
+        return tempRecipe;
+    }
+
+    public static String uploadThumbnail(MultipartFile thumbnail) throws IOException {
         Uuid uuid = staticAmazonS3Manager.createUUID();
         String keyName = staticAmazonS3Manager.generateRecipeKeyName(uuid);
         String fileUrl = staticAmazonS3Manager.uploadFile(keyName, thumbnail);
@@ -271,9 +330,53 @@ public class RecipeConverter {
         String imageUrl = null;
         if(stepImages != null)
             imageUrl = uploadStepImage(stepImage);
+        else
+            throw new RecipeException(Code.NULL_RECIPE_ERROR);
         createdStep.setImage(imageUrl);
 
         return createdStep;
+    }
+
+    private static TempStep toTempStepDto(RecipeRequestDto.TempStepDto step, TempRecipe tempRecipe, List<MultipartFile> stepImages) throws IOException {
+        TempStep createdTempStep = TempStep.builder()
+                .imageUrl(step.getStepUrl())
+                .stepNum(step.getStepNum())
+                .description(step.getDescription())
+                .tempRecipe(tempRecipe)
+                .build();
+
+        Optional<TempStep> findTempStep = staticTempStepRepository.findByTempRecipeAndStepNum(tempRecipe, step.getStepNum());
+
+        if(step.getStepUrl() == null) {
+            if(findTempStep.isPresent() && findTempStep.get().getImageUrl() != null) {
+                staticAmazonS3Manager.deleteFile(RecipeConverter.toKeyName(findTempStep.get().getImageUrl()).substring(1));
+            }
+
+            if (stepImages != null) {
+                MultipartFile stepImage = null;
+
+                for (int i = 0; i < stepImages.size(); i++) {
+                    Integer imageNum = Integer.parseInt(stepImages.get(i).getOriginalFilename().substring(0, 1)) + 1;
+                    if (imageNum == step.getStepNum()) {
+                        stepImage = stepImages.get(i);
+                        break;
+                    }
+                }
+
+                String imageUrl = null;
+                if (stepImage != null) {
+                    imageUrl = uploadStepImage(stepImage);
+                    createdTempStep.setImage(imageUrl);
+                }
+            }
+        }
+        else{
+            createdTempStep.setImage(step.getStepUrl());
+        }
+
+        staticTempStepRepository.delete(findTempStep.get());
+
+        return createdTempStep;
     }
 
     private static String uploadStepImage(MultipartFile stepImage) throws IOException {
@@ -290,6 +393,14 @@ public class RecipeConverter {
                 .name(ingredient.getIngredientName())
                 .quantity(ingredient.getQuantity())
                 .recipe(recipe)
+                .build();
+    }
+
+    private static TempIngredient toTempIngredientDto(RecipeRequestDto.NewIngredientDto ingredient, TempRecipe tempRecipe) {
+        return TempIngredient.builder()
+                .name(ingredient.getIngredientName())
+                .quantity(ingredient.getQuantity())
+                .tempRecipe(tempRecipe)
                 .build();
     }
 
