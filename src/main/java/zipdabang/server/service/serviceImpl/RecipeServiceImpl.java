@@ -42,11 +42,14 @@ import static zipdabang.server.domain.recipe.QRecipeCategoryMapping.*;
 public class RecipeServiceImpl implements RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final TempRecipeRepository tempRecipeRepository;
     private final RecipeCategoryMappingRepository recipeCategoryMappingRepository;
     private final RecipeCategoryRepository recipeCategoryRepository;
     private final RecipeBannerRepository recipeBannerRepository;
     private final StepRepository stepRepository;
+    private final TempStepRepository tempStepRepository;
     private final IngredientRepository ingredientRepository;
+    private final TempIngredientRepository tempIngredientRepository;
     private final LikesRepository likesRepository;
     private final ScrapRepository scrapRepository;
     private final AmazonS3Manager amazonS3Manager;
@@ -59,7 +62,6 @@ public class RecipeServiceImpl implements RecipeService {
 
     private final JPAQueryFactory queryFactory;
 
-    private final JPAQueryFactory jpaQueryFactory;
 
     @Value("${paging.size}")
     Integer pageSize;
@@ -96,6 +98,93 @@ public class RecipeServiceImpl implements RecipeService {
                 .map(ingredient -> ingredient.setRecipe(recipe));
 
         return recipe;
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public TempRecipe tempCreate(RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException {
+
+        log.info("service: ", request.toString());
+
+        TempRecipe buildTempRecipe = RecipeConverter.toTempRecipe(request, thumbnail, member);
+        TempRecipe tempRecipe = tempRecipeRepository.save(buildTempRecipe);
+
+        if (request.getStepCount() > 0) {
+            RecipeConverter.toTempStep(request, tempRecipe, stepImages).stream()
+                    .map(step -> tempStepRepository.save(step))
+                    .collect(Collectors.toList())
+                    .stream()
+                    .map(step -> step.setTempRecipe(tempRecipe));
+        }
+
+        if(request.getIngredientCount() > 0) {
+            RecipeConverter.toTempIngredient(request, tempRecipe).stream()
+                    .map(ingredient -> tempIngredientRepository.save(ingredient))
+                    .collect(Collectors.toList())
+                    .stream()
+                    .map(ingredient -> ingredient.setTempRecipe(tempRecipe));
+        }
+
+        return tempRecipe;
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public TempRecipe tempUpdate(Long tempId, RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException {
+
+        log.info("service: ", request.toString());
+
+        TempRecipe tempRecipe = tempRecipeRepository.findById(tempId).orElseThrow(() -> new RecipeException(Code.NO_TEMP_RECIPE_EXIST));
+
+        //recipe
+        String thumbnailUrl = null;
+        if (request.getThumbnailUrl() == null){
+            if (tempRecipe.getThumbnailUrl() != null)
+                amazonS3Manager.deleteFile(RecipeConverter.toKeyName(tempRecipe.getThumbnailUrl()).substring(1));
+
+            if(thumbnail != null)
+                thumbnailUrl = RecipeConverter.uploadThumbnail(thumbnail);
+
+        }
+        else {
+            thumbnailUrl = request.getThumbnailUrl();
+        }
+
+        tempRecipe.setThumbnail(thumbnailUrl);
+        tempRecipe.updateInfo(request);
+
+
+        //step
+        if(request.getStepCount() > 0) {
+            RecipeConverter.toTempStep(request, tempRecipe, stepImages).stream()
+                    .map(step -> tempStepRepository.save(step))
+                    .collect(Collectors.toList())
+                    .stream()
+                    .map(step -> step.setTempRecipe(tempRecipe));
+        }
+        else{
+            tempStepRepository.findAllByTempRecipe(tempRecipe).stream()
+                    .filter(step -> step.getImageUrl() != null)
+                    .forEach(step -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(step.getImageUrl()).substring(1)));
+            tempStepRepository.deleteAllByTempRecipe(tempRecipe);
+        }
+
+        //ingredient
+        if(request.getIngredientCount() >0) {
+            tempIngredientRepository.deleteAllByTempRecipe(tempRecipe);
+
+            RecipeConverter.toTempIngredient(request, tempRecipe).stream()
+                    .map(ingredient -> tempIngredientRepository.save(ingredient))
+                    .collect(Collectors.toList())
+                    .stream()
+                    .map(ingredient -> ingredient.setTempRecipe(tempRecipe));
+        }
+        else{
+            tempIngredientRepository.deleteAllByTempRecipe(tempRecipe);
+        }
+
+        return tempRecipe;
+
     }
 
     @Transactional(readOnly = false)
