@@ -19,6 +19,9 @@ public class CheckDeregisterValidator implements ConstraintValidator<CheckDeregi
     public boolean isValid(Object value, ConstraintValidatorContext context) {
         if (value instanceof Member) {
             Member member = (Member) value;
+            if (member.getZipCode()==null) {
+                return true;
+            }
             if (member.getZipCode().equals("TEST")) {
                 context.disableDefaultConstraintViolation();
                 context.buildConstraintViolationWithTemplate(Code.DEREGISTER_FAIL.toString()).addConstraintViolation();
