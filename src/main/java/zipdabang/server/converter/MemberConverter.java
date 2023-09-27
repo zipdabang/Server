@@ -50,24 +50,24 @@ public class MemberConverter {
 
     @Value("${cloud.aws.s3.user-default-image}")
     public void setDefaultImage(String value) {
-        defaultProfileImage=value;
+        defaultProfileImage = value;
     }
 
-    public static MemberResponseDto.JoinMemberDto toJoinMemberDto(Member member){
-            return MemberResponseDto.JoinMemberDto.builder()
-                    .memberId(member.getMemberId())
-                    .nickname(member.getNickname()).build();
+    public static MemberResponseDto.JoinMemberDto toJoinMemberDto(Member member) {
+        return MemberResponseDto.JoinMemberDto.builder()
+                .memberId(member.getMemberId())
+                .nickname(member.getNickname()).build();
 //                .accessToken()
     }
 
     public static int calculateAge(String birth) {
-        String year = birth.substring(0,2);
+        String year = birth.substring(0, 2);
 
         // 현재 날짜를 가져옴
         LocalDate currentDate = LocalDate.now();
 
         // 생년월일과 현재 날짜를 기준으로 만 나이 계산
-        int age = currentDate.getYear() % 100 - Integer.valueOf(year)- 1;
+        int age = currentDate.getYear() % 100 - Integer.valueOf(year) - 1;
 
         if (age < 0)
             age += 100;
@@ -84,7 +84,6 @@ public class MemberConverter {
         age = ChronoUnit.DAYS.between(completeDate, currentDate) >= 0 ? age + 1 : age;
         return age;
     }
-
 
 
     public static Member toSocialMember(MemberRequestDto.MemberInfoDto request, String type) {
@@ -148,7 +147,7 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.MemberInfoResponseDto toMemberInfoDto(Member member,MemberResponseDto.MemberPreferCategoryDto preferCategories) {
+    public static MemberResponseDto.MemberInfoResponseDto toMemberInfoDto(Member member, MemberResponseDto.MemberPreferCategoryDto preferCategories) {
         return MemberResponseDto.MemberInfoResponseDto.builder()
                 .profileUrl(member.getProfileUrl())
                 .email(member.getEmail())
@@ -159,17 +158,17 @@ public class MemberConverter {
                 .build();
     }
 
-    public static Member toMember(Long memberId){
-        return staticMemberRepository.findById(memberId).orElseThrow(()->new MemberException(Code.MEMBER_NOT_FOUND));
+    public static Member toMember(Long memberId) {
+        return staticMemberRepository.findById(memberId).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
     }
 
-    public static Member toMemberTemp(Long memberId){
+    public static Member toMemberTemp(Long memberId) {
         return Member.builder()
                 .memberId(memberId)
                 .build();
     }
 
-    public static Member toOAuthMember(String email, String profileUrl){
+    public static Member toOAuthMember(String email, String profileUrl) {
         return Member.builder()
                 .socialType(SocialType.KAKAO)
                 .email(email)
@@ -177,7 +176,7 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.SocialLoginDto toSocialLoginDto(String accessToken, String refreshToken){
+    public static MemberResponseDto.SocialLoginDto toSocialLoginDto(String accessToken, String refreshToken) {
         return MemberResponseDto.SocialLoginDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -208,7 +207,7 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.MemberStatusDto toMemberStatusDto(Long memberId, String status){
+    public static MemberResponseDto.MemberStatusDto toMemberStatusDto(Long memberId, String status) {
         return MemberResponseDto.MemberStatusDto.builder()
                 .memberId(memberId)
                 .status(status)
@@ -216,14 +215,14 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.IssueNewTokenDto toIssueNewTokenDto(String accessToken, String refreshToken){
+    public static MemberResponseDto.IssueNewTokenDto toIssueNewTokenDto(String accessToken, String refreshToken) {
         return MemberResponseDto.IssueNewTokenDto.builder()
                 .refreshToken(refreshToken)
                 .accessToken(accessToken)
                 .build();
     }
 
-    public static MemberResponseDto.TermsDto toTermsDto(Terms terms){
+    public static MemberResponseDto.TermsDto toTermsDto(Terms terms) {
         return MemberResponseDto.TermsDto.builder()
                 .termsId(terms.getId())
                 .termsTitle(terms.getTermsTitle())
@@ -232,7 +231,7 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.TermsListDto toTermsDto(List<Terms> termsList){
+    public static MemberResponseDto.TermsListDto toTermsDto(List<Terms> termsList) {
         List<MemberResponseDto.TermsDto> termsBodyList = termsList.stream()
                 .map(terms -> toTermsDto(terms)).collect(Collectors.toList());
         return MemberResponseDto.TermsListDto.builder()
@@ -241,13 +240,13 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.TempLoginDto toTempLoginDto(String token){
+    public static MemberResponseDto.TempLoginDto toTempLoginDto(String token) {
         return MemberResponseDto.TempLoginDto.builder()
                 .accessToken(token)
                 .build();
     }
 
-    public static MemberResponseDto.MemberInqueryResultDto toMemberInqueryResultDto(Inquery inquery){
+    public static MemberResponseDto.MemberInqueryResultDto toMemberInqueryResultDto(Inquery inquery) {
         return MemberResponseDto.MemberInqueryResultDto.builder()
                 .id(inquery.getId())
                 .created_at(inquery.getMember().getCreatedAt())
@@ -255,8 +254,7 @@ public class MemberConverter {
     }
 
 
-    public static List<InqueryImage> toInqueryImage(List<MultipartFile> imageList)
-    {
+    public static List<InqueryImage> toInqueryImage(List<MultipartFile> imageList) {
         List<InqueryImage> inqueryImageList = imageList.stream()
                 .map(
                         image ->
@@ -277,7 +275,7 @@ public class MemberConverter {
         return inqueryImageList;
     }
 
-    public static Inquery toInquery(MemberRequestDto.InqueryDto request){
+    public static Inquery toInquery(MemberRequestDto.InqueryDto request) {
         return Inquery.builder()
                 .title(request.getTitle())
                 .body(request.getBody())
@@ -286,7 +284,7 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.InqueryPreviewDto toInqueryPreviewDto(Inquery inquery){
+    public static MemberResponseDto.InqueryPreviewDto toInqueryPreviewDto(Inquery inquery) {
         return MemberResponseDto.InqueryPreviewDto.builder()
                 .id(inquery.getId())
                 .title(inquery.getTitle())
@@ -294,7 +292,7 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.InqueryListDto toInqueryListDto(Page<Inquery> inqueryPage){
+    public static MemberResponseDto.InqueryListDto toInqueryListDto(Page<Inquery> inqueryPage) {
 
         List<MemberResponseDto.InqueryPreviewDto> inqueryPreviewDtoList = inqueryPage.getContent().stream()
                 .map(MemberConverter::toInqueryPreviewDto).collect(Collectors.toList());
@@ -306,6 +304,9 @@ public class MemberConverter {
                 .currentPageElements(inqueryPage.getNumberOfElements())
                 .totalElements(inqueryPage.getTotalElements())
                 .totalPage(inqueryPage.getTotalPages())
+                .build();
+
+    }
 
     public static Deregister toDeregister(String phoneNum, MemberRequestDto.DeregisterDto request) {
         return Deregister.builder()
