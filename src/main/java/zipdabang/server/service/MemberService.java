@@ -52,4 +52,6 @@ public interface MemberService {
     public void inactivateMember(Member member);
 
     public void saveDeregisterReasons(Long deregisterId, List<DeregisterType> deregisterTypeList);
+
+    public void blockMember(Member owner, Long blocked);
 }

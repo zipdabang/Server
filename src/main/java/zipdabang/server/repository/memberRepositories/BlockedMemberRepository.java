@@ -11,4 +11,6 @@ public interface BlockedMemberRepository extends JpaRepository<BlockedMember, Lo
     List<BlockedMember> findByOwner(Member owner);
     Optional<BlockedMember> findByOwnerAndBlocked(Member owner, Member blocked);
 
+    boolean existsByOwnerAndBlocked(Member owner, Member blocked);
+
 }

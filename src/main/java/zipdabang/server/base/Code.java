@@ -84,6 +84,12 @@ public enum Code {
 
     //BAD_REQUEST
     DEREGISTER_FAIL(HttpStatus.OK, 4061, "탈퇴할 수 없는 유저입니다. 탈퇴 불가 사유가 존재합니다."),
+
+    ALREADY_BLOCKED_MEMBER(HttpStatus.OK, 4062, "이미 차단된 사용자입니다."),
+    BLOCK_SELF(HttpStatus.OK, 4063, "자신을 차단할 수 없습니다."),
+
+
+
     // market error
 
     //recipe error

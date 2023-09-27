@@ -386,4 +386,21 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "deregister"));
 
     }
+
+
+    @Operation(summary = "유저 차단 API ✔️🔑", description = "유저 차단 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 유저 차단 완료"),
+            @ApiResponse(responseCode = "4052", description = "해당 사용자가 존재하지 않습니다"),
+            @ApiResponse(responseCode = "4062", description = "이미 차단된 사용자입니다."),
+            @ApiResponse(responseCode = "4063", description = "자신을 차단할 수 없습니다."),
+    })
+    @PostMapping("/members/block")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> block(@AuthMember Member member, Long blocked) {
+        memberService.blockMember(member, blocked);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "Block"));
+    }
 }
