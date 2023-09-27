@@ -1,5 +1,7 @@
 package zipdabang.server.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Inquery;
 import zipdabang.server.domain.member.Member;
@@ -41,4 +43,6 @@ public interface MemberService {
     String tempLoginService();
 
     Inquery createInquery(Member member, MemberRequestDto.InqueryDto request);
+
+    Page<Inquery> findInquery(Member member, Integer page);
 }

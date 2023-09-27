@@ -2,6 +2,7 @@ package zipdabang.server.converter;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.aws.s3.AmazonS3Manager;
@@ -13,6 +14,7 @@ import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.*;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
+import zipdabang.server.utils.converter.TimeConverter;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
@@ -280,4 +282,26 @@ public class MemberConverter {
                 .build();
     }
 
+    public static MemberResponseDto.InqueryPreviewDto toInqueryPreviewDto(Inquery inquery){
+        return MemberResponseDto.InqueryPreviewDto.builder()
+                .id(inquery.getId())
+                .title(inquery.getTitle())
+                .createdAt(TimeConverter.ConvertTime(inquery.getCreatedAt()))
+                .build();
+    }
+
+    public static MemberResponseDto.InqueryListDto toInqueryListDto(Page<Inquery> inqueryPage){
+
+        List<MemberResponseDto.InqueryPreviewDto> inqueryPreviewDtoList = inqueryPage.getContent().stream()
+                .map(MemberConverter::toInqueryPreviewDto).collect(Collectors.toList());
+
+        return MemberResponseDto.InqueryListDto.builder()
+                .inqueryList(inqueryPreviewDtoList)
+                .isFirst(inqueryPage.isFirst())
+                .isLast(inqueryPage.isLast())
+                .currentPageElements(inqueryPage.getNumberOfElements())
+                .totalElements(inqueryPage.getTotalElements())
+                .totalPage(inqueryPage.getTotalPages())
+                .build();
+    }
 }

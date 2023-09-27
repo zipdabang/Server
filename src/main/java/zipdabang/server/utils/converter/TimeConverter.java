@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class TimeConverter {
 
-    public String ConvertTime(LocalDateTime time) {
+    public static String ConvertTime(LocalDateTime time) {
         LocalDateTime currentTime = LocalDateTime.now();
 
         String result = null;
