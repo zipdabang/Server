@@ -15,7 +15,8 @@ import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 public class MemberRequestDto {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     public static class quitMember {
         @Override
         public String toString() {
@@ -33,7 +34,8 @@ public class MemberRequestDto {
         private String status;
     }
 
-    @Getter @Setter
+    @Getter
+    @Setter
     public static class restoreMember {
         @Override
         public String toString() {
@@ -62,7 +64,7 @@ public class MemberRequestDto {
 
     @Getter
     @Setter
-    public static class MemberInfoDto{
+    public static class MemberInfoDto {
 
         @NotBlank
         private String name;
@@ -85,7 +87,7 @@ public class MemberRequestDto {
 
     @Getter
     @Setter
-    public static class SmsRequestDto{
+    public static class SmsRequestDto {
         @Override
         public String toString() {
             return "SmsRequestDto{" +
@@ -111,7 +113,8 @@ public class MemberRequestDto {
         private Integer authNum;
     }
 
-    @Getter @Setter
+    @Getter
+    @Setter
     public static class memberProfileDto {
 
         @Override
@@ -138,24 +141,27 @@ public class MemberRequestDto {
         List<String> categories;
     }
 
-    @Getter @Setter
-    public static class changeNicknameDto{
+    @Getter
+    @Setter
+    public static class changeNicknameDto {
         String nickname;
     }
 
-    @Getter @Setter
+    @Getter
+    @Setter
     public static class changeProfileDto {
         private MultipartFile newProfile;
     }
 
-    @Getter @Setter
-    public static class IssueTokenDto{
+    @Getter
+    @Setter
+    public static class IssueTokenDto {
         String refreshToken;
     }
 
-<<<<<<< HEAD
-    @Getter @Setter
-    public static class InqueryDto{
+    @Getter
+    @Setter
+    public static class InqueryDto {
 
         @NotBlank
         String email;
@@ -168,6 +174,8 @@ public class MemberRequestDto {
 
         @Nullable
         List<MultipartFile> imageList;
+    }
+
     @Getter
     @Setter
     public static class DeregisterDto {
@@ -175,5 +183,4 @@ public class MemberRequestDto {
         private List<DeregisterType> deregisterTypes;
         private String feedback;
     }
-
 }
