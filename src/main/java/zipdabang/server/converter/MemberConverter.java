@@ -13,6 +13,10 @@ import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.*;
+import zipdabang.server.domain.member.Deregister;
+import zipdabang.server.domain.member.Terms;
+import zipdabang.server.domain.member.Member;
+import zipdabang.server.domain.member.MemberPreferCategory;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.utils.converter.TimeConverter;
 import zipdabang.server.utils.dto.OAuthJoin;
@@ -302,6 +306,11 @@ public class MemberConverter {
                 .currentPageElements(inqueryPage.getNumberOfElements())
                 .totalElements(inqueryPage.getTotalElements())
                 .totalPage(inqueryPage.getTotalPages())
+
+    public static Deregister toDeregister(String phoneNum, MemberRequestDto.DeregisterDto request) {
+        return Deregister.builder()
+                .phoneNum(phoneNum)
+                .feedback(request.getFeedback())
                 .build();
     }
 }

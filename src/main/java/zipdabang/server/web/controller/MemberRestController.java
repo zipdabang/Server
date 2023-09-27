@@ -36,6 +36,7 @@ import zipdabang.server.sms.service.SmsService;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.validation.annotation.CheckPage;
 import zipdabang.server.validation.annotation.CheckTempMember;
+import zipdabang.server.validation.annotation.CheckDeregister;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
@@ -58,11 +59,11 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @ApiResponses({
-        @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-        @ApiResponse(responseCode = "4005",description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-        @ApiResponse(responseCode = "4008",description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-        @ApiResponse(responseCode = "4052",description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-        @ApiResponse(responseCode = "5000",description = "SERVER ERROR, 백앤드 개발자에게 알려주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+        @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
 })
 @Tag(name = "유저 관련 API", description = "로그인, 회원가입, 마이 페이지에서 필요한 API모음")
 public class MemberRestController {
@@ -181,7 +182,6 @@ public class MemberRestController {
     }
 
 
-
     // 내 선호 음료 조회
     @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 조회 API ✔️", description = "유저 선호 카테고리 조회 API입니다.")
     @Parameters({
@@ -198,7 +198,6 @@ public class MemberRestController {
     }
 
 
-
     // 회원정보 조회 및 수정 APIs
 
 
@@ -213,7 +212,7 @@ public class MemberRestController {
     public ResponseDto<MemberResponseDto.MemberInfoResponseDto> showMyInfo(@AuthMember Member member) {
         List<Category> memberPreferCategories = memberService.findMemberPreferCategories(member);
         MemberResponseDto.MemberPreferCategoryDto memberPreferCategoryDto = MemberConverter.toMemberPreferCategoryDto(memberPreferCategories);
-        return ResponseDto.of(MemberConverter.toMemberInfoDto(member,memberPreferCategoryDto));
+        return ResponseDto.of(MemberConverter.toMemberInfoDto(member, memberPreferCategoryDto));
     }
 
     @Operation(summary = "[figma 더보기 - 회원 정보 1] 프로필사진 수정 API ✔️", description = "프로필사진 수정 API입니다.")
@@ -223,10 +222,10 @@ public class MemberRestController {
     @ApiResponses({
             @ApiResponse(responseCode = "2000", description = "OK 성공 , 프로필사진 수정 완료"),
     })
-    @PatchMapping(value = "/myInfo/profileImage",consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PatchMapping(value = "/myInfo/profileImage", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseDto<MemberResponseDto.MemberStatusDto> updateProfileImage(@AuthMember Member member, @ModelAttribute MemberRequestDto.changeProfileDto request) throws IOException {
         memberService.updateMemberProfileImage(member, request);
-        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateProfileImage"));
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updateProfileImage"));
     }
 
     @Operation(summary = "[figma 더보기 - 회원 정보 수정 1] 기본정보 수정 API ✔️", description = "기본정보 수정 API입니다.")
@@ -240,7 +239,7 @@ public class MemberRestController {
     public ResponseDto<MemberResponseDto.MemberStatusDto> updateBasicInfo(@AuthMember Member member, @RequestBody MemberResponseDto.MemberBasicInfoDto request) {
         memberService.updateMemberBasicInfo(member, request);
 
-        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateBasicInfo"));
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updateBasicInfo"));
     }
 
     @Operation(summary = "[figma 더보기 - 회원 정보 수정 2] 상세정보 수정 API ✔️", description = "상세정보 수정 API입니다.")
@@ -253,7 +252,7 @@ public class MemberRestController {
     @PatchMapping("/myInfo/detailInfo")
     public ResponseDto<MemberResponseDto.MemberStatusDto> updateDetailInfo(@AuthMember Member member, @RequestBody MemberResponseDto.MemberDetailInfoDto request) {
         memberService.updateMemberDetailInfo(member, request);
-        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateDetailInfo"));
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updateDetailInfo"));
     }
 
     @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ✔️", description = "닉네임 수정 API입니다.")
@@ -266,7 +265,7 @@ public class MemberRestController {
     @PatchMapping("/myInfo/nickname")
     public ResponseDto<MemberResponseDto.MemberStatusDto> updateNickname(@AuthMember Member member, @RequestBody MemberRequestDto.changeNicknameDto request) {
         memberService.updateMemberNickname(member, request.getNickname());
-        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updateNickname"));
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updateNickname"));
     }
 
 
@@ -282,10 +281,8 @@ public class MemberRestController {
     public ResponseDto<MemberResponseDto.MemberStatusDto> updatePreferCategories(@AuthMember Member member, @RequestBody MemberRequestDto.changeCategoryDto request) {
         List<String> categories = request.getCategories();
         memberService.updateMemberPreferCategory(member, request);
-        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(),"updatePreferCategories"));
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updatePreferCategories"));
     }
-
-
 
 
     //닉네임 중복검사
@@ -336,10 +333,10 @@ public class MemberRestController {
 
     @Operation(summary = "🎪figma[온보딩1] 나중에 로그인하기 API ✔️", description = "나중에 로그인하기 API 입니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "2000",description = "OK 성공, access Token 하나만 반환함"),
+            @ApiResponse(responseCode = "2000", description = "OK 성공, access Token 하나만 반환함"),
     })
     @PostMapping("/members/temp-login")
-    public ResponseDto<MemberResponseDto.TempLoginDto> tempLogin(){
+    public ResponseDto<MemberResponseDto.TempLoginDto> tempLogin() {
         return ResponseDto.of(MemberConverter.toTempLoginDto(memberService.tempLoginService()));
     }
 
@@ -368,5 +365,25 @@ public class MemberRestController {
     public ResponseDto<MemberResponseDto.InqueryListDto> showInquery(@CheckTempMember @AuthMember Member member, @RequestParam(name = "page",required = true) @CheckPage Integer page){
         Page<Inquery> inqueryPage = memberService.findInquery(member, page);
         return ResponseDto.of(MemberConverter.toInqueryListDto(inqueryPage));
+    }
+    @Operation(summary = "[figma 더보기 - 회원 탈퇴] 회원 탈퇴 API ✔️", description = "회원 탈퇴 API입니다.<br> 테스트를 위해 임시로 해당 유저의 상세주소를 \"TEST\" 로 설정하면(상세정보 수정 API - zipCode) 탈퇴 불가능한 경우로 처리되도록 해놨습니다.<br> deregisterTypes 종류 <br>"+
+            "- NOTHING_TO_BUY(\"사고싶은 물건이 없어요.\"),<br>" +
+            "- DISINTERESTED(\"앱을 이용하지 않아요.\"),<br>" +
+            "- UNCOMFORTABLE(\"앱 이용이 불편해요.\"),<br>" +
+            "- NEW_REGISTER(\"새 계정을 만들고 싶어요.\"),<br>" +
+            "- MET_RUDE_USER(\"비매너 유저를 만났어요.\"),<br>" +
+            "- OTHERS(\"기타\")")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 유저 비활성화 완료"),
+            @ApiResponse(responseCode = "4061", description = "탈퇴할 수 없는 유저입니다. 탈퇴 불가 사유가 존재합니다."),
+    })
+    @PatchMapping("/members/deregister")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> deregister(@CheckDeregister @AuthMember Member member, MemberRequestDto.DeregisterDto request) {
+        memberService.memberDeregister(member, request);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "deregister"));
+
     }
 }

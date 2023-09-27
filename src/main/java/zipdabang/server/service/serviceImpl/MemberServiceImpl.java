@@ -16,6 +16,7 @@ import zipdabang.server.base.exception.handler.AuthNumberException;
 import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.enums.DeregisterType;
 import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.Member;
@@ -32,6 +33,7 @@ import zipdabang.server.repository.memberRepositories.FcmTokenRepository;
 import zipdabang.server.repository.memberRepositories.InqueryRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.repository.memberRepositories.PreferCategoryRepository;
+import zipdabang.server.repository.memberRepositories.*;
 import zipdabang.server.service.MemberService;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.utils.dto.OAuthResult;
@@ -69,6 +71,8 @@ public class MemberServiceImpl implements MemberService {
 
     private final InqueryRepository inqueryRepository;
     private final AmazonS3Manager s3Manager;
+    private final DeregisterRepository deregisterRepository;
+    private final DeregisterReasonRepository deregisterReasonRepository;
 
     @Value("${paging.size}")
     private Integer pageSize;
@@ -268,5 +272,47 @@ public class MemberServiceImpl implements MemberService {
             categoryList.add(memberPreferCategory.getCategory());
         }
         return categoryList;
+    }
+
+    @Override
+    @Transactional
+    public void memberDeregister(Member member, MemberRequestDto.DeregisterDto request) {
+        inactivateMember(member);
+        Long deregisterId = saveDeregisterInfo(member.getPhoneNum(), request);
+        saveDeregisterReasons(deregisterId,request.getDeregisterTypes());
+
+    }
+
+    @Override
+    @Transactional
+    public void inactivateMember(Member member) {
+        member.inactivateStatus();
+    }
+
+    @Override
+    @Transactional
+    public Long saveDeregisterInfo(String phoneNum, MemberRequestDto.DeregisterDto request) {
+        Deregister deregister = MemberConverter.toDeregister(phoneNum, request);
+        deregisterRepository.save(deregister);
+
+        for (DeregisterType deregisterType : request.getDeregisterTypes()) {
+            deregisterReasonRepository.save(
+                    DeregisterReason.builder()
+                            .deregister(deregister)
+                            .deregisterType(deregisterType)
+                            .build());
+
+        }
+
+        return deregister.getId();
+    }
+
+    @Override
+    @Transactional
+    public void saveDeregisterReasons(Long deregisterId, List<DeregisterType> deregisterTypeList) {
+//        for (DeregisterType deregisterType : deregisterTypeList) {
+//            DeregisterReason.builder()
+//                    .
+//        }
     }
 }

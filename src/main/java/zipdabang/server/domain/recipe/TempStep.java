@@ -1,12 +1,11 @@
 package zipdabang.server.domain.recipe;
 
-import javax.persistence.*;
-
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
-import zipdabang.server.domain.recipe.Recipe;
+
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -15,7 +14,7 @@ import zipdabang.server.domain.recipe.Recipe;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class Step extends BaseEntity {
+public class TempStep extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
@@ -24,26 +23,26 @@ public class Step extends BaseEntity {
     @Column(nullable = false)
     private Integer stepNum;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipe_id", nullable = false)
-    private Recipe recipe;
+    @JoinColumn(name = "temp_id", nullable = false)
+    private TempRecipe tempRecipe;
 
-    public Step setImage(String imageUrl) {
+    public TempStep setImage(String imageUrl) {
         this.imageUrl = imageUrl;
         return this;
     }
 
-    public Step setRecipe(Recipe recipe){
-        if(this.recipe != null)
-            recipe.getStepList().remove(this);
-        this.recipe = recipe;
-        recipe.getStepList().add(this);
+    public TempStep setTempRecipe(TempRecipe tempRecipe){
+        if(this.tempRecipe != null)
+            tempRecipe.getStepList().remove(this);
+        this.tempRecipe = tempRecipe;
+        tempRecipe.getStepList().add(this);
 
         return this;
     }

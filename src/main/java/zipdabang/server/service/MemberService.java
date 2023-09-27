@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Inquery;
+import zipdabang.server.domain.enums.DeregisterType;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.Terms;
 import zipdabang.server.redis.domain.RefreshToken;
@@ -42,7 +43,13 @@ public interface MemberService {
 
     String tempLoginService();
 
+
     Inquery createInquery(Member member, MemberRequestDto.InqueryDto request);
 
     Page<Inquery> findInquery(Member member, Integer page);
+    public void memberDeregister(Member member, MemberRequestDto.DeregisterDto request);
+    public Long saveDeregisterInfo(String phoneNum, MemberRequestDto.DeregisterDto request);
+    public void inactivateMember(Member member);
+
+    public void saveDeregisterReasons(Long deregisterId, List<DeregisterType> deregisterTypeList);
 }

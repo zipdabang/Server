@@ -128,4 +128,7 @@ public class Member extends BaseEntity {
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
+
+    public void inactivateStatus(){
+        this.status = StatusType.INACTIVE;}
 }

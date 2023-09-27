@@ -57,6 +57,7 @@ public enum Code {
     //NOT_FOUND
     NOTIFICATION_NOT_FOUND(HttpStatus.OK, 4010, "공지를 찾을 수 없습니다."),
 
+
     //BAD_REQUEST
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.OK, 4050,"refresh token이 필요합니다."),
     //BAD_REQUEST
@@ -81,6 +82,8 @@ public enum Code {
     //BAD_REQUEST
     NO_REPORT_EXIST(HttpStatus.OK, 4060, "해당 id를 가진 신고 목록이 없습니다. 잘못 보내줬어요"),
 
+    //BAD_REQUEST
+    DEREGISTER_FAIL(HttpStatus.OK, 4061, "탈퇴할 수 없는 유저입니다. 탈퇴 불가 사유가 존재합니다."),
     // market error
 
     //recipe error
@@ -107,6 +110,8 @@ public enum Code {
     RECIPE_OWNER(HttpStatus.OK, 4109, "본인의 레시피입니다. 신고/차단할 수 없습니다"),
     //BAD_REQUEST
     COMMENT_OWNER(HttpStatus.OK, 4110, "본인의 댓글입니다. 신고/차단할 수 없습니다"),
+    //BAD_REQUEST
+    NO_TEMP_RECIPE_EXIST(HttpStatus.OK, 4111, "해당 임시저장 Id가 존재하지 않습니다."),
     //INTERNAL_SERVER_ERROR
     INTERNAL_ERROR(HttpStatus.OK, 5000, "Internal server Error"),
     //INTERNAL_SERVER_ERROR
