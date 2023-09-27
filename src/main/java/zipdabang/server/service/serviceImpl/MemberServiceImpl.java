@@ -2,6 +2,10 @@ package zipdabang.server.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +29,10 @@ import zipdabang.server.repository.TermsAgreeRepository;
 import zipdabang.server.repository.TermsRepository;
 import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.repository.CategoryRepository;
+import zipdabang.server.repository.memberRepositories.FcmTokenRepository;
+import zipdabang.server.repository.memberRepositories.InqueryRepository;
+import zipdabang.server.repository.memberRepositories.MemberRepository;
+import zipdabang.server.repository.memberRepositories.PreferCategoryRepository;
 import zipdabang.server.repository.memberRepositories.*;
 import zipdabang.server.service.MemberService;
 import zipdabang.server.utils.dto.OAuthJoin;
@@ -60,9 +68,14 @@ public class MemberServiceImpl implements MemberService {
     private final RedisService redisService;
 
     private final FcmTokenRepository fcmTokenRepository;
+
+    private final InqueryRepository inqueryRepository;
     private final AmazonS3Manager s3Manager;
     private final DeregisterRepository deregisterRepository;
     private final DeregisterReasonRepository deregisterReasonRepository;
+
+    @Value("${paging.size}")
+    private Integer pageSize;
 
     @Override
     @Transactional
@@ -190,6 +203,29 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public String tempLoginService() {
         return tokenProvider.createTempAccessToken(Arrays.asList(new SimpleGrantedAuthority("GUEST")));
+    }
+
+    @Override
+    @Transactional
+    public Inquery createInquery(Member member, MemberRequestDto.InqueryDto request) {
+        Inquery inquery = MemberConverter.toInquery(request);
+        List<InqueryImage> inqueryImageList = null;
+        if(request.getImageList() != null)
+            if(request.getImageList().size() > 0) {
+                inqueryImageList = MemberConverter.toInqueryImage(request.getImageList());
+                inqueryImageList.forEach(inqueryImage -> inqueryImage.setInquery(inquery));
+            }
+        inquery.setMember(member);
+        return inqueryRepository.save(inquery);
+    }
+
+    @Override
+    public Page<Inquery> findInquery(Member member, Integer page) {
+        page -= 1;
+        Page<Inquery> inqueries = inqueryRepository.findByMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        if(inqueries.getTotalPages() <= page)
+            throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
+        return inqueries;
     }
 
     @Override

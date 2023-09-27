@@ -5,8 +5,10 @@ import lombok.Setter;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.domain.enums.DeregisterType;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
@@ -151,6 +153,21 @@ public class MemberRequestDto {
         String refreshToken;
     }
 
+<<<<<<< HEAD
+    @Getter @Setter
+    public static class InqueryDto{
+
+        @NotBlank
+        String email;
+
+        @NotBlank @Size(max = 20)
+        String title;
+
+        @NotBlank @Size(max = 500)
+        String body;
+
+        @Nullable
+        List<MultipartFile> imageList;
     @Getter
     @Setter
     public static class DeregisterDto {

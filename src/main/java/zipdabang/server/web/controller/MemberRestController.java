@@ -1,6 +1,7 @@
 package zipdabang.server.web.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,12 +27,15 @@ import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.member.Inquery;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.service.MemberService;
 import zipdabang.server.sms.service.SmsService;
 import zipdabang.server.utils.dto.OAuthJoin;
+import zipdabang.server.validation.annotation.CheckPage;
+import zipdabang.server.validation.annotation.CheckTempMember;
 import zipdabang.server.validation.annotation.CheckDeregister;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
@@ -40,6 +45,7 @@ import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.dto.OAuthResult;
 import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
@@ -334,6 +340,32 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toTempLoginDto(memberService.tempLoginService()));
     }
 
+    @Operation(summary = "🎪figma[더보기 - 오류 신고 및 신고하기] 오류 신고하기 API ✔️🔑", description = "오류 신고하기 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @PostMapping(value = "/members/inquiries",consumes ={ MediaType.MULTIPART_FORM_DATA_VALUE } )
+    public ResponseDto<MemberResponseDto.MemberInqueryResultDto> createInquery(@CheckTempMember @AuthMember Member member, @ModelAttribute @Valid MemberRequestDto.InqueryDto request){
+        Inquery inquery = memberService.createInquery(member, request);
+        return ResponseDto.of(MemberConverter.toMemberInqueryResultDto(inquery));
+    }
+
+    @Operation(summary = "🎪[더보기 - 오류 신고및 신고하기5] 내가 문의 한 오류 모아보기 (페이징 포함) ✔️🔑", description = "내가 신고한 오류 모아보기 입니다.")
+    @GetMapping("/members/inquiries")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, access Token과 refresh 토큰을 반환함"),
+            @ApiResponse(responseCode = "4054", description = "BAD_REQEUST , 페이지 번호가 없거나 0 이하", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQEUST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+
+    })
+    public ResponseDto<MemberResponseDto.InqueryListDto> showInquery(@CheckTempMember @AuthMember Member member, @RequestParam(name = "page",required = true) @CheckPage Integer page){
+        Page<Inquery> inqueryPage = memberService.findInquery(member, page);
+        return ResponseDto.of(MemberConverter.toInqueryListDto(inqueryPage));
+    }
     @Operation(summary = "[figma 더보기 - 회원 탈퇴] 회원 탈퇴 API ✔️", description = "회원 탈퇴 API입니다.<br> 테스트를 위해 임시로 해당 유저의 상세주소를 \"TEST\" 로 설정하면(상세정보 수정 API - zipCode) 탈퇴 불가능한 경우로 처리되도록 해놨습니다.<br> deregisterTypes 종류 <br>"+
             "- NOTHING_TO_BUY(\"사고싶은 물건이 없어요.\"),<br>" +
             "- DISINTERESTED(\"앱을 이용하지 않아요.\"),<br>" +
@@ -354,7 +386,4 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "deregister"));
 
     }
-
-
-
 }

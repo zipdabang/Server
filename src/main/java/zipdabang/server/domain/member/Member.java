@@ -104,6 +104,9 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<FcmToken> fcmTokenList;
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Inquery> inqueryList;
+
 
     public void setProfileUrl(String profileUrl) {
         this.profileUrl = profileUrl;
