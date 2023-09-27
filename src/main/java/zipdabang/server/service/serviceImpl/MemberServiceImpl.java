@@ -25,6 +25,7 @@ import zipdabang.server.repository.TermsRepository;
 import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.repository.CategoryRepository;
 import zipdabang.server.repository.memberRepositories.FcmTokenRepository;
+import zipdabang.server.repository.memberRepositories.InqueryRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.repository.memberRepositories.PreferCategoryRepository;
 import zipdabang.server.service.MemberService;
@@ -61,6 +62,8 @@ public class MemberServiceImpl implements MemberService {
     private final RedisService redisService;
 
     private final FcmTokenRepository fcmTokenRepository;
+
+    private final InqueryRepository inqueryRepository;
     private final AmazonS3Manager s3Manager;
 
     @Override
@@ -189,6 +192,20 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public String tempLoginService() {
         return tokenProvider.createTempAccessToken(Arrays.asList(new SimpleGrantedAuthority("GUEST")));
+    }
+
+    @Override
+    @Transactional
+    public Inquery createInquery(Member member, MemberRequestDto.InqueryDto request) {
+        Inquery inquery = MemberConverter.toInquery(request);
+        List<InqueryImage> inqueryImageList = null;
+        if(request.getImageList() != null)
+            if(request.getImageList().size() > 0) {
+                inqueryImageList = MemberConverter.toInqueryImage(request.getImageList());
+                inqueryImageList.forEach(inqueryImage -> inqueryImage.setInquery(inquery));
+            }
+        inquery.setMember(member);
+        return inqueryRepository.save(inquery);
     }
 
     @Override

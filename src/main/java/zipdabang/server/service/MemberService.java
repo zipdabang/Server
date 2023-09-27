@@ -1,6 +1,7 @@
 package zipdabang.server.service;
 
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.member.Inquery;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.Terms;
 import zipdabang.server.redis.domain.RefreshToken;
@@ -38,4 +39,6 @@ public interface MemberService {
     List<Terms> getAllTerms();
 
     String tempLoginService();
+
+    Inquery createInquery(Member member, MemberRequestDto.InqueryDto request);
 }

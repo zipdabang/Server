@@ -3,26 +3,29 @@ package zipdabang.server.converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.SocialType;
-import zipdabang.server.domain.member.Terms;
-import zipdabang.server.domain.member.Member;
-import zipdabang.server.domain.member.MemberPreferCategory;
+import zipdabang.server.domain.etc.Uuid;
+import zipdabang.server.domain.member.*;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -33,7 +36,11 @@ public class MemberConverter {
 
     private static MemberRepository staticMemberRepository;
 
+    private final AmazonS3Manager amazonS3Manager;
+
     private static String defaultProfileImage;
+
+    private static AmazonS3Manager staticAmazonS3Manager;
 
     @Value("${cloud.aws.s3.user-default-image}")
     public void setDefaultImage(String value) {
@@ -104,6 +111,7 @@ public class MemberConverter {
     @PostConstruct
     public void init() {
         this.staticMemberRepository = this.memberRepository;
+        this.staticAmazonS3Manager = amazonS3Manager;
     }
 
 
@@ -232,4 +240,44 @@ public class MemberConverter {
                 .accessToken(token)
                 .build();
     }
+
+    public static MemberResponseDto.MemberInqueryResultDto toMemberInqueryResultDto(Inquery inquery){
+        return MemberResponseDto.MemberInqueryResultDto.builder()
+                .id(inquery.getId())
+                .created_at(inquery.getMember().getCreatedAt())
+                .build();
+    }
+
+
+    public static List<InqueryImage> toInqueryImage(List<MultipartFile> imageList)
+    {
+        List<InqueryImage> inqueryImageList = imageList.stream()
+                .map(
+                        image ->
+                        {
+                            try {
+                                Uuid uuid = staticAmazonS3Manager.createUUID();
+                                String keyName = staticAmazonS3Manager.generateInqueryKeyName(uuid);
+                                String inqueryImageUrl = staticAmazonS3Manager.uploadFile(keyName, image);
+                                return InqueryImage.builder()
+                                        .imageUrl(inqueryImageUrl)
+                                        .build();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                return null;
+                            }
+                        }
+                ).collect(Collectors.toList());
+        return inqueryImageList;
+    }
+
+    public static Inquery toInquery(MemberRequestDto.InqueryDto request){
+        return Inquery.builder()
+                .title(request.getTitle())
+                .body(request.getBody())
+                .receiveEmail(request.getEmail())
+                .inqueryImageList(new ArrayList<>())
+                .build();
+    }
+
 }

@@ -1,6 +1,7 @@
 package zipdabang.server.web.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -25,12 +26,14 @@ import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.member.Inquery;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.service.MemberService;
 import zipdabang.server.sms.service.SmsService;
 import zipdabang.server.utils.dto.OAuthJoin;
+import zipdabang.server.validation.annotation.CheckTempMember;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
@@ -39,6 +42,7 @@ import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.dto.OAuthResult;
 import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
@@ -335,5 +339,15 @@ public class MemberRestController {
     @PostMapping("/members/temp-login")
     public ResponseDto<MemberResponseDto.TempLoginDto> tempLogin(){
         return ResponseDto.of(MemberConverter.toTempLoginDto(memberService.tempLoginService()));
+    }
+
+    @Operation(summary = "🎪figma[더보기 - 오류 신고 및 신고하기] 오류 신고하기 API", description = "오류 신고하기 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @PostMapping(value = "/members/inquery",consumes ={ MediaType.MULTIPART_FORM_DATA_VALUE } )
+    public ResponseDto<MemberResponseDto.MemberInqueryResultDto> createInquery(@CheckTempMember @AuthMember Member member, @ModelAttribute @Valid MemberRequestDto.InqueryDto request){
+        Inquery inquery = memberService.createInquery(member, request);
+        return ResponseDto.of(MemberConverter.toMemberInqueryResultDto(inquery));
     }
 }

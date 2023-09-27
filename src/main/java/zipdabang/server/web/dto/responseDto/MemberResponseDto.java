@@ -154,4 +154,12 @@ public class MemberResponseDto {
     }
 
 
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class MemberInqueryResultDto{
+        private Long id;
+        private LocalDateTime created_at;
+    }
 }

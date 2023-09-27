@@ -38,6 +38,9 @@ public class AmazonConfig {
     @Value("${cloud.aws.s3.folder.zipdabang-proifile}")
     private String userProfile;
 
+    @Value("${cloud.aws.s3.folder.zipdabang-inquery}")
+    private String inquery;
+
 
     private AWSCredentials awsCredentials;
 
