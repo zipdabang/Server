@@ -90,16 +90,6 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "logout"));
     }
 
-    @PatchMapping("/members/quit")
-    public ResponseDto<MemberResponseDto.MemberStatusDto> quit(@RequestBody MemberRequestDto.quitMember request) {
-        return null;
-    }
-
-    @PatchMapping("/members/restore")
-    public ResponseDto<MemberResponseDto.MemberStatusDto> restore(@RequestBody MemberRequestDto.restoreMember request) {
-        return null;
-    }
-
     //소셜로그인
 
     @Operation(summary = "🎪figma[온보딩1] 소셜로그인 API ✔️", description = "소셜로그인 API, 응답으로 로그인(메인으로 이동), 회원가입(정보 입력으로 이동) code로 구분하며 query String으로 카카오인지 구글인지 주면 됩니다.")
@@ -163,27 +153,8 @@ public class MemberRestController {
     }
 
 
-    //프로필 수정
-    @PatchMapping(value = "/members", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseDto<MemberResponseDto.MemberStatusDto> updateProfile(@ModelAttribute MemberRequestDto.memberProfileDto request) {
-        return null;
-    }
-
-    //프로필 조회
-    @GetMapping("/members/{memberId}")
-    public ResponseDto<MemberResponseDto.MemberProfileDto> showProfile(@PathVariable("memberId") Long memberId) {
-        return null;
-    }
-
-    //내 프로필 조회
-    @GetMapping("/members")
-    public ResponseDto<MemberResponseDto.MemberProfileDto> showMyProfile(@AuthMember Member member) {
-        return null;
-    }
-
-
     // 내 선호 음료 조회
-    @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 조회 API ✔️", description = "유저 선호 카테고리 조회 API입니다.")
+    @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 조회 API ✔️🔑", description = "유저 선호 카테고리 조회 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -201,7 +172,7 @@ public class MemberRestController {
     // 회원정보 조회 및 수정 APIs
 
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 1] 회원정보 조회 API ✔️", description = "회원정보 조회 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 1] 회원정보 조회 API ✔️🔑", description = "회원정보 조회 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -215,7 +186,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberInfoDto(member, memberPreferCategoryDto));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 1] 프로필사진 수정 API ✔️", description = "프로필사진 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 1] 프로필사진 수정 API ✔️🔑", description = "프로필사진 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -228,7 +199,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updateProfileImage"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 1] 기본정보 수정 API ✔️", description = "기본정보 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 1] 기본정보 수정 API ✔️🔑", description = "기본정보 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -242,7 +213,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updateBasicInfo"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 2] 상세정보 수정 API ✔️", description = "상세정보 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 2] 상세정보 수정 API ✔️🔑", description = "상세정보 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -255,7 +226,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updateDetailInfo"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ✔️", description = "닉네임 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ✔️🔑", description = "닉네임 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -270,7 +241,7 @@ public class MemberRestController {
 
 
     // 내 선호 음료 카테고리 수정
-    @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 수정 API ✔️", description = "유저 선호 카테고리 수정 API입니다. 카테고리명(커피, 차 등)을 넣으시면 됩니다.")
+    @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 수정 API ✔️🔑", description = "유저 선호 카테고리 수정 API입니다. 카테고리명(커피, 차 등)을 넣으시면 됩니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -366,7 +337,7 @@ public class MemberRestController {
         Page<Inquery> inqueryPage = memberService.findInquery(member, page);
         return ResponseDto.of(MemberConverter.toInqueryListDto(inqueryPage));
     }
-    @Operation(summary = "[figma 더보기 - 회원 탈퇴] 회원 탈퇴 API ✔️", description = "회원 탈퇴 API입니다.<br> 테스트를 위해 임시로 해당 유저의 상세주소를 \"TEST\" 로 설정하면(상세정보 수정 API - zipCode) 탈퇴 불가능한 경우로 처리되도록 해놨습니다.<br> deregisterTypes 종류 <br>"+
+    @Operation(summary = "[figma 더보기 - 회원 탈퇴] 회원 탈퇴 API ✔️🔑", description = "회원 탈퇴 API입니다.<br> 테스트를 위해 임시로 해당 유저의 상세주소를 \"TEST\" 로 설정하면(상세정보 수정 API - zipCode) 탈퇴 불가능한 경우로 처리되도록 해놨습니다.<br> deregisterTypes 종류 <br>"+
             "- NOTHING_TO_BUY(\"사고싶은 물건이 없어요.\"),<br>" +
             "- DISINTERESTED(\"앱을 이용하지 않아요.\"),<br>" +
             "- UNCOMFORTABLE(\"앱 이용이 불편해요.\"),<br>" +
