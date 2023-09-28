@@ -54,4 +54,6 @@ public interface MemberService {
     public void saveDeregisterReasons(Long deregisterId, List<DeregisterType> deregisterTypeList);
 
     public void blockMember(Member owner, Long blocked);
+    public void unblockMember(Member owner, Long blockedId);
+    public Page<Member> findBlockedMember(Integer page, Member member);
 }

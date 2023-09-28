@@ -1,7 +1,6 @@
 package zipdabang.server.web.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -24,8 +23,9 @@ import zipdabang.server.FeignClient.service.KakaoOauthService;
 import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
+import zipdabang.server.base.exception.handler.MemberException;
+import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.MemberConverter;
-import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Inquery;
 import zipdabang.server.domain.member.Member;
@@ -43,7 +43,6 @@ import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 import org.springframework.web.bind.annotation.*;
 import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.dto.OAuthResult;
-import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -373,5 +372,42 @@ public class MemberRestController {
     public ResponseDto<MemberResponseDto.MemberStatusDto> block(@AuthMember Member member, Long blocked) {
         memberService.blockMember(member, blocked);
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "Block"));
+    }
+
+    @Operation(summary = "유저 차단 해지 API ✔️🔑", description = "유저 차단 해지 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 유저 차단 해지 완료"),
+            @ApiResponse(responseCode = "4052", description = "해당 사용자가 존재하지 않습니다"),
+    })
+    @DeleteMapping("/members/unblock")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> unblock(@AuthMember Member member, Long blocked) {
+        memberService.unblockMember(member, blocked);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "Unblock"));
+    }
+
+    @Operation(summary = "차단 유저 목록 조회 API 🔑", description = "차단 유저 목록 조회 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 차단 유저 목록 조회 완료"),
+            @ApiResponse(responseCode = "4052", description = "해당 사용자가 존재하지 않습니다"),
+            @ApiResponse(responseCode = "4054", description = "BAD_REQUEST , 페이지 번호가 없거나 0 이하", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/members/blockedList")
+    public ResponseDto<MemberResponseDto.PagingMemberListDto> blockerMemberList(@RequestParam(name = "page", required = false) Integer page, @AuthMember Member member) {
+        if (page == null)
+            page = 1;
+        else if (page < 1)
+            throw new MemberException(Code.UNDER_PAGE_INDEX_ERROR);
+        page -= 1;
+
+        Page<Member> blockedMembers = memberService.findBlockedMember(page, member);
+        return ResponseDto.of(MemberConverter.toPagingMemberListDto(blockedMembers));
     }
 }

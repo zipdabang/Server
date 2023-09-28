@@ -322,7 +322,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void blockMember(Member owner, Long blockedId) {
         if (owner.getMemberId() == blockedId) {
-            thorw new MemberException(Code.BLOCK_SELF);
+            throw new MemberException(Code.BLOCK_SELF);
         }
         Member blocked = memberRepository.findById(blockedId).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
         if (blockedMemberRepository.existsByOwnerAndBlocked(owner, blocked)) {
@@ -334,4 +334,32 @@ public class MemberServiceImpl implements MemberService {
                         .blocked(blocked)
                         .build());
     }
+
+    @Override
+    @Transactional
+    public void unblockMember(Member owner, Long blockedId) {
+        Member blocked = memberRepository.findById(blockedId).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+        blockedMemberRepository.deleteByOwnerAndBlocked(owner, blocked);
+    }
+
+    @Override
+    @Transactional
+    public Page<Member> findBlockedMember(Integer page, Member member) {
+
+        Page<Member> blockedMembers = blockedMemberRepository.findBlockedByOwner(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        if (blockedMembers.getContent().isEmpty()) {
+            throw new MemberException(Code.BLOCKED_MEMBER_NOT_FOUND);
+        }
+        if(blockedMembers.getTotalPages() <= page)
+            throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
+
+        return blockedMembers;
+
+    }
 }
+
+
+
+
+
+

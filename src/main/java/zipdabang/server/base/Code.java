@@ -21,6 +21,8 @@ public enum Code {
     PHONE_NUMBER_EXIST(HttpStatus.OK, 2054, "이미 인증된 전화번호입니다."),
     AUTO_LOGIN_MAIN(HttpStatus.OK, 2055, "홈 화면으로 이동하세요"),
     AUTO_LOGIN_NOT_MAIN(HttpStatus.OK, 2056, "로그인 화면으로 이동하세요"),
+    BLOCKED_MEMBER_NOT_FOUND(HttpStatus.OK, 2057, "차단한 유저가 없습니다"),
+
 
 
     //recipe response

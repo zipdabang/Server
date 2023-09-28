@@ -31,7 +31,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -314,4 +313,28 @@ public class MemberConverter {
                 .feedback(request.getFeedback())
                 .build();
     }
+
+    public static MemberResponseDto.MemberSimpleDto toMemberSimpleDto(Member member) {
+        return MemberResponseDto.MemberSimpleDto.builder()
+                .memberId(member.getMemberId())
+                .profileUrl(member.getProfileUrl())
+                .nickname(member.getNickname())
+                .createdAt(TimeConverter.ConvertTime(member.getCreatedAt()))
+                .build();
+    }
+
+    public static MemberResponseDto.PagingMemberListDto toPagingMemberListDto(Page<Member> memberPage) {
+        List<MemberResponseDto.MemberSimpleDto> memberSimpleDtoList = memberPage.getContent().stream()
+                .map(MemberConverter::toMemberSimpleDto).collect(Collectors.toList());
+
+        return MemberResponseDto.PagingMemberListDto.builder()
+                .memberSimpleDtoList(memberSimpleDtoList)
+                .isFirst(memberPage.isFirst())
+                .isLast(memberPage.isLast())
+                .currentPageElements(memberPage.getNumberOfElements())
+                .totalElements(memberPage.getTotalElements())
+                .totalPage(memberPage.getTotalPages())
+                .build();
+    }
+
 }
