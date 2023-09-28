@@ -10,10 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.converter.RootConverter;
@@ -23,8 +20,10 @@ import zipdabang.server.domain.inform.Notification;
 import zipdabang.server.service.RootService;
 import zipdabang.server.validation.annotation.ExistNotification;
 import zipdabang.server.web.dto.common.BaseDto;
+import zipdabang.server.web.dto.requestDto.RootRequestDto;
 import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -108,5 +107,13 @@ public class RootController {
     public ResponseDto<RootResponseDto.ReportListDto> showReportList(){
         List<Report> allReports = rootService.getAllReports();
         return ResponseDto.of(RootConverter.toReportListDto(allReports));
+    }
+
+    @Operation(summary = "FCM 테스트 API", description = "테스트용")
+    @PostMapping("/fcm")
+    public ResponseDto<BaseDto> testFCM(@RequestBody RootRequestDto.FCMTestDto fcmToken) throws IOException
+    {
+        rootService.testFCMService(fcmToken.getFcmToken());
+        return ResponseDto.of(null);
     }
 }

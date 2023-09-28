@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import zipdabang.server.FeignClient.dto.KakaoSocialUserDto;
+import zipdabang.server.FeignClient.Config.KakaoFeignConfiguration;
 
 @FeignClient(name = "KakaoInfoFeignClient", url = "${oauth.kakao.baseUrl}", configuration = KakaoFeignConfiguration.class)
 @Component

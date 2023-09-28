@@ -11,12 +11,14 @@ import zipdabang.server.domain.Category;
 import zipdabang.server.domain.Report;
 import zipdabang.server.domain.inform.Notification;
 import zipdabang.server.domain.member.Member;
+import zipdabang.server.firebase.fcm.service.FirebaseService;
 import zipdabang.server.repository.CategoryRepository;
 import zipdabang.server.repository.NotificationRepository;
 import zipdabang.server.repository.ReportRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.service.RootService;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -34,6 +36,8 @@ public class RootServiceImpl implements RootService {
     private final ReportRepository reportRepository;
 
     private final TokenProvider tokenProvider;
+
+    private final FirebaseService firebaseService;
 
     @Override
     public List<Category> getAllCategories() {
@@ -86,5 +90,16 @@ public class RootServiceImpl implements RootService {
     @Override
     public List<Report> getAllReports() {
         return reportRepository.findAll();
+    }
+
+    @Override
+    public void testFCMService(String fcmToken) throws IOException
+    {
+        String title = "집다방 FCM 테스트";
+        String body = "되나? 되나? 되나? 되나?";
+        String targetView = "레시피";
+        String targetPK = "1";
+        String targetNotification = "2";
+        firebaseService.sendMessageTo(fcmToken,title,body,targetView,targetPK,targetNotification);
     }
 }

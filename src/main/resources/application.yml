@@ -89,4 +89,6 @@ naver-sms:
   serviceId: ${NAVER_SMS_SERVICEID}
   senderPhone: ${NAVER_SMS_PHONE}
 
-
+fcm:
+  url: ${FCM_URL}
+  project-num: ${FCM_PROJECT_NUMBER}
