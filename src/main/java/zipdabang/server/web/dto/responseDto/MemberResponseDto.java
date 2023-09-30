@@ -218,4 +218,29 @@ public class MemberResponseDto {
         Long targetId;
         LocalDateTime followAt;
     }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class FollowInfoDto{
+        Long id;
+        String nickname;
+        String imageUrl;
+        String caption;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class FollowingListDto{
+        List<FollowInfoDto> followingList;
+        Long totalElements;
+        Integer currentPageElements;
+        Integer totalPage;
+        Boolean isFirst;
+        Boolean isLast;
+    }
+
 }

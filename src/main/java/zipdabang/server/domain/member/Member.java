@@ -43,6 +43,8 @@ public class Member extends BaseEntity {
     @Column(length = 18)
     private String phoneNum;
 
+    private String caption;
+
     @Column(length = 6)
     private String birth;
 

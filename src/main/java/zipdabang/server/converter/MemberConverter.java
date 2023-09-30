@@ -347,4 +347,27 @@ public class MemberConverter {
                 .followAt(LocalDateTime.now())
                 .build();
     }
+
+    public static MemberResponseDto.FollowInfoDto toFollowInfoDto(Member member){
+        return MemberResponseDto.FollowInfoDto.builder()
+                .id(member.getMemberId())
+                .caption(member.getCaption())
+                .nickname(member.getNickname())
+                .imageUrl(member.getProfileUrl())
+                .build();
+    }
+
+    public static MemberResponseDto.FollowingListDto toFollowingListDto(Page<Follow> followList){
+        List<MemberResponseDto.FollowInfoDto> followInfoDtoList = followList.stream()
+                .map(follow -> toFollowInfoDto(follow.getFollowingMember())).collect(Collectors.toList());
+
+        return MemberResponseDto.FollowingListDto.builder()
+                .followingList(followInfoDtoList)
+                .isFirst(followList.isFirst())
+                .isLast(followList.isLast())
+                .totalPage(followList.getTotalPages())
+                .totalElements(followList.getTotalElements())
+                .currentPageElements(followList.getNumberOfElements())
+                .build();
+    }
 }

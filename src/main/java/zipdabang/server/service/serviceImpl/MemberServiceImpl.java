@@ -367,10 +367,24 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public Follow createFollow(Long targetId, Member member) {
+
+        if(targetId.equals(member.getMemberId()))
+            throw new MemberException(Code.SELF_FOLLOW_FORBIDDEN);
         Follow follow = MemberConverter.toFollow();
         follow.setFollowingMember(member);
         follow.setTargetMember(memberRepository.findById(targetId).get());
         return followRepository.save(follow);
+    }
+
+    @Override
+    public Page<Follow> findFollowing(Member member, Integer page) {
+        page -= 1;
+        Page<Follow> followingMember = followRepository.findAllByTargetMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+
+        if(followingMember.getTotalPages() <= page)
+            throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
+
+        return followingMember;
     }
 }
 

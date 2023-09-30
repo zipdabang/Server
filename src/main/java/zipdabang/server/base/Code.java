@@ -93,7 +93,8 @@ public enum Code {
     // BAD_REQUEST
     TARGET_MEMBER_NOT_FOUND(HttpStatus.OK, 4064,"대상 사용자가 없습니다.."),
 
-
+    //FORBIDDEN
+    SELF_FOLLOW_FORBIDDEN(HttpStatus.OK, 4065, "스스로 팔로우는 안됩니다."),
 
     // market error
 

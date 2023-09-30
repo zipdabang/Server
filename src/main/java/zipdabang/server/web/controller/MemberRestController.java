@@ -413,12 +413,33 @@ public class MemberRestController {
     }
 
 
+    @Operation(summary = "🎪팔로우하기 API", description = "팔로우하기 API 입니다.")
     @PostMapping("/members/followings/{targetId}")
     @Parameters({
             @Parameter(name = "member", hidden = true)
     })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+            @ApiResponse(responseCode = "4064", description = "BAD_REQEUST , 팔로우하려는 대상이 없음", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4065", description = "FORBIDDEN , 스스로는 팔로우가 안됩니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
     public ResponseDto<MemberResponseDto.FollowingResultDto> followMember(@CheckTempMember @AuthMember Member member, @ExistMember @PathVariable(name = "targetId") Long targetId){
         Follow follow = memberService.createFollow(targetId, member);
         return ResponseDto.of(MemberConverter.toFollowingResultDto(follow));
+    }
+
+    @Operation(summary = "🎪팔로우중인 사용자 조회 API", description = "팔로우중인 사용자 조회 API 입니다. 페이지 주세요")
+    @GetMapping("/members/followings")
+    @Parameters({
+            @Parameter(name = "member", hidden = true)
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+            @ApiResponse(responseCode = "4054", description = "BAD_REQUEST , 페이지 번호가 없거나 0 이하", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    public ResponseDto<MemberResponseDto.FollowingListDto> getFollowingMember(@CheckPage Integer page, @CheckTempMember @AuthMember Member member){
+        Page<Follow> following = memberService.findFollowing(member, page);
+        return ResponseDto.of(MemberConverter.toFollowingListDto(following));
     }
 }
