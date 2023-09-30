@@ -337,4 +337,14 @@ public class MemberConverter {
                 .build();
     }
 
+    public static Follow toFollow(){
+        return Follow.builder().build();
+    }
+
+    public static MemberResponseDto.FollowingResultDto toFollowingResultDto(Follow follow){
+        return MemberResponseDto.FollowingResultDto.builder()
+                .targetId(follow.getTargetMember().getMemberId())
+                .followAt(LocalDateTime.now())
+                .build();
+    }
 }

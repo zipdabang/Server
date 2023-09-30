@@ -24,9 +24,9 @@ import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.base.exception.handler.MemberException;
-import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.member.Follow;
 import zipdabang.server.domain.member.Inquery;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.redis.domain.RefreshToken;
@@ -37,6 +37,7 @@ import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.validation.annotation.CheckPage;
 import zipdabang.server.validation.annotation.CheckTempMember;
 import zipdabang.server.validation.annotation.CheckDeregister;
+import zipdabang.server.validation.annotation.ExistMember;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
@@ -409,5 +410,15 @@ public class MemberRestController {
 
         Page<Member> blockedMembers = memberService.findBlockedMember(page, member);
         return ResponseDto.of(MemberConverter.toPagingMemberListDto(blockedMembers));
+    }
+
+
+    @PostMapping("/members/followings/{targetId}")
+    @Parameters({
+            @Parameter(name = "member", hidden = true)
+    })
+    public ResponseDto<MemberResponseDto.FollowingResultDto> followMember(@CheckTempMember @AuthMember Member member, @ExistMember @PathVariable(name = "targetId") Long targetId){
+        Follow follow = memberService.createFollow(targetId, member);
+        return ResponseDto.of(MemberConverter.toFollowingResultDto(follow));
     }
 }

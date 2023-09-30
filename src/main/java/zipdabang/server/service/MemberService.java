@@ -3,6 +3,7 @@ package zipdabang.server.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.member.Follow;
 import zipdabang.server.domain.member.Inquery;
 import zipdabang.server.domain.enums.DeregisterType;
 import zipdabang.server.domain.member.Member;
@@ -21,6 +22,8 @@ public interface MemberService {
     OAuthResult.OAuthResultDto SocialLogin(MemberRequestDto.OAuthRequestDto request, String type);
 
     Optional<Member> checkExistNickname(String nickname);
+
+    Optional<Member> findMemberById(Long id);
 
     public void existByPhoneNumber(String phoneNum);
     
@@ -56,4 +59,6 @@ public interface MemberService {
     public void blockMember(Member owner, Long blocked);
     public void unblockMember(Member owner, Long blockedId);
     public Page<Member> findBlockedMember(Integer page, Member member);
+
+    public Follow createFollow(Long targetId, Member member);
 }

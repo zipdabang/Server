@@ -90,6 +90,9 @@ public enum Code {
     ALREADY_BLOCKED_MEMBER(HttpStatus.OK, 4062, "이미 차단된 사용자입니다."),
     BLOCK_SELF(HttpStatus.OK, 4063, "자신을 차단할 수 없습니다."),
 
+    // BAD_REQUEST
+    TARGET_MEMBER_NOT_FOUND(HttpStatus.OK, 4064,"대상 사용자가 없습니다.."),
+
 
 
     // market error

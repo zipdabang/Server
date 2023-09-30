@@ -76,6 +76,8 @@ public class MemberServiceImpl implements MemberService {
     private final DeregisterReasonRepository deregisterReasonRepository;
     private final BlockedMemberRepository blockedMemberRepository;
 
+    private final FollowRepository followRepository;
+
     @Value("${paging.size}")
     private Integer pageSize;
 
@@ -118,6 +120,11 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Optional<Member> checkExistNickname(String nickname){
         return memberRepository.findByNickname(nickname);
+    }
+
+    @Override
+    public Optional<Member> findMemberById(Long id) {
+        return memberRepository.findById(id);
     }
 
     @Override
@@ -355,6 +362,15 @@ public class MemberServiceImpl implements MemberService {
 
         return blockedMembers;
 
+    }
+
+    @Override
+    @Transactional
+    public Follow createFollow(Long targetId, Member member) {
+        Follow follow = MemberConverter.toFollow();
+        follow.setFollowingMember(member);
+        follow.setTargetMember(memberRepository.findById(targetId).get());
+        return followRepository.save(follow);
     }
 }
 
