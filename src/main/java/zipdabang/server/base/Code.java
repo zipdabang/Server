@@ -21,6 +21,8 @@ public enum Code {
     PHONE_NUMBER_EXIST(HttpStatus.OK, 2054, "이미 인증된 전화번호입니다."),
     AUTO_LOGIN_MAIN(HttpStatus.OK, 2055, "홈 화면으로 이동하세요"),
     AUTO_LOGIN_NOT_MAIN(HttpStatus.OK, 2056, "로그인 화면으로 이동하세요"),
+    BLOCKED_MEMBER_NOT_FOUND(HttpStatus.OK, 2057, "차단한 유저가 없습니다"),
+
 
 
     //recipe response
@@ -84,6 +86,12 @@ public enum Code {
 
     //BAD_REQUEST
     DEREGISTER_FAIL(HttpStatus.OK, 4061, "탈퇴할 수 없는 유저입니다. 탈퇴 불가 사유가 존재합니다."),
+
+    ALREADY_BLOCKED_MEMBER(HttpStatus.OK, 4062, "이미 차단된 사용자입니다."),
+    BLOCK_SELF(HttpStatus.OK, 4063, "자신을 차단할 수 없습니다."),
+
+
+
     // market error
 
     //recipe error

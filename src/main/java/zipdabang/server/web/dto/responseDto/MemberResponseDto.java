@@ -1,7 +1,6 @@
 package zipdabang.server.web.dto.responseDto;
 
 import lombok.*;
-import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.GenderType;
 
 
@@ -185,4 +184,30 @@ public class MemberResponseDto {
         Boolean isFirst;
         Boolean isLast;
     }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class MemberSimpleDto {
+        private Long memberId;
+        private String profileUrl;
+        private String nickname;
+        private String createdAt;
+
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class PagingMemberListDto {
+        private List<MemberSimpleDto> memberSimpleDtoList;
+        Long totalElements;
+        Integer currentPageElements;
+        Integer totalPage;
+        Boolean isFirst;
+        Boolean isLast;
+    }
+
 }

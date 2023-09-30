@@ -1,7 +1,6 @@
 package zipdabang.server.web.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -24,8 +23,9 @@ import zipdabang.server.FeignClient.service.KakaoOauthService;
 import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
+import zipdabang.server.base.exception.handler.MemberException;
+import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.MemberConverter;
-import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Inquery;
 import zipdabang.server.domain.member.Member;
@@ -43,7 +43,6 @@ import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 import org.springframework.web.bind.annotation.*;
 import zipdabang.server.sms.dto.SmsResponseDto;
 import zipdabang.server.utils.dto.OAuthResult;
-import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -88,16 +87,6 @@ public class MemberRestController {
         String token = authorizationHeader.substring(7);
         memberService.logout(token, member);
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "logout"));
-    }
-
-    @PatchMapping("/members/quit")
-    public ResponseDto<MemberResponseDto.MemberStatusDto> quit(@RequestBody MemberRequestDto.quitMember request) {
-        return null;
-    }
-
-    @PatchMapping("/members/restore")
-    public ResponseDto<MemberResponseDto.MemberStatusDto> restore(@RequestBody MemberRequestDto.restoreMember request) {
-        return null;
     }
 
     //소셜로그인
@@ -163,27 +152,8 @@ public class MemberRestController {
     }
 
 
-    //프로필 수정
-    @PatchMapping(value = "/members", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseDto<MemberResponseDto.MemberStatusDto> updateProfile(@ModelAttribute MemberRequestDto.memberProfileDto request) {
-        return null;
-    }
-
-    //프로필 조회
-    @GetMapping("/members/{memberId}")
-    public ResponseDto<MemberResponseDto.MemberProfileDto> showProfile(@PathVariable("memberId") Long memberId) {
-        return null;
-    }
-
-    //내 프로필 조회
-    @GetMapping("/members")
-    public ResponseDto<MemberResponseDto.MemberProfileDto> showMyProfile(@AuthMember Member member) {
-        return null;
-    }
-
-
     // 내 선호 음료 조회
-    @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 조회 API ✔️", description = "유저 선호 카테고리 조회 API입니다.")
+    @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 조회 API ✔️🔑", description = "유저 선호 카테고리 조회 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -201,7 +171,7 @@ public class MemberRestController {
     // 회원정보 조회 및 수정 APIs
 
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 1] 회원정보 조회 API ✔️", description = "회원정보 조회 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 1] 회원정보 조회 API ✔️🔑", description = "회원정보 조회 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -215,7 +185,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberInfoDto(member, memberPreferCategoryDto));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 1] 프로필사진 수정 API ✔️", description = "프로필사진 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 1] 프로필사진 수정 API ✔️🔑", description = "프로필사진 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -228,7 +198,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updateProfileImage"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 1] 기본정보 수정 API ✔️", description = "기본정보 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 1] 기본정보 수정 API ✔️🔑", description = "기본정보 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -242,7 +212,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updateBasicInfo"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 2] 상세정보 수정 API ✔️", description = "상세정보 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 2] 상세정보 수정 API ✔️🔑", description = "상세정보 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -255,7 +225,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updateDetailInfo"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ✔️", description = "닉네임 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ✔️🔑", description = "닉네임 수정 API입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -270,7 +240,7 @@ public class MemberRestController {
 
 
     // 내 선호 음료 카테고리 수정
-    @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 수정 API ✔️", description = "유저 선호 카테고리 수정 API입니다. 카테고리명(커피, 차 등)을 넣으시면 됩니다.")
+    @Operation(summary = "[figma 더보기 - 즐겨마시는 음료 종류 1] 유저 선호 카테고리 수정 API ✔️🔑", description = "유저 선호 카테고리 수정 API입니다. 카테고리명(커피, 차 등)을 넣으시면 됩니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -366,7 +336,7 @@ public class MemberRestController {
         Page<Inquery> inqueryPage = memberService.findInquery(member, page);
         return ResponseDto.of(MemberConverter.toInqueryListDto(inqueryPage));
     }
-    @Operation(summary = "[figma 더보기 - 회원 탈퇴] 회원 탈퇴 API ✔️", description = "회원 탈퇴 API입니다.<br> 테스트를 위해 임시로 해당 유저의 상세주소를 \"TEST\" 로 설정하면(상세정보 수정 API - zipCode) 탈퇴 불가능한 경우로 처리되도록 해놨습니다.<br> deregisterTypes 종류 <br>"+
+    @Operation(summary = "[figma 더보기 - 회원 탈퇴] 회원 탈퇴 API ✔️🔑", description = "회원 탈퇴 API입니다.<br> 테스트를 위해 임시로 해당 유저의 상세주소를 \"TEST\" 로 설정하면(상세정보 수정 API - zipCode) 탈퇴 불가능한 경우로 처리되도록 해놨습니다.<br> deregisterTypes 종류 <br>"+
             "- NOTHING_TO_BUY(\"사고싶은 물건이 없어요.\"),<br>" +
             "- DISINTERESTED(\"앱을 이용하지 않아요.\"),<br>" +
             "- UNCOMFORTABLE(\"앱 이용이 불편해요.\"),<br>" +
@@ -385,5 +355,59 @@ public class MemberRestController {
         memberService.memberDeregister(member, request);
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "deregister"));
 
+    }
+
+
+    @Operation(summary = "유저 차단 API ✔️🔑", description = "유저 차단 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 유저 차단 완료"),
+            @ApiResponse(responseCode = "4052", description = "해당 사용자가 존재하지 않습니다"),
+            @ApiResponse(responseCode = "4062", description = "이미 차단된 사용자입니다."),
+            @ApiResponse(responseCode = "4063", description = "자신을 차단할 수 없습니다."),
+    })
+    @PostMapping("/members/block")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> block(@AuthMember Member member, Long blocked) {
+        memberService.blockMember(member, blocked);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "Block"));
+    }
+
+    @Operation(summary = "유저 차단 해지 API ✔️🔑", description = "유저 차단 해지 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 유저 차단 해지 완료"),
+            @ApiResponse(responseCode = "4052", description = "해당 사용자가 존재하지 않습니다"),
+    })
+    @DeleteMapping("/members/unblock")
+    public ResponseDto<MemberResponseDto.MemberStatusDto> unblock(@AuthMember Member member, Long blocked) {
+        memberService.unblockMember(member, blocked);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "Unblock"));
+    }
+
+    @Operation(summary = "차단 유저 목록 조회 API 🔑", description = "차단 유저 목록 조회 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 차단 유저 목록 조회 완료"),
+            @ApiResponse(responseCode = "4052", description = "해당 사용자가 존재하지 않습니다"),
+            @ApiResponse(responseCode = "4054", description = "BAD_REQUEST , 페이지 번호가 없거나 0 이하", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/members/blockedList")
+    public ResponseDto<MemberResponseDto.PagingMemberListDto> blockerMemberList(@RequestParam(name = "page", required = false) Integer page, @AuthMember Member member) {
+        if (page == null)
+            page = 1;
+        else if (page < 1)
+            throw new MemberException(Code.UNDER_PAGE_INDEX_ERROR);
+        page -= 1;
+
+        Page<Member> blockedMembers = memberService.findBlockedMember(page, member);
+        return ResponseDto.of(MemberConverter.toPagingMemberListDto(blockedMembers));
     }
 }

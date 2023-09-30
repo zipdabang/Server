@@ -14,6 +14,7 @@ import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.exception.handler.AuthNumberException;
 import zipdabang.server.base.exception.handler.MemberException;
+import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.DeregisterType;
@@ -73,6 +74,7 @@ public class MemberServiceImpl implements MemberService {
     private final AmazonS3Manager s3Manager;
     private final DeregisterRepository deregisterRepository;
     private final DeregisterReasonRepository deregisterReasonRepository;
+    private final BlockedMemberRepository blockedMemberRepository;
 
     @Value("${paging.size}")
     private Integer pageSize;
@@ -315,4 +317,49 @@ public class MemberServiceImpl implements MemberService {
 //                    .
 //        }
     }
+
+    @Override
+    @Transactional
+    public void blockMember(Member owner, Long blockedId) {
+        if (owner.getMemberId() == blockedId) {
+            throw new MemberException(Code.BLOCK_SELF);
+        }
+        Member blocked = memberRepository.findById(blockedId).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+        if (blockedMemberRepository.existsByOwnerAndBlocked(owner, blocked)) {
+            throw new MemberException(Code.ALREADY_BLOCKED_MEMBER);
+        }
+        blockedMemberRepository.save(
+                BlockedMember.builder()
+                        .owner(owner)
+                        .blocked(blocked)
+                        .build());
+    }
+
+    @Override
+    @Transactional
+    public void unblockMember(Member owner, Long blockedId) {
+        Member blocked = memberRepository.findById(blockedId).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+        blockedMemberRepository.deleteByOwnerAndBlocked(owner, blocked);
+    }
+
+    @Override
+    @Transactional
+    public Page<Member> findBlockedMember(Integer page, Member member) {
+
+        Page<Member> blockedMembers = blockedMemberRepository.findBlockedByOwner(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        if (blockedMembers.getContent().isEmpty()) {
+            throw new MemberException(Code.BLOCKED_MEMBER_NOT_FOUND);
+        }
+        if(blockedMembers.getTotalPages() <= page)
+            throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
+
+        return blockedMembers;
+
+    }
 }
+
+
+
+
+
+
