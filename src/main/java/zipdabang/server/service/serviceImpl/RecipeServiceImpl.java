@@ -306,6 +306,9 @@ public class RecipeServiceImpl implements RecipeService {
     public Recipe updateLikeOnRecipe(Long recipeId, Member member) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(Code.NO_RECIPE_EXIST));
 
+        if(recipe.getMember() == member)
+            throw new RecipeException(Code.RECIPE_OWNER);
+
         Optional<Likes> likesExist = likesRepository.findByRecipeAndMember(recipe,member);
 
         if(likesExist.isEmpty()) {
@@ -324,6 +327,9 @@ public class RecipeServiceImpl implements RecipeService {
     @Transactional(readOnly = false)
     public Recipe updateScrapOnRecipe(Long recipeId, Member member) {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(Code.NO_RECIPE_EXIST));
+
+        if(recipe.getMember() == member)
+            throw new RecipeException(Code.RECIPE_OWNER);
 
         Optional<Scrap> scrapExist = scrapRepository.findByRecipeAndMember(recipe,member);
 
