@@ -1,4 +1,4 @@
-package zipdabang.server.FeignClient;
+package zipdabang.server.FeignClient.Config;
 
 import feign.Logger;
 import feign.RequestInterceptor;
