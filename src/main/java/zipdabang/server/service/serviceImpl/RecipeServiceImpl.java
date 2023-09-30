@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static zipdabang.server.domain.recipe.QComment.comment;
@@ -348,6 +349,27 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public List<RecipeCategory> getAllRecipeCategories() {
         return recipeCategoryRepository.findAll();
+    }
+
+    @Override
+    public List<Recipe> getTop5RecipePerCategory(Long categoryId) {
+        QRecipe qRecipe = recipe;
+        QRecipeCategoryMapping qRecipeCategoryMapping = recipeCategoryMapping;
+
+        AtomicLong index = new AtomicLong(1);
+        List<Recipe> recipeList = queryFactory
+                .selectFrom(recipe)
+                .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
+                .where(
+                        recipeCategoryMapping.category.id.eq(categoryId)
+                )
+                .limit(5)
+                .orderBy(recipe.totalLike.desc(), recipe.createdAt.desc())
+                .fetch();
+
+        log.info(recipeList.toString());
+
+        return recipeList;
     }
 
     @Override

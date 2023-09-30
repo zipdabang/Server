@@ -33,6 +33,31 @@ public class RecipeResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class PerCategoryPreview{
+        private List<RecipePreviewDto> recipeList;
+        private Long categoryId;
+        private Integer totalElements;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RecipePreviewDto {
+        private Long recipeId;
+        private String recipeName;
+        private String nickname;
+        private String thumbnailUrl;
+        private Long likes;
+        private Long scraps;
+        private Boolean isLiked;
+        private Boolean isScrapped;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class RecipeSimpleDto {
         private Long recipeId;
         List<Long> categoryId;

@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.view.RedirectView;
 import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
@@ -24,6 +23,7 @@ import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.validation.annotation.CheckTempMember;
+import zipdabang.server.validation.annotation.ExistRecipeCategory;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
@@ -192,10 +192,7 @@ RecipeRestController {
             @Parameter(name = "keyword", description = "query string 검색할 단어")
     })
     @GetMapping(value = "/members/recipes/search/{categoryId}")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@PathVariable Long categoryId, @RequestParam(name = "keyword") String keyword, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
-
-        if (recipeService.checkRecipeCategoryExist(categoryId) == false)
-            throw new RecipeException(Code.NO_RECIPE_CATEGORY_EXIST);
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "keyword") String keyword, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
 
         if (pageIndex == null)
             pageIndex = 1;
@@ -212,6 +209,31 @@ RecipeRestController {
             throw new RecipeException(Code.OVER_PAGE_INDEX_ERROR);
 
         return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
+    }
+
+    @Operation(summary = "🍹figma 레시피2, 레시피 카테고리 별 top5 화면 API 🔑 ✔", description = "레시피 카테고리별 top5 조회 화면 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK, 목록이 있을 땐 이 응답임"),
+            @ApiResponse(responseCode = "2100", description = "OK, 목록이 없을 경우", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4105", description = "BAD_REQUEST, 해당 id를 가진 레시피 카테고리가 없습니다. 잘못 보내줬어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @GetMapping(value = "/members/recipes/categories/{categoryId}/top5")
+    public ResponseDto<RecipeResponseDto.PerCategoryPreview> RecipeCategoryTop5(@ExistRecipeCategory @PathVariable Long categoryId, @AuthMember Member member) {
+
+        List<Recipe> recipeList = recipeService.getTop5RecipePerCategory(categoryId);
+
+        log.info(recipeList.toString());
+
+        return ResponseDto.of(RecipeConverter.toPerCategoryPreview(categoryId, recipeList ,member));
     }
 
     @Operation(summary = "🍹figma 레시피2, 카테고리 별 레시피 목록 조회 API 🔑 ✔", description = "카테고리 별 레시피 목록 조회 화면 API입니다. pageIndex로 페이징")
@@ -235,10 +257,7 @@ RecipeRestController {
             @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 조회순: views, 최신순: latest로 넘겨주세요, 기본값 latest")
     })
     @GetMapping(value = "/members/recipes/categories/{categoryId}")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@PathVariable Long categoryId, @RequestParam(name = "order", required = false) String order, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
-
-        if (recipeService.checkRecipeCategoryExist(categoryId) == false)
-            throw new RecipeException(Code.NO_RECIPE_CATEGORY_EXIST);
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "order", required = false) String order, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
 
         if (pageIndex == null)
             pageIndex = 1;
