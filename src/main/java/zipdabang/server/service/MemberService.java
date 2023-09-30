@@ -63,4 +63,6 @@ public interface MemberService {
     public Follow createFollow(Long targetId, Member member);
 
     Page<Follow> findFollowing(Member member, Integer page);
+
+    Page<Follow> findFollower(Member member, Integer page);
 }

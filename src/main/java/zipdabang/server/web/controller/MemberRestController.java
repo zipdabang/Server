@@ -442,4 +442,19 @@ public class MemberRestController {
         Page<Follow> following = memberService.findFollowing(member, page);
         return ResponseDto.of(MemberConverter.toFollowingListDto(following));
     }
+
+    @Operation(summary = "🎪나를 팔로잉 하는 사용자 조회 API", description = "나를 팔로잉 하는 사용자 조회 API 입니다. 페이지 주세요")
+    @GetMapping("/members/followers")
+    @Parameters({
+            @Parameter(name = "member", hidden = true)
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+            @ApiResponse(responseCode = "4054", description = "BAD_REQUEST , 페이지 번호가 없거나 0 이하", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    public ResponseDto<MemberResponseDto.FollowerListDto> getFollowerMember(@CheckPage Integer page, @CheckTempMember @AuthMember Member member){
+        Page<Follow> follower = memberService.findFollower(member, page);
+        return ResponseDto.of(MemberConverter.toFollowerListDto(follower, member));
+    }
 }

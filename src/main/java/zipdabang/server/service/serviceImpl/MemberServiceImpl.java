@@ -379,12 +379,23 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Page<Follow> findFollowing(Member member, Integer page) {
         page -= 1;
-        Page<Follow> followingMember = followRepository.findAllByTargetMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        Page<Follow> followingMember = followRepository.findAllByFollowingMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
 
         if(followingMember.getTotalPages() <= page)
             throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
 
         return followingMember;
+    }
+
+    @Override
+    public Page<Follow> findFollower(Member member, Integer page) {
+        page -= 1;
+        Page<Follow> followerMember = followRepository.findAllByTargetMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+
+        if(followerMember.getTotalPages() <= page)
+            throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
+
+        return followerMember;
     }
 }
 

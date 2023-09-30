@@ -10,4 +10,5 @@ import zipdabang.server.domain.member.Member;
 public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     Page<Follow> findAllByTargetMember(Member member, PageRequest pageRequest);
+    Page<Follow> findAllByFollowingMember(Member member, PageRequest pageRequest);
 }

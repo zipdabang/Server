@@ -234,8 +234,34 @@ public class MemberResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class FollowerInfoDto{
+        Long id;
+        String nickname;
+        String imageUrl;
+        String caption;
+        Boolean isFollowing;
+    }
+
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class FollowingListDto{
         List<FollowInfoDto> followingList;
+        Long totalElements;
+        Integer currentPageElements;
+        Integer totalPage;
+        Boolean isFirst;
+        Boolean isLast;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class FollowerListDto{
+        List<FollowerInfoDto> followerList;
         Long totalElements;
         Integer currentPageElements;
         Integer totalPage;
