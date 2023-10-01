@@ -268,5 +268,4 @@ public class MemberResponseDto {
         Boolean isFirst;
         Boolean isLast;
     }
-
 }
