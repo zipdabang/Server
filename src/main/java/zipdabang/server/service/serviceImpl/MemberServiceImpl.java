@@ -75,11 +75,8 @@ public class MemberServiceImpl implements MemberService {
     private final DeregisterRepository deregisterRepository;
     private final DeregisterReasonRepository deregisterReasonRepository;
     private final BlockedMemberRepository blockedMemberRepository;
-<<<<<<< HEAD
-=======
 
     private final FollowRepository followRepository;
->>>>>>> a5dc21e0132e8f3e84329ab4d71729bbff08fef8
 
     @Value("${paging.size}")
     private Integer pageSize;

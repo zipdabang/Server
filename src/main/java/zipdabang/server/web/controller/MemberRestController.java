@@ -24,10 +24,7 @@ import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.base.exception.handler.MemberException;
-<<<<<<< HEAD
 import zipdabang.server.base.exception.handler.RecipeException;
-=======
->>>>>>> a5dc21e0132e8f3e84329ab4d71729bbff08fef8
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Follow;
@@ -416,7 +413,7 @@ public class MemberRestController {
         Page<Member> blockedMembers = memberService.findBlockedMember(page, member);
         return ResponseDto.of(MemberConverter.toPagingMemberListDto(blockedMembers));
     }
-}
+
 
 
     @Operation(summary = "🎪팔로우하기 API", description = "팔로우하기 API 입니다.")
