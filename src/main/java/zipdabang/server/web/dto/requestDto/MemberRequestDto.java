@@ -5,13 +5,13 @@ import lombok.Setter;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.domain.enums.DeregisterType;
-import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 public class MemberRequestDto {
 

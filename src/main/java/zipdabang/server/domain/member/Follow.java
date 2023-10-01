@@ -20,7 +20,28 @@ public class Follow extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // follow 객체
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_id")
-    private Member member;
+    private Member targetMember;
+
+    // follow 주체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "following_id")
+    private Member followingMember;
+
+    public void setTargetMember(Member targetMember){
+        if (this.targetMember != null)
+            targetMember.getFollowerList().remove(this);
+        this.targetMember = targetMember;
+        targetMember.getFollowerList().add(this);
+    }
+
+    public void setFollowingMember(Member followingMember){
+        if (this.followingMember != null)
+            followingMember.getFollowerList().remove(this);
+        this.followingMember = followingMember;
+        followingMember.getFollowerList().add(this);
+    }
+
 }
