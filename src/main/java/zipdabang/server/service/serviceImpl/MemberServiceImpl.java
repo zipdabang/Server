@@ -75,6 +75,11 @@ public class MemberServiceImpl implements MemberService {
     private final DeregisterRepository deregisterRepository;
     private final DeregisterReasonRepository deregisterReasonRepository;
     private final BlockedMemberRepository blockedMemberRepository;
+<<<<<<< HEAD
+=======
+
+    private final FollowRepository followRepository;
+>>>>>>> a5dc21e0132e8f3e84329ab4d71729bbff08fef8
 
     @Value("${paging.size}")
     private Integer pageSize;
@@ -118,6 +123,11 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Optional<Member> checkExistNickname(String nickname){
         return memberRepository.findByNickname(nickname);
+    }
+
+    @Override
+    public Optional<Member> findMemberById(Long id) {
+        return memberRepository.findById(id);
     }
 
     @Override
@@ -355,6 +365,40 @@ public class MemberServiceImpl implements MemberService {
 
         return blockedMembers;
 
+    }
+
+    @Override
+    @Transactional
+    public Follow createFollow(Long targetId, Member member) {
+
+        if(targetId.equals(member.getMemberId()))
+            throw new MemberException(Code.SELF_FOLLOW_FORBIDDEN);
+        Follow follow = MemberConverter.toFollow();
+        follow.setFollowingMember(member);
+        follow.setTargetMember(memberRepository.findById(targetId).get());
+        return followRepository.save(follow);
+    }
+
+    @Override
+    public Page<Follow> findFollowing(Member member, Integer page) {
+        page -= 1;
+        Page<Follow> followingMember = followRepository.findAllByFollowingMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+
+        if(followingMember.getTotalPages() <= page)
+            throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
+
+        return followingMember;
+    }
+
+    @Override
+    public Page<Follow> findFollower(Member member, Integer page) {
+        page -= 1;
+        Page<Follow> followerMember = followRepository.findAllByTargetMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+
+        if(followerMember.getTotalPages() <= page)
+            throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
+
+        return followerMember;
     }
 }
 

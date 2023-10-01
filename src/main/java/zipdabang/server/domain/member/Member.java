@@ -43,6 +43,8 @@ public class Member extends BaseEntity {
     @Column(length = 18)
     private String phoneNum;
 
+    private String caption;
+
     @Column(length = 6)
     private String birth;
 
@@ -107,6 +109,13 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Inquery> inqueryList;
 
+    // 나를 따르는 = follow 테이블에서 targetMember가 나인,
+    @OneToMany(mappedBy = "targetMember", cascade = CascadeType.ALL)
+    private List<Follow> followerList;
+
+    // 내가 따르는 = follow 테이블에서 followingMember가 나인,
+    @OneToMany(mappedBy = "followingMember", cascade = CascadeType.ALL)
+    private List<Follow> followingList;
 
     public void setProfileUrl(String profileUrl) {
         this.profileUrl = profileUrl;

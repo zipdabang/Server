@@ -337,4 +337,65 @@ public class MemberConverter {
                 .build();
     }
 
+    public static Follow toFollow(){
+        return Follow.builder().build();
+    }
+
+    public static MemberResponseDto.FollowingResultDto toFollowingResultDto(Follow follow){
+        return MemberResponseDto.FollowingResultDto.builder()
+                .targetId(follow.getTargetMember().getMemberId())
+                .followAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static MemberResponseDto.FollowInfoDto toFollowInfoDto(Member member){
+        return MemberResponseDto.FollowInfoDto.builder()
+                .id(member.getMemberId())
+                .caption(member.getCaption())
+                .nickname(member.getNickname())
+                .imageUrl(member.getProfileUrl())
+                .build();
+    }
+
+    public static MemberResponseDto.FollowerInfoDto toFollowerInfoDto(Member member, Member owner){
+
+        List<Member> followingMembers = owner.getFollowingList().stream()
+                .map(Follow::getTargetMember).collect(Collectors.toList());
+
+        return MemberResponseDto.FollowerInfoDto.builder()
+                .id(member.getMemberId())
+                .caption(member.getCaption())
+                .nickname(member.getNickname())
+                .imageUrl(member.getProfileUrl())
+                .isFollowing(followingMembers.contains(member))
+                .build();
+    }
+
+    public static MemberResponseDto.FollowingListDto toFollowingListDto(Page<Follow> followList){
+        List<MemberResponseDto.FollowInfoDto> followInfoDtoList = followList.stream()
+                .map(follow -> toFollowInfoDto(follow.getTargetMember())).collect(Collectors.toList());
+
+        return MemberResponseDto.FollowingListDto.builder()
+                .followingList(followInfoDtoList)
+                .isFirst(followList.isFirst())
+                .isLast(followList.isLast())
+                .totalPage(followList.getTotalPages())
+                .totalElements(followList.getTotalElements())
+                .currentPageElements(followList.getNumberOfElements())
+                .build();
+    }
+
+    public static MemberResponseDto.FollowerListDto toFollowerListDto(Page<Follow> followList, Member owner){
+        List<MemberResponseDto.FollowerInfoDto> followerInfoDtoList = followList.stream()
+                .map(follow -> toFollowerInfoDto(follow.getFollowingMember(), owner)).collect(Collectors.toList());
+
+        return MemberResponseDto.FollowerListDto.builder()
+                .followerList(followerInfoDtoList)
+                .isFirst(followList.isFirst())
+                .isLast(followList.isLast())
+                .totalPage(followList.getTotalPages())
+                .totalElements(followList.getTotalElements())
+                .currentPageElements(followList.getNumberOfElements())
+                .build();
+    }
 }
