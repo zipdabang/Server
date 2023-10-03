@@ -63,6 +63,28 @@ public class RecipeConverter {
     private static AmazonS3Manager staticAmazonS3Manager;
     private static TimeConverter staticTimeConverter;
 
+    public static RecipeResponseDto.PerCategoryPreview toPerCategoryPreview(Long categoryId, List<Recipe> recipeList, Member member) {
+        return RecipeResponseDto.PerCategoryPreview.builder()
+                .categoryId(categoryId)
+                .totalElements(recipeList.size())
+                .recipeList(recipeList.stream()
+                        .map(recipe -> toRecipePreviewDto(recipe,member))
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    public static RecipeResponseDto.RecipePreviewDto toRecipePreviewDto(Recipe recipe, Member member) {
+        return RecipeResponseDto.RecipePreviewDto.builder()
+                .recipeId(recipe.getId())
+                .recipeName(recipe.getName())
+                .nickname(recipe.getMember().getNickname())
+                .likes(recipe.getTotalLike())
+                .scraps(recipe.getTotalScrap())
+                .isLiked(staticLikesRepository.findByRecipeAndMember(recipe, member).isPresent())
+                .isScrapped(staticScrapRepository.findByRecipeAndMember(recipe,member).isPresent())
+                .build();
+    }
+
 
     @PostConstruct
     public void init() {

@@ -315,8 +315,8 @@ public class MemberRestController {
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
-    @PostMapping(value = "/members/inquiries",consumes ={ MediaType.MULTIPART_FORM_DATA_VALUE } )
-    public ResponseDto<MemberResponseDto.MemberInqueryResultDto> createInquery(@CheckTempMember @AuthMember Member member, @ModelAttribute @Valid MemberRequestDto.InqueryDto request){
+    @PostMapping(value = "/members/inquiries", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseDto<MemberResponseDto.MemberInqueryResultDto> createInquery(@CheckTempMember @AuthMember Member member, @ModelAttribute @Valid MemberRequestDto.InqueryDto request) {
         Inquery inquery = memberService.createInquery(member, request);
         return ResponseDto.of(MemberConverter.toMemberInqueryResultDto(inquery));
     }
@@ -333,11 +333,12 @@ public class MemberRestController {
             @ApiResponse(responseCode = "4055", description = "BAD_REQEUST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
 
     })
-    public ResponseDto<MemberResponseDto.InqueryListDto> showInquery(@CheckTempMember @AuthMember Member member, @RequestParam(name = "page",required = true) @CheckPage Integer page){
+    public ResponseDto<MemberResponseDto.InqueryListDto> showInquery(@CheckTempMember @AuthMember Member member, @RequestParam(name = "page", required = true) @CheckPage Integer page) {
         Page<Inquery> inqueryPage = memberService.findInquery(member, page);
         return ResponseDto.of(MemberConverter.toInqueryListDto(inqueryPage));
     }
-    @Operation(summary = "[figma 더보기 - 회원 탈퇴] 회원 탈퇴 API ✔️🔑", description = "회원 탈퇴 API입니다.<br> 테스트를 위해 임시로 해당 유저의 상세주소를 \"TEST\" 로 설정하면(상세정보 수정 API - zipCode) 탈퇴 불가능한 경우로 처리되도록 해놨습니다.<br> deregisterTypes 종류 <br>"+
+
+    @Operation(summary = "[figma 더보기 - 회원 탈퇴] 회원 탈퇴 API ✔️🔑", description = "회원 탈퇴 API입니다.<br> 테스트를 위해 임시로 해당 유저의 상세주소를 \"TEST\" 로 설정하면(상세정보 수정 API - zipCode) 탈퇴 불가능한 경우로 처리되도록 해놨습니다.<br> deregisterTypes 종류 <br>" +
             "- NOTHING_TO_BUY(\"사고싶은 물건이 없어요.\"),<br>" +
             "- DISINTERESTED(\"앱을 이용하지 않아요.\"),<br>" +
             "- UNCOMFORTABLE(\"앱 이용이 불편해요.\"),<br>" +
@@ -413,6 +414,7 @@ public class MemberRestController {
     }
 
 
+
     @Operation(summary = "🎪팔로우하기/취소하기 API", description = "팔로우하기 API 입니다.")
     @PostMapping("/members/followings/{targetId}")
     @Parameters({
@@ -458,3 +460,4 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toFollowerListDto(follower, member));
     }
 }
+

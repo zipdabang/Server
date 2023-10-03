@@ -57,4 +57,6 @@ public interface RecipeService {
     TempRecipe tempCreate(RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException;
 
     TempRecipe tempUpdate(Long tempId, RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException;
+
+    List<Recipe> getTop5RecipePerCategory(Long categoryId);
 }

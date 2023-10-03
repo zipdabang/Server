@@ -106,6 +106,7 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Inquery> inqueryList;
 
+
     // 나를 따르는 놈들
     @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL)
     private List<Follow> myFollowerList;
