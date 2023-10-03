@@ -7,8 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import zipdabang.server.domain.member.Follow;
 import zipdabang.server.domain.member.Member;
 
+import java.util.Optional;
+
 public interface FollowRepository extends JpaRepository<Follow, Long> {
 
-    Page<Follow> findAllByTargetMember(Member member, PageRequest pageRequest);
-    Page<Follow> findAllByFollowingMember(Member member, PageRequest pageRequest);
+    Page<Follow> findAllByFollowee(Member member, PageRequest pageRequest);
+    Page<Follow> findAllByFollower(Member member, PageRequest pageRequest);
+
+    Optional<Follow> findByFollowerAndFollowee(Member follower, Member followee);
 }

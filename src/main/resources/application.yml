@@ -14,6 +14,8 @@ spring:
 ##  # local redis
 #  redis:
 #    host: localhost
+#  redis:
+#    briefing-redis.bjyb5r.ng.0001.apne1.cache.amazonaws.com
 
   redis:
     host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com

@@ -341,15 +341,16 @@ public class MemberConverter {
         return Follow.builder().build();
     }
 
-    public static MemberResponseDto.FollowingResultDto toFollowingResultDto(Follow follow){
+    public static MemberResponseDto.FollowingResultDto toFollowingResultDto(Follow follow, Member member, Long targetId){
+
         return MemberResponseDto.FollowingResultDto.builder()
-                .targetId(follow.getTargetMember().getMemberId())
-                .followAt(LocalDateTime.now())
+                .targetId(targetId)
+                .isFollowing(follow != null)
                 .build();
     }
 
-    public static MemberResponseDto.FollowInfoDto toFollowInfoDto(Member member){
-        return MemberResponseDto.FollowInfoDto.builder()
+    public static MemberResponseDto.FollowingInfoDto toFollowInfoDto(Member member){
+        return MemberResponseDto.FollowingInfoDto.builder()
                 .id(member.getMemberId())
                 .caption(member.getCaption())
                 .nickname(member.getNickname())
@@ -359,8 +360,8 @@ public class MemberConverter {
 
     public static MemberResponseDto.FollowerInfoDto toFollowerInfoDto(Member member, Member owner){
 
-        List<Member> followingMembers = owner.getFollowingList().stream()
-                .map(Follow::getTargetMember).collect(Collectors.toList());
+        List<Member> followingMembers = owner.getMyFollowingList().stream()
+                .map(Follow::getFollowee).collect(Collectors.toList());
 
         return MemberResponseDto.FollowerInfoDto.builder()
                 .id(member.getMemberId())
@@ -372,8 +373,8 @@ public class MemberConverter {
     }
 
     public static MemberResponseDto.FollowingListDto toFollowingListDto(Page<Follow> followList){
-        List<MemberResponseDto.FollowInfoDto> followInfoDtoList = followList.stream()
-                .map(follow -> toFollowInfoDto(follow.getTargetMember())).collect(Collectors.toList());
+        List<MemberResponseDto.FollowingInfoDto> followInfoDtoList = followList.stream()
+                .map(follow -> toFollowInfoDto(follow.getFollowee())).collect(Collectors.toList());
 
         return MemberResponseDto.FollowingListDto.builder()
                 .followingList(followInfoDtoList)
@@ -387,7 +388,7 @@ public class MemberConverter {
 
     public static MemberResponseDto.FollowerListDto toFollowerListDto(Page<Follow> followList, Member owner){
         List<MemberResponseDto.FollowerInfoDto> followerInfoDtoList = followList.stream()
-                .map(follow -> toFollowerInfoDto(follow.getFollowingMember(), owner)).collect(Collectors.toList());
+                .map(follow -> toFollowerInfoDto(follow.getFollower(), owner)).collect(Collectors.toList());
 
         return MemberResponseDto.FollowerListDto.builder()
                 .followerList(followerInfoDtoList)
