@@ -63,9 +63,6 @@ public class Member extends BaseEntity {
 
     private String detailAddress;
 
-    private Long followers;
-    private Long followings;
-
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
@@ -109,13 +106,13 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Inquery> inqueryList;
 
-    // 나를 따르는 = follow 테이블에서 targetMember가 나인,
-    @OneToMany(mappedBy = "targetMember", cascade = CascadeType.ALL)
-    private List<Follow> followerList;
+    // 나를 따르는 놈들
+    @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL)
+    private List<Follow> myFollowerList;
 
-    // 내가 따르는 = follow 테이블에서 followingMember가 나인,
-    @OneToMany(mappedBy = "followingMember", cascade = CascadeType.ALL)
-    private List<Follow> followingList;
+    // 내가 따르는 놈들
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
+    private List<Follow> myFollowingList;
 
     public void setProfileUrl(String profileUrl) {
         this.profileUrl = profileUrl;

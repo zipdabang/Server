@@ -20,28 +20,35 @@ public class Follow extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // follow 객체
+    // 팔로우 당하는 대상
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "target_id")
-    private Member targetMember;
+    @JoinColumn(name = "followee_id")
+    private Member followee;
 
-    // follow 주체
+    // 팔로우 하는 놈
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "following_id")
-    private Member followingMember;
+    @JoinColumn(name = "follower_id")
+    private Member follower;
 
-    public void setTargetMember(Member targetMember){
-        if (this.targetMember != null)
-            targetMember.getFollowerList().remove(this);
-        this.targetMember = targetMember;
-        targetMember.getFollowerList().add(this);
+    // 팔로우 하는놈 세팅
+    public void setFollower(Member follower){
+        if (this.follower != null)
+            follower.getMyFollowingList().remove(this);
+        this.follower = follower;
+        follower.getMyFollowingList().add(this);
     }
 
-    public void setFollowingMember(Member followingMember){
-        if (this.followingMember != null)
-            followingMember.getFollowerList().remove(this);
-        this.followingMember = followingMember;
-        followingMember.getFollowerList().add(this);
+    public void setFollowee(Member followee){
+        if(this.followee != null)
+            followee.getMyFollowerList().remove(this);
+        this.followee = followee;
+        followee.getMyFollowerList().add(this);
     }
 
+    public void cancleFollow(Member followee, Member follower){
+        this.follower = null;
+        this.followee = null;
+        followee.getMyFollowerList().remove(this);
+        follower.getMyFollowingList().remove(this);
+    }
 }
