@@ -24,7 +24,6 @@ import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.base.Code;
 import zipdabang.server.base.ResponseDto;
 import zipdabang.server.base.exception.handler.MemberException;
-import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Follow;
@@ -416,7 +415,7 @@ public class MemberRestController {
 
 
 
-    @Operation(summary = "🎪팔로우하기 API", description = "팔로우하기 API 입니다.")
+    @Operation(summary = "🎪팔로우하기/취소하기 API", description = "팔로우하기 API 입니다.")
     @PostMapping("/members/followings/{targetId}")
     @Parameters({
             @Parameter(name = "member", hidden = true)
@@ -427,8 +426,8 @@ public class MemberRestController {
             @ApiResponse(responseCode = "4065", description = "FORBIDDEN , 스스로는 팔로우가 안됩니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     public ResponseDto<MemberResponseDto.FollowingResultDto> followMember(@CheckTempMember @AuthMember Member member, @ExistMember @PathVariable(name = "targetId") Long targetId){
-        Follow follow = memberService.createFollow(targetId, member);
-        return ResponseDto.of(MemberConverter.toFollowingResultDto(follow));
+        Follow follow = memberService.toggleFollow(targetId, member);
+        return ResponseDto.of(MemberConverter.toFollowingResultDto(follow,member, targetId));
     }
 
     @Operation(summary = "🎪팔로우중인 사용자 조회 API", description = "팔로우중인 사용자 조회 API 입니다. 페이지 주세요")
@@ -491,3 +490,4 @@ public class MemberRestController {
     }
 
 }
+

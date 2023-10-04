@@ -216,14 +216,14 @@ public class MemberResponseDto {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class FollowingResultDto{
         Long targetId;
-        LocalDateTime followAt;
+        Boolean isFollowing;
     }
 
     @Builder
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class FollowInfoDto{
+    public static class FollowingInfoDto{
         Long id;
         String nickname;
         String imageUrl;
@@ -248,7 +248,7 @@ public class MemberResponseDto {
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class FollowingListDto{
-        List<FollowInfoDto> followingList;
+        List<FollowingInfoDto> followingList;
         Long totalElements;
         Integer currentPageElements;
         Integer totalPage;

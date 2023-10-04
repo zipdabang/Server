@@ -378,20 +378,33 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public Follow createFollow(Long targetId, Member member) {
-
+    public Follow toggleFollow(Long targetId, Member member) {
         if(targetId.equals(member.getMemberId()))
             throw new MemberException(Code.SELF_FOLLOW_FORBIDDEN);
-        Follow follow = MemberConverter.toFollow();
-        follow.setFollowingMember(member);
-        follow.setTargetMember(memberRepository.findById(targetId).get());
-        return followRepository.save(follow);
+        Member target = memberRepository.findById(targetId).get();
+
+        Optional<Follow> checkFollow = followRepository.findByFollowerAndFollowee(member, target);
+
+        // 팔로우 하기
+        if (checkFollow.isEmpty()) {
+            Follow follow = MemberConverter.toFollow();
+            // 내 팔로우 대상에게 팔로워 목록 추가
+            follow.setFollower(member);
+            // 내 팔로잉 목록에 해당 멤버를 넣기
+            follow.setFollowee(target);
+            return follow;
+        }else{
+            // 팔로우 끊기
+            checkFollow.get().cancleFollow(target,member);
+            followRepository.delete(checkFollow.get());
+            return null;
+        }
     }
 
     @Override
     public Page<Follow> findFollowing(Member member, Integer page) {
         page -= 1;
-        Page<Follow> followingMember = followRepository.findAllByFollowingMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        Page<Follow> followingMember = followRepository.findAllByFollower(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
 
         if(followingMember.getTotalPages() <= page)
             throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
@@ -402,7 +415,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Page<Follow> findFollower(Member member, Integer page) {
         page -= 1;
-        Page<Follow> followerMember = followRepository.findAllByTargetMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        Page<Follow> followerMember = followRepository.findAllByFollowee(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
 
         if(followerMember.getTotalPages() <= page)
             throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);

@@ -60,7 +60,7 @@ public interface MemberService {
     public void unblockMember(Member owner, Long blockedId);
     public Page<Member> findBlockedMember(Integer page, Member member);
 
-    public Follow createFollow(Long targetId, Member member);
+    public Follow toggleFollow(Long targetId, Member member);
 
     Page<Follow> findFollowing(Member member, Integer page);
 
