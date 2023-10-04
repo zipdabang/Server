@@ -410,6 +410,11 @@ public class MemberServiceImpl implements MemberService {
 
         return followerMember;
     }
+
+    @Override
+    public Boolean checkFollowing(Member loginMember, Member targetMember) {
+        return followRepository.findByFollowerAndFollowee(loginMember,targetMember).isPresent();
+    }
 }
 
 
