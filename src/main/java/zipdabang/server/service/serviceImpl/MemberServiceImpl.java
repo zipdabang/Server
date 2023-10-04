@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import zipdabang.server.auth.provider.TokenProvider;
 import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.base.Code;
+import zipdabang.server.base.ResponseDto;
 import zipdabang.server.base.exception.handler.AuthNumberException;
 import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.base.exception.handler.RecipeException;
@@ -41,12 +42,15 @@ import zipdabang.server.utils.dto.OAuthResult;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,14 +76,23 @@ public class MemberServiceImpl implements MemberService {
 
     private final InqueryRepository inqueryRepository;
     private final AmazonS3Manager s3Manager;
+    private static AmazonS3Manager staticAmazonS3Manager;
     private final DeregisterRepository deregisterRepository;
     private final DeregisterReasonRepository deregisterReasonRepository;
     private final BlockedMemberRepository blockedMemberRepository;
-
     private final FollowRepository followRepository;
+    private static String defaultProfileImage;
 
     @Value("${paging.size}")
     private Integer pageSize;
+
+    @Value("${cloud.aws.s3.user-default-image}")
+    public void setDefaultImage(String value) {
+        defaultProfileImage = value;
+    }
+    @PostConstruct
+    public void init(){
+        this.staticAmazonS3Manager = this.s3Manager;}
 
     @Override
     @Transactional
@@ -401,6 +414,12 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public Long getFollowingCount(Member member) {
+        return followRepository.countByFollower(member);
+    }
+
+
+    @Override
     public Page<Follow> findFollower(Member member, Integer page) {
         page -= 1;
         Page<Follow> followerMember = followRepository.findAllByFollowee(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
@@ -412,8 +431,64 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public Long getFollowerCount(Member member) {
+        return followRepository.countByFollowee(member);
+    }
+
+
+    @Override
+    @Transactional
+    public void updateCaption(Member member, MemberRequestDto.changeCaptionDto captionDto) {
+        member.setCaption(captionDto.getCaption());
+
+    }
+
+    public static String toKeyName(String imageUrl) {
+        String input = imageUrl;
+
+        Pattern regex = Pattern.compile(staticAmazonS3Manager.getPattern());
+        Matcher matcher = regex.matcher(input);
+        String extractedString = null;
+        if (matcher.find())
+            extractedString = matcher.group(1);
+
+        return extractedString;
+
+    }
+
+    @Override
+    @Transactional
+    public void updateProfileDefault(Member member) {
+        s3Manager.deleteFile(toKeyName(member.getProfileUrl()).substring(1));
+        member.setProfileUrl(defaultProfileImage);
+    }
+
+    @Override
     public Boolean checkFollowing(Member loginMember, Member targetMember) {
         return followRepository.findByFollowerAndFollowee(loginMember,targetMember).isPresent();
+    }
+
+    @Override
+    public MemberResponseDto.MyZipdabangDto getMyZipdabang(Member member, Long targetId) {
+        Member target = memberRepository.findById(targetId).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+        boolean checkSelf = false;
+        boolean isFollowing = false;
+        if (member.getMemberId() == target.getMemberId()) {
+            checkSelf=true;
+        }
+        else if(blockedMemberRepository.existsByOwnerAndBlocked(member,target)){
+            throw new MemberException(Code.BLOCKED_MEMBER);
+        }
+
+        if (followRepository.existsByFollowerAndFollowee(member, target)) {
+            isFollowing=true;
+        }
+
+        List<Category> categories = findMemberPreferCategories(member);
+        MemberResponseDto.MemberPreferCategoryDto memberPreferCategoryDto = MemberConverter.toMemberPreferCategoryDto(categories);
+
+        return MemberConverter.toMyZipdabangDto(target, checkSelf, isFollowing, memberPreferCategoryDto);
+
     }
 }
 
