@@ -65,4 +65,6 @@ public interface MemberService {
     Page<Follow> findFollowing(Member member, Integer page);
 
     Page<Follow> findFollower(Member member, Integer page);
+
+    Boolean checkFollowing(Member loginMember, Member targetMember);
 }
