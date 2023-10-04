@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import zipdabang.server.auth.provider.TokenProvider;
 import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.base.Code;
+import zipdabang.server.base.ResponseDto;
 import zipdabang.server.base.exception.handler.AuthNumberException;
 import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.base.exception.handler.RecipeException;
@@ -413,6 +414,12 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public Long getFollowingCount(Member member) {
+        return followRepository.countByFollower(member);
+    }
+
+
+    @Override
     public Page<Follow> findFollower(Member member, Integer page) {
         page -= 1;
         Page<Follow> followerMember = followRepository.findAllByFollowee(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
@@ -421,6 +428,11 @@ public class MemberServiceImpl implements MemberService {
             throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
 
         return followerMember;
+    }
+
+    @Override
+    public Long getFollowerCount(Member member) {
+        return followRepository.countByFollowee(member);
     }
 
 
@@ -449,6 +461,34 @@ public class MemberServiceImpl implements MemberService {
     public void updateProfileDefault(Member member) {
         s3Manager.deleteFile(toKeyName(member.getProfileUrl()).substring(1));
         member.setProfileUrl(defaultProfileImage);
+    }
+
+    @Override
+    public Boolean checkFollowing(Member loginMember, Member targetMember) {
+        return followRepository.findByFollowerAndFollowee(loginMember,targetMember).isPresent();
+    }
+
+    @Override
+    public MemberResponseDto.MyZipdabangDto getMyZipdabang(Member member, Long targetId) {
+        Member target = memberRepository.findById(targetId).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+        boolean checkSelf = false;
+        boolean isFollowing = false;
+        if (member.getMemberId() == target.getMemberId()) {
+            checkSelf=true;
+        }
+        else if(blockedMemberRepository.existsByOwnerAndBlocked(member,target)){
+            throw new MemberException(Code.BLOCKED_MEMBER);
+        }
+
+        if (followRepository.existsByFollowerAndFollowee(member, target)) {
+            isFollowing=true;
+        }
+
+        List<Category> categories = findMemberPreferCategories(member);
+        MemberResponseDto.MemberPreferCategoryDto memberPreferCategoryDto = MemberConverter.toMemberPreferCategoryDto(categories);
+
+        return MemberConverter.toMyZipdabangDto(target, checkSelf, isFollowing, memberPreferCategoryDto);
+
     }
 }
 
