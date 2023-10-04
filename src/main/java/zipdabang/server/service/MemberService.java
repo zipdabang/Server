@@ -65,4 +65,7 @@ public interface MemberService {
     Page<Follow> findFollowing(Member member, Integer page);
 
     Page<Follow> findFollower(Member member, Integer page);
+
+    public void updateCaption(Member member, MemberRequestDto.changeCaptionDto captionDto);
+    public void updateProfileDefault(Member member);
 }

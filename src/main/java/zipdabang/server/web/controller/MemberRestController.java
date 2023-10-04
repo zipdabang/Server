@@ -391,7 +391,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "Unblock"));
     }
 
-    @Operation(summary = "차단 유저 목록 조회 API 🔑", description = "차단 유저 목록 조회 API 입니다.")
+    @Operation(summary = "차단 유저 목록 조회 API ✔️🔑", description = "차단 유저 목록 조회 API 입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
@@ -460,4 +460,34 @@ public class MemberRestController {
         Page<Follow> follower = memberService.findFollower(member, page);
         return ResponseDto.of(MemberConverter.toFollowerListDto(follower, member));
     }
+
+
+    @Operation(summary = "🎪figma[내집다방 - 회원 정보 수정4] 한줄소개 변경 API 🔑", description = "한줄 소개 변경 API 입니다.")
+    @PatchMapping("/members/caption")
+    @Parameters({
+            @Parameter(name = "member", hidden = true)
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+    })
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateCaption(@AuthMember Member member, MemberRequestDto.changeCaptionDto captionDto) {
+        memberService.updateCaption(member, captionDto);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "UpdateCaption"));
+    }
+
+
+    @Operation(summary = "🎪figma[내집다방 - 프로필 사진 변경2] 기본 프로필로 변경 API 🔑", description = "유저 기본 프로필로 변경 API 입니다.")
+    @PatchMapping("/members/defaultProfile")
+    @Parameters({
+            @Parameter(name = "member", hidden = true)
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+    })
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateProfileDefault(@AuthMember Member member) {
+        memberService.updateProfileDefault(member);
+
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "UpdateProfileDefault"));
+    }
+
 }

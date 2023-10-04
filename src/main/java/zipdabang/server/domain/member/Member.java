@@ -138,6 +138,10 @@ public class Member extends BaseEntity {
         this.nickname = nickname;
     }
 
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
+
     public void inactivateStatus(){
         this.status = StatusType.INACTIVE;}
 }

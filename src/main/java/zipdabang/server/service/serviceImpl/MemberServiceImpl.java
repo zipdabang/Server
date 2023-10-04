@@ -41,12 +41,15 @@ import zipdabang.server.utils.dto.OAuthResult;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,14 +75,23 @@ public class MemberServiceImpl implements MemberService {
 
     private final InqueryRepository inqueryRepository;
     private final AmazonS3Manager s3Manager;
+    private static AmazonS3Manager staticAmazonS3Manager;
     private final DeregisterRepository deregisterRepository;
     private final DeregisterReasonRepository deregisterReasonRepository;
     private final BlockedMemberRepository blockedMemberRepository;
-
     private final FollowRepository followRepository;
+    private static String defaultProfileImage;
 
     @Value("${paging.size}")
     private Integer pageSize;
+
+    @Value("${cloud.aws.s3.user-default-image}")
+    public void setDefaultImage(String value) {
+        defaultProfileImage = value;
+    }
+    @PostConstruct
+    public void init(){
+        this.staticAmazonS3Manager = this.s3Manager;}
 
     @Override
     @Transactional
@@ -396,6 +408,34 @@ public class MemberServiceImpl implements MemberService {
             throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
 
         return followerMember;
+    }
+
+
+    @Override
+    @Transactional
+    public void updateCaption(Member member, MemberRequestDto.changeCaptionDto captionDto) {
+        member.setCaption(captionDto.getCaption());
+
+    }
+
+    public static String toKeyName(String imageUrl) {
+        String input = imageUrl;
+
+        Pattern regex = Pattern.compile(staticAmazonS3Manager.getPattern());
+        Matcher matcher = regex.matcher(input);
+        String extractedString = null;
+        if (matcher.find())
+            extractedString = matcher.group(1);
+
+        return extractedString;
+
+    }
+
+    @Override
+    @Transactional
+    public void updateProfileDefault(Member member) {
+        s3Manager.deleteFile(toKeyName(member.getProfileUrl()).substring(1));
+        member.setProfileUrl(defaultProfileImage);
     }
 }
 
