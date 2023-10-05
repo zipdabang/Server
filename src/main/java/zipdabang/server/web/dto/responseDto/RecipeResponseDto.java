@@ -142,6 +142,7 @@ public class RecipeResponseDto {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class RecipeInfoDto {
         private RecipeDto recipeInfo;
+        private Long ownerId;
         private boolean isOwner;
         private List<StepDto> steps;
         private List<IngredientDto> ingredients;

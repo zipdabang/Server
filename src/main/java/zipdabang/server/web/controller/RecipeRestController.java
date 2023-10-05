@@ -22,6 +22,7 @@ import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
 import zipdabang.server.service.RecipeService;
+import zipdabang.server.validation.annotation.CheckPage;
 import zipdabang.server.validation.annotation.CheckTempMember;
 import zipdabang.server.validation.annotation.ExistRecipeCategory;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
@@ -245,7 +246,6 @@ RecipeRestController {
             @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4053", description = "BAD_REQUEST, 넘겨받은 categoryId와 일치하는 카테고리 없음. 1~6 사이로 보내세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4054", description = "BAD_REQUEST, 페이지 번호 0 이하입니다. 1 이상으로 주세요.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4055", description = "BAD_REQUEST, 페이지 인덱스 범위 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4104", description = "BAD_REQUEST, 조회 방식 타입이 잘못되었습니다. likes, views, lastest중 하나로 보내주세요.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4105", description = "BAD_REQUEST, 해당 id를 가진 레시피 카테고리가 없습니다. 잘못 보내줬어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -254,15 +254,13 @@ RecipeRestController {
     @Parameters({
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 안주면 1으로(최초 페이지) 설정함, 0 이런거 주면 에러 뱉음"),
-            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 조회순: views, 최신순: latest로 넘겨주세요, 기본값 latest")
+            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 이름순: name, 최신순: latest로 넘겨주세요, 기본값 latest")
     })
     @GetMapping(value = "/members/recipes/categories/{categoryId}")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "order", required = false) String order, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "order", required = false) String order, @CheckPage @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
 
         if (pageIndex == null)
             pageIndex = 1;
-        else if (pageIndex < 1)
-            throw new RecipeException(Code.UNDER_PAGE_INDEX_ERROR);
 
         pageIndex -= 1;
 
@@ -315,7 +313,6 @@ RecipeRestController {
             @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4053", description = "BAD_REQUEST, 넘겨받은 categoryId와 일치하는 카테고리 없음. 1~6 사이로 보내세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4054", description = "BAD_REQUEST, 페이지 번호 0 이하입니다. 1 이상으로 주세요.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4055", description = "BAD_REQUEST, 페이지 인덱스 범위 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
@@ -323,11 +320,70 @@ RecipeRestController {
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "writtenby", description = "query string 누가 쓴 레시피 종류인지. 모든 사람: all, 인플루언서: influencer, 우리들: common으로 넘겨주세요"),
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 안주면 0으로(최초 페이지) 설정함, -1 이런거 주면 에러 뱉음"),
-            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 조회순: views, 최신순: latest로 넘겨주세요")
+            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 조회순: name, 최신순: latest로 넘겨주세요")
     })
     @GetMapping(value = "/members/recipes/types")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListWrittenBy(@RequestParam(name = "writtenby") String writtenby, @RequestParam(name = "order") String order, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListWrittenBy(@RequestParam(name = "writtenby") String writtenby, @RequestParam(name = "order") String order, @CheckPage @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
         return null;
+    }
+
+    @Operation(summary = "특정 유저의 레시피 미리보기 목록 API 🔑 ✔", description = "특정 유저의 레시피 미리기보기 목록")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK, 목록이 있을 땐 이 응답임"),
+            @ApiResponse(responseCode = "2100", description = "OK, 목록이 없을 경우, result = null", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 해당 memberId를 가진 사용자가 없습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @GetMapping(value = "/members/recipes/owner/preview/{memberId}")
+    public ResponseDto<RecipeResponseDto.RecipeListDto> recipeByOwnerPreview(@PathVariable Long memberId, @AuthMember Member member) {
+        List<Recipe> recipes = recipeService.getRecipeByOwnerPreview(memberId);
+
+        return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
+    }
+
+    @Operation(summary = "특정 유저의 레시피 목록 API 🔑 ✔", description = "특정 유저의 레시피 목록")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK, 목록이 있을 땐 이 응답임"),
+            @ApiResponse(responseCode = "2100", description = "OK, 목록이 없을 경우, result = null", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 해당 memberId를 가진 사용자가 없습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST, 페이지 인덱스 범위 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 안주면 0으로(최초 페이지) 설정함, -1 이런거 주면 에러 뱉음"),
+            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 조회순: name, 최신순: latest로 넘겨주세요")
+    })
+    @GetMapping(value = "/members/recipes/owner/{memberId}")
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeByOwner(@RequestParam(name = "order") String order,
+                                                                      @CheckPage @RequestParam(name = "pageIndex", required = false) Integer pageIndex,
+                                                                      @PathVariable Long memberId,
+                                                                      @AuthMember Member member) {
+
+        if (pageIndex == null)
+            pageIndex = 1;
+
+        pageIndex -= 1;
+
+        Page<Recipe> recipes = recipeService.getRecipeByOwner(pageIndex, order, memberId);
+
+        log.info(recipes.toString());
+
+        if (recipes.getTotalElements() == 0)
+            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+        if (pageIndex >= recipes.getTotalPages())
+            throw new RecipeException(Code.OVER_PAGE_INDEX_ERROR);
+
+        return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
     }
 
     @Operation(summary = "🏠figma 홈1, 주간 베스트 레시피 API 🔑", description = "이번 주 베스트 레시피 API입니다.")
@@ -442,27 +498,6 @@ RecipeRestController {
 
         return ResponseDto.of(reportedRecipeId+"번 레시피가 신고되었습니다.");
     }
-
-//    @Operation(summary = "레시피 차단 API 🔑 ✔", description = "래시피 차단 API입니다.")
-//    @ApiResponses({
-//            @ApiResponse(responseCode = "2000", description = "OK, 레시피가 차단 되었습니다."),
-//            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4109", description = "BAD_REQUEST, 본인의 레시피입니다. 신고/차단할 수 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//    })
-//    @Parameters({
-//            @Parameter(name = "member", hidden = true),
-//    })
-//    @GetMapping("/members/recipes/{recipeId}/block")
-//    public ResponseDto<String> blockRecipe(@PathVariable(name = "recipeId") Long recipeId, @CheckTempMember @AuthMember Member member) {
-//        Long blockRecipeId = recipeService.blockRecipe(recipeId, member);
-//
-//        return ResponseDto.of(blockRecipeId+"번 레시피가 차단되었습니다.");
-//    }
 
     @Operation(summary = "댓글 등록 API 🔑 ✔", description = "레시피 (작성)등록 API입니다.")
     @ApiResponses({
@@ -592,25 +627,4 @@ RecipeRestController {
         return ResponseDto.of(reportedCommentId+"번 댓글이 신고되었습니다.");
     }
 
-//    @Operation(summary = "댓글 차단 API 🔑 ✔", description = "댓글 차단 API입니다.")
-//    @ApiResponses({
-//            @ApiResponse(responseCode = "2000", description = "OK, 댓글이 차단 되었습니다."),
-//            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4107", description = "BAD_REQUEST, 해당 commentId를 가진 댓글이 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4110", description = "BAD_REQUEST, 본인의 댓글입니다. 신고/차단할 수 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//    })
-//    @Parameters({
-//            @Parameter(name = "member", hidden = true),
-//    })
-//    @GetMapping("/members/recipes/{recipeId}/{commentId}/block")
-//    public ResponseDto<String> blockComment(@PathVariable(name = "recipeId") Long recipeId, @PathVariable(name = "commentId") Long commentId, @CheckTempMember @AuthMember Member member) {
-//        Long blockCommentId = recipeService.blockComment(recipeId, commentId, member);
-//
-//        return ResponseDto.of(blockCommentId+"번 댓글이 차단되었습니다.");
-//    }
 }

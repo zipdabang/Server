@@ -5,6 +5,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.base.Code;
+import zipdabang.server.base.exception.handler.MemberException;
 import zipdabang.server.base.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.Report;
@@ -21,6 +23,7 @@ import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
 import zipdabang.server.repository.ReportRepository;
 import zipdabang.server.repository.memberRepositories.BlockedMemberRepository;
+import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
@@ -55,6 +58,7 @@ public class RecipeServiceImpl implements RecipeService {
     private final ScrapRepository scrapRepository;
     private final AmazonS3Manager amazonS3Manager;
 
+    private final MemberRepository memberRepository;
     private final BlockedMemberRepository blockedMemberRepository;
     private final CommentRepository commentRepository;
     private final ReportRepository reportRepository;
@@ -407,7 +411,7 @@ public class RecipeServiceImpl implements RecipeService {
 
         if(order.equals("likes"))
             orderBy = "totalLike";
-        else if(order.equals("views"))
+        else if(order.equals("name"))
             orderBy = "totalView";
         else if(order.equals("latest"))
             orderBy = "createdAt";
@@ -449,6 +453,29 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         return recipeList;
+    }
+
+    @Override
+    public List<Recipe> getRecipeByOwnerPreview(Long memberId) {
+        Member findMember = memberRepository.findById(memberId).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+
+        QRecipe qRecipe = recipe;
+
+        List<Recipe> recipeList = queryFactory
+                .selectFrom(recipe)
+                .where(
+                        recipe.member.eq(findMember)
+                )
+                .limit(5)
+                .orderBy(recipe.createdAt.desc())
+                .fetch();
+
+        return recipeList;
+    }
+
+    @Override
+    public Page<Recipe> getRecipeByOwner(Integer pageIndex, String order, Long memberId) {
+        return null;
     }
 
     private List<Member> getBlockedMembers(Member member) {

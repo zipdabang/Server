@@ -19,7 +19,7 @@ public class CheckPageValidator implements ConstraintValidator<CheckPage, Intege
 
     @Override
     public boolean isValid(Integer value, ConstraintValidatorContext context) {
-        if(value < 1 || value == null) {
+        if(value < 1) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(Code.UNDER_PAGE_INDEX_ERROR.toString()).addConstraintViolation();
             return false;

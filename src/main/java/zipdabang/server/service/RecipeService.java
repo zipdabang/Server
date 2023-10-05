@@ -59,4 +59,8 @@ public interface RecipeService {
     TempRecipe tempUpdate(Long tempId, RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException;
 
     List<Recipe> getTop5RecipePerCategory(Long categoryId);
+
+    List<Recipe> getRecipeByOwnerPreview(Long memberId);
+
+    Page<Recipe> getRecipeByOwner(Integer pageIndex, String order, Long memberId);
 }
