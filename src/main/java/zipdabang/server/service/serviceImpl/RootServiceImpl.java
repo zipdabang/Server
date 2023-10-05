@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.auth.provider.TokenProvider;
-import zipdabang.server.base.Code;
-import zipdabang.server.base.exception.handler.RootException;
+import zipdabang.server.apiPayload.exception.handler.RootException;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.Report;
 import zipdabang.server.domain.inform.Notification;
@@ -57,16 +57,16 @@ public class RootServiceImpl implements RootService {
                 result = true;
             else if (memberId < 0L){
                 if (memberId.equals(-1L))
-                    throw new RootException(Code.JWT_BAD_REQUEST);
+                    throw new RootException(CommonStatus.JWT_BAD_REQUEST);
                 else if (memberId.equals(-2L))
-                    throw new RootException(Code.JWT_ACCESS_TOKEN_EXPIRED);
+                    throw new RootException(CommonStatus.JWT_ACCESS_TOKEN_EXPIRED);
                 else if (memberId.equals(-3L))
-                    throw new RootException(Code.JWT_UNSUPPORTED_TOKEN);
+                    throw new RootException(CommonStatus.JWT_UNSUPPORTED_TOKEN);
                 else if (memberId.equals(-4L))
-                    throw new RootException(Code.JWT_BAD_REQUEST);
+                    throw new RootException(CommonStatus.JWT_BAD_REQUEST);
             }
             else{
-                Member member = memberRepository.findById(memberId).orElseThrow(() -> new RootException(Code.MEMBER_NOT_FOUND));
+                Member member = memberRepository.findById(memberId).orElseThrow(() -> new RootException(CommonStatus.MEMBER_NOT_FOUND));
                 if(member.getAge() == null || member.getNickname() == null || member.getName() == null || member.getGender() == null)
                     result = false;
                 else

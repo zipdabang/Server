@@ -6,9 +6,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.auth.provider.TokenProvider;
-import zipdabang.server.base.Code;
-import zipdabang.server.base.exception.handler.JwtAuthenticationException;
+import zipdabang.server.apiPayload.exception.handler.JwtAuthenticationException;
 import zipdabang.server.redis.service.RedisService;
 
 import javax.servlet.FilterChain;
@@ -35,12 +35,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             // jwt는 정상적인 형태이나, 로그아웃 한 토큰인가?
             if(!redisService.validateLoginToken(jwt)) {
                 logger.error("이미 로그아웃 된 토큰 발견");
-                throw new JwtAuthenticationException(Code.JWT_FORBIDDEN);
+                throw new JwtAuthenticationException(CommonStatus.JWT_FORBIDDEN);
             }
             Authentication authentication = tokenProvider.getAuthentication(jwt);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }else{
-            throw new JwtAuthenticationException(Code.JWT_TOKEN_NOT_FOUND);
+            throw new JwtAuthenticationException(CommonStatus.JWT_TOKEN_NOT_FOUND);
         }
         filterChain.doFilter(httpServletRequest, response);
     }

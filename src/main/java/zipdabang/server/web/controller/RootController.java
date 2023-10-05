@@ -11,8 +11,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import zipdabang.server.base.Code;
-import zipdabang.server.base.ResponseDto;
+import zipdabang.server.apiPayload.code.CommonStatus;
+import zipdabang.server.apiPayload.reponse.ResponseDto;
 import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.Report;
@@ -73,9 +73,9 @@ public class RootController {
     public ResponseDto<BaseDto.BaseResponseDto> autoLogin(@RequestHeader(value = "Authorization", required = false) String authorizationHeader){
         Boolean autoResult = rootService.autoLoginService(authorizationHeader);
         if(autoResult)
-            return ResponseDto.of(Code.AUTO_LOGIN_MAIN,null);
+            return ResponseDto.of(CommonStatus.AUTO_LOGIN_MAIN,null);
         else
-            return ResponseDto.of(Code.AUTO_LOGIN_NOT_MAIN,null);
+            return ResponseDto.of(CommonStatus.AUTO_LOGIN_NOT_MAIN,null);
     }
 
     @GetMapping("/notices/{noticeId}")

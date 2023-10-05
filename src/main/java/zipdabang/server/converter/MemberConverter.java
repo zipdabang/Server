@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.aws.s3.AmazonS3Manager;
-import zipdabang.server.base.Code;
-import zipdabang.server.base.exception.handler.MemberException;
+import zipdabang.server.apiPayload.exception.handler.MemberException;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.SocialType;
@@ -158,7 +158,7 @@ public class MemberConverter {
     }
 
     public static Member toMember(Long memberId) {
-        return staticMemberRepository.findById(memberId).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+        return staticMemberRepository.findById(memberId).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
     }
 
     public static Member toMemberTemp(Long memberId) {

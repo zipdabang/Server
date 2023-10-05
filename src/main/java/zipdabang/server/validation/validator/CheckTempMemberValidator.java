@@ -2,7 +2,7 @@ package zipdabang.server.validation.validator;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import zipdabang.server.base.Code;
+import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.validation.annotation.CheckTempMember;
 
@@ -23,7 +23,7 @@ public class CheckTempMemberValidator implements ConstraintValidator<CheckTempMe
             Member member = (Member)value;
             if(member.getMemberId().equals(0L)) {
                 context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(Code.TEMP_MEMBER_FORBIDDEN.toString()).addConstraintViolation();
+                context.buildConstraintViolationWithTemplate(CommonStatus.TEMP_MEMBER_FORBIDDEN.toString()).addConstraintViolation();
                 return false;
             }
         }

@@ -14,10 +14,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import zipdabang.server.apiPayload.code.CommonStatus;
+import zipdabang.server.apiPayload.reponse.ResponseDto;
 import zipdabang.server.auth.handler.annotation.AuthMember;
-import zipdabang.server.base.Code;
-import zipdabang.server.base.ResponseDto;
-import zipdabang.server.base.exception.handler.RecipeException;
+import zipdabang.server.apiPayload.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
@@ -145,7 +145,7 @@ RecipeRestController {
         if (recipeDeleteBoolean)
             return ResponseDto.of(recipeId + " 레시피 삭제 완료");
         else
-            throw new RecipeException(Code.INTERNAL_ERROR);
+            throw new RecipeException(CommonStatus.INTERNAL_ERROR);
     }
 
     @Operation(summary = "🍹figma 레시피2, 레시피 검색 카테고리 별 preview 화면 API 🔑 ✔", description = "검색한 레시피 카테고리별 조회 화면 API입니다.")
@@ -197,16 +197,16 @@ RecipeRestController {
         if (pageIndex == null)
             pageIndex = 1;
         else if (pageIndex < 1)
-            throw new RecipeException(Code.UNDER_PAGE_INDEX_ERROR);
+            throw new RecipeException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
 
         pageIndex -= 1;
 
         Page<Recipe> recipes = recipeService.searchRecipe(categoryId, keyword, pageIndex, member);
 
         if (recipes.getTotalElements() == 0)
-            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
         if (pageIndex >= recipes.getTotalPages())
-            throw new RecipeException(Code.OVER_PAGE_INDEX_ERROR);
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
         return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
     }
@@ -262,7 +262,7 @@ RecipeRestController {
         if (pageIndex == null)
             pageIndex = 1;
         else if (pageIndex < 1)
-            throw new RecipeException(Code.UNDER_PAGE_INDEX_ERROR);
+            throw new RecipeException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
 
         pageIndex -= 1;
 
@@ -272,9 +272,9 @@ RecipeRestController {
         log.info(recipes.toString());
 
         if (recipes.getTotalElements() == 0)
-            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
         if (pageIndex >= recipes.getTotalPages())
-            throw new RecipeException(Code.OVER_PAGE_INDEX_ERROR);
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
         return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
     }
@@ -301,7 +301,7 @@ RecipeRestController {
         log.info(recipes.toString());
 
         if (recipes.size() == 0)
-            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
 
         return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
     }
@@ -445,14 +445,14 @@ RecipeRestController {
 
 //    @Operation(summary = "레시피 차단 API 🔑 ✔", description = "래시피 차단 API입니다.")
 //    @ApiResponses({
-//            @ApiResponse(responseCode = "2000", description = "OK, 레시피가 차단 되었습니다."),
-//            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4109", description = "BAD_REQUEST, 본인의 레시피입니다. 신고/차단할 수 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "2000", description = "OK, 레시피가 차단 되었습니다."),
+//            @ApiResponse(responseCommonStatus = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "4109", description = "BAD_REQUEST, 본인의 레시피입니다. 신고/차단할 수 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
 //    })
 //    @Parameters({
 //            @Parameter(name = "member", hidden = true),
@@ -507,7 +507,7 @@ RecipeRestController {
         if (pageIndex == null)
             pageIndex = 1;
         else if (pageIndex < 1)
-            throw new RecipeException(Code.UNDER_PAGE_INDEX_ERROR);
+            throw new RecipeException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
 
         pageIndex -= 1;
 
@@ -517,7 +517,7 @@ RecipeRestController {
         log.info(comments.toString());
 
         if (pageIndex >= comments.getTotalPages())
-            throw new RecipeException(Code.OVER_PAGE_INDEX_ERROR);
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
         return ResponseDto.of(RecipeConverter.toPagingCommentDtoList(comments, member));
     }
@@ -544,7 +544,7 @@ RecipeRestController {
         if (commentDeleteBoolean)
             return ResponseDto.of(commentId + " 댓글 삭제 완료");
         else
-            throw new RecipeException(Code.INTERNAL_ERROR);
+            throw new RecipeException(CommonStatus.INTERNAL_ERROR);
     }
 
     @Operation(summary = "댓글 수정 API 🔑 ✔", description = "댓글 수정 API입니다.")
@@ -594,15 +594,15 @@ RecipeRestController {
 
 //    @Operation(summary = "댓글 차단 API 🔑 ✔", description = "댓글 차단 API입니다.")
 //    @ApiResponses({
-//            @ApiResponse(responseCode = "2000", description = "OK, 댓글이 차단 되었습니다."),
-//            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4107", description = "BAD_REQUEST, 해당 commentId를 가진 댓글이 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "4110", description = "BAD_REQUEST, 본인의 댓글입니다. 신고/차단할 수 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-//            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "2000", description = "OK, 댓글이 차단 되었습니다."),
+//            @ApiResponse(responseCommonStatus = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "4107", description = "BAD_REQUEST, 해당 commentId를 가진 댓글이 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "4110", description = "BAD_REQUEST, 본인의 댓글입니다. 신고/차단할 수 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCommonStatus = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
 //    })
 //    @Parameters({
 //            @Parameter(name = "member", hidden = true),

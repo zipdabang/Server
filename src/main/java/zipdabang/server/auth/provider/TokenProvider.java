@@ -13,8 +13,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import zipdabang.server.base.Code;
-import zipdabang.server.base.exception.handler.JwtAuthenticationException;
+import zipdabang.server.apiPayload.code.CommonStatus;
+import zipdabang.server.apiPayload.exception.handler.JwtAuthenticationException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
@@ -115,14 +115,14 @@ public class TokenProvider implements InitializingBean {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         }catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e){
-            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
+            throw new JwtAuthenticationException(CommonStatus.JWT_BAD_REQUEST);
         }catch (ExpiredJwtException e){
-            if (type == TokenType.ACCESS) throw new JwtAuthenticationException(Code.JWT_ACCESS_TOKEN_EXPIRED);
-            else throw new JwtAuthenticationException(Code.JWT_REFRESH_TOKEN_EXPIRED);
+            if (type == TokenType.ACCESS) throw new JwtAuthenticationException(CommonStatus.JWT_ACCESS_TOKEN_EXPIRED);
+            else throw new JwtAuthenticationException(CommonStatus.JWT_REFRESH_TOKEN_EXPIRED);
         }catch (UnsupportedJwtException e){
-            throw new JwtAuthenticationException(Code.JWT_UNSUPPORTED_TOKEN);
+            throw new JwtAuthenticationException(CommonStatus.JWT_UNSUPPORTED_TOKEN);
         }catch (IllegalArgumentException e){
-            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
+            throw new JwtAuthenticationException(CommonStatus.JWT_BAD_REQUEST);
         }
     }
 
@@ -131,17 +131,17 @@ public class TokenProvider implements InitializingBean {
             Claims body = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
             return Long.valueOf(body.getSubject());
         }catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e){
-//            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
+//            throw new JwtAuthenticationException(CommonStatus.JWT_BAD_REQUEST);
             return -1L;
         }catch(ExpiredJwtException e){
-//            throw new JwtAuthenticationException(Code.JWT_ACCESS_TOKEN_EXPIRED);
+//            throw new JwtAuthenticationException(CommonStatus.JWT_ACCESS_TOKEN_EXPIRED);
             return -2L;
         }
         catch (UnsupportedJwtException e){
-//            throw new JwtAuthenticationException(Code.JWT_UNSUPPORTED_TOKEN);
+//            throw new JwtAuthenticationException(CommonStatus.JWT_UNSUPPORTED_TOKEN);
             return -3L;
         }catch (IllegalArgumentException e){
-//            throw new JwtAuthenticationException(Code.JWT_BAD_REQUEST);
+//            throw new JwtAuthenticationException(CommonStatus.JWT_BAD_REQUEST);
             return -4L;
         }
     }
