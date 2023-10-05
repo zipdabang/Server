@@ -390,7 +390,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "Unblock"));
     }
 
-    @Operation(summary = "차단 유저 목록 조회 API 🔑", description = "차단 유저 목록 조회 API 입니다.")
+    @Operation(summary = "차단 유저 목록 조회 API ✔️🔑", description = "차단 유저 목록 조회 API 입니다.")
     @Parameters({
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
@@ -459,5 +459,56 @@ public class MemberRestController {
         Page<Follow> follower = memberService.findFollower(member, page);
         return ResponseDto.of(MemberConverter.toFollowerListDto(follower, member));
     }
+
+
+    @Operation(summary = "🎪figma[내집다방 - 회원 정보 수정4] 한줄소개 변경 API ✔️🔑", description = "한줄 소개 변경 API 입니다.")
+    @PatchMapping("/members/caption")
+    @Parameters({
+            @Parameter(name = "member", hidden = true)
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+    })
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateCaption(@AuthMember Member member, MemberRequestDto.changeCaptionDto captionDto) {
+        memberService.updateCaption(member, captionDto);
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "UpdateCaption"));
+    }
+
+
+    @Operation(summary = "🎪figma[내집다방 - 프로필 사진 변경2] 기본 프로필로 변경 API ✔️🔑", description = "유저 기본 프로필로 변경 API 입니다.")
+    @PatchMapping("/members/defaultProfile")
+    @Parameters({
+            @Parameter(name = "member", hidden = true)
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+    })
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateProfileDefault(@AuthMember Member member) {
+        memberService.updateProfileDefault(member);
+
+        return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "UpdateProfileDefault"));
+    }
+
+
+    @Operation(summary = "🎪figma[내집다방 - 원본] 내집다방 화면 조회 API ✔️🔑", description = "내집다방 화면 조회 API 입니다.<br>"
+            + "\"checkSelf\" : 자신의 내집다방을 조회하는 경우 true, 남이면 false <br>"
+            +"\"checkFollowing\" : 자신이 follow하는 사람이면 true, 아니면 false")
+    @GetMapping("/members/myZipdabang")
+    @Parameters({
+            @Parameter(name = "member", hidden = true)
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+            @ApiResponse(responseCode = "4052", description = "해당 사용자가 존재하지 않습니다."),
+            @ApiResponse(responseCode = "4059", description = "로그인 후 조회 가능합니다."),
+            @ApiResponse(responseCode = "4066", description = "내가 차단한 사용자입니다."),
+    })
+    public ResponseDto<MemberResponseDto.MyZipdabangDto> getMyZipdabang(@CheckTempMember @AuthMember Member member, Long targetMemberId) {
+
+        return ResponseDto.of(memberService.getMyZipdabang(member, targetMemberId));
+
+
+    }
+
 }
 

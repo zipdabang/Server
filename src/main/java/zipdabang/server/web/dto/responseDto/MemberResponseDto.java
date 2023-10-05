@@ -268,4 +268,21 @@ public class MemberResponseDto {
         Boolean isFirst;
         Boolean isLast;
     }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class MyZipdabangDto{
+        Long memberId;
+        String imageUrl;
+        boolean checkSelf;
+        boolean checkFollowing;
+        String nickname;
+        String caption;
+        MemberPreferCategoryDto memberPreferCategoryDto;
+        Long followerCount;
+        Long followingCount;
+
+    }
 }

@@ -150,6 +150,12 @@ public class MemberRequestDto {
 
     @Getter
     @Setter
+    public static class changeCaptionDto {
+        String caption;
+    }
+
+    @Getter
+    @Setter
     public static class changeProfileDto {
         private MultipartFile newProfile;
     }

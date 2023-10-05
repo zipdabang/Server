@@ -92,6 +92,9 @@ public enum CommonStatus implements BaseCode {
     //FORBIDDEN
     SELF_FOLLOW_FORBIDDEN(HttpStatus.OK, 4065, "스스로 팔로우는 안됩니다."),
 
+    BLOCKED_MEMBER(HttpStatus.OK, 4066, "내가 차단한 사용자입니다."),
+
+
     // market error
 
     //recipe error

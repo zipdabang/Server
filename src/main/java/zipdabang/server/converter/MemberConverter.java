@@ -17,7 +17,9 @@ import zipdabang.server.domain.member.Deregister;
 import zipdabang.server.domain.member.Terms;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.MemberPreferCategory;
+import zipdabang.server.repository.memberRepositories.FollowRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
+import zipdabang.server.service.MemberService;
 import zipdabang.server.utils.converter.TimeConverter;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
@@ -46,6 +48,8 @@ public class MemberConverter {
     private static String defaultProfileImage;
 
     private static AmazonS3Manager staticAmazonS3Manager;
+    private final MemberService memberService;
+    private static MemberService staticMemberService;
 
     @Value("${cloud.aws.s3.user-default-image}")
     public void setDefaultImage(String value) {
@@ -116,6 +120,7 @@ public class MemberConverter {
     public void init() {
         this.staticMemberRepository = this.memberRepository;
         this.staticAmazonS3Manager = amazonS3Manager;
+        this.staticMemberService = memberService;
     }
 
 
@@ -397,6 +402,21 @@ public class MemberConverter {
                 .totalPage(followList.getTotalPages())
                 .totalElements(followList.getTotalElements())
                 .currentPageElements(followList.getNumberOfElements())
+                .build();
+    }
+
+    public static MemberResponseDto.MyZipdabangDto toMyZipdabangDto(Member member, boolean checkSelf, boolean isFollowing,MemberResponseDto.MemberPreferCategoryDto memberPreferCategoryDto) {
+
+        return MemberResponseDto.MyZipdabangDto.builder()
+                .memberId(member.getMemberId())
+                .imageUrl(member.getProfileUrl())
+                .checkSelf(checkSelf)
+                .checkFollowing(isFollowing)
+                .nickname(member.getNickname())
+                .caption(member.getCaption())
+                .memberPreferCategoryDto(memberPreferCategoryDto)
+                .followerCount(staticMemberService.getFollowerCount(member))
+                .followingCount(staticMemberService.getFollowingCount(member))
                 .build();
     }
 }

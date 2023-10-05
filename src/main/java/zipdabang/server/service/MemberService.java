@@ -63,8 +63,13 @@ public interface MemberService {
     public Follow toggleFollow(Long targetId, Member member);
 
     Page<Follow> findFollowing(Member member, Integer page);
+    public Long getFollowingCount(Member member);
 
     Page<Follow> findFollower(Member member, Integer page);
+    public Long getFollowerCount(Member member);
 
+    public void updateCaption(Member member, MemberRequestDto.changeCaptionDto captionDto);
+    public void updateProfileDefault(Member member);
     Boolean checkFollowing(Member loginMember, Member targetMember);
-}
+    public MemberResponseDto.MyZipdabangDto getMyZipdabang(Member member, Long targetId);
+    }

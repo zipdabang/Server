@@ -12,7 +12,13 @@ import java.util.Optional;
 public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     Page<Follow> findAllByFollowee(Member member, PageRequest pageRequest);
+    Long countByFollowee(Member followee);
+
     Page<Follow> findAllByFollower(Member member, PageRequest pageRequest);
 
+    Long countByFollower(Member follower);
     Optional<Follow> findByFollowerAndFollowee(Member follower, Member followee);
+
+    boolean existsByFollowerAndFollowee(Member follower, Member followee);
+
 }
