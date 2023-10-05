@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
-import zipdabang.server.base.Code;
+import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.base.exception.common.ApiErrorResult;
 
 import javax.servlet.ServletException;
@@ -27,8 +27,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         PrintWriter writer = response.getWriter();
         ApiErrorResult apiErrorResult = ApiErrorResult.builder()
                 .isSuccess(false)
-                .code(Code.UNAUTHORIZED.getCode())
-                .message(Code.UNAUTHORIZED.getMessage())
+                .code(CommonStatus.UNAUTHORIZED.getCode())
+                .message(CommonStatus.UNAUTHORIZED.getMessage())
                 .result(null)
                 .build();
         try {

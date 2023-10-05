@@ -1,7 +1,6 @@
 package zipdabang.server.validation.validator;
 
-import zipdabang.server.base.Code;
-import zipdabang.server.domain.member.Deregister;
+import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.validation.annotation.CheckDeregister;
 
@@ -24,7 +23,7 @@ public class CheckDeregisterValidator implements ConstraintValidator<CheckDeregi
             }
             if (member.getZipCode().equals("TEST")) {
                 context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(Code.DEREGISTER_FAIL.toString()).addConstraintViolation();
+                context.buildConstraintViolationWithTemplate(CommonStatus.DEREGISTER_FAIL.toString()).addConstraintViolation();
                 return false;
             }
         }

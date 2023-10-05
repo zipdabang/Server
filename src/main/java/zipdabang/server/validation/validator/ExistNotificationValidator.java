@@ -2,7 +2,7 @@ package zipdabang.server.validation.validator;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import zipdabang.server.base.Code;
+import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.domain.inform.Notification;
 import zipdabang.server.repository.NotificationRepository;
 import zipdabang.server.validation.annotation.ExistNotification;
@@ -27,7 +27,7 @@ public class ExistNotificationValidator implements ConstraintValidator<ExistNoti
         Optional<Notification> foundNotification = notificationRepository.findById(value);
         if(foundNotification.isEmpty()){
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(Code.NOTIFICATION_NOT_FOUND.toString()).addConstraintViolation();
+            context.buildConstraintViolationWithTemplate(CommonStatus.NOTIFICATION_NOT_FOUND.toString()).addConstraintViolation();
             return false;
         }
         return true;

@@ -10,9 +10,9 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.auth.handler.annotation.AuthMember;
-import zipdabang.server.base.Code;
-import zipdabang.server.base.exception.handler.MemberException;
+import zipdabang.server.apiPayload.exception.handler.MemberException;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.member.Member;
 
@@ -38,7 +38,7 @@ public class AuthMemberArgumentResolver implements HandlerMethodArgumentResolver
             principal = authentication.getPrincipal();
         }
         if (principal == null || principal.getClass() == String.class) {
-            throw new MemberException(Code.MEMBER_NOT_FOUND);
+            throw new MemberException(CommonStatus.MEMBER_NOT_FOUND);
         }
 
         UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) authentication;

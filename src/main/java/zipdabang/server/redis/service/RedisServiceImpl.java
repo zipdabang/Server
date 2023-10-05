@@ -5,10 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.auth.provider.TokenProvider;
-import zipdabang.server.base.Code;
-import zipdabang.server.base.exception.handler.MemberException;
-import zipdabang.server.base.exception.handler.RefreshTokenExceptionHandler;
+import zipdabang.server.apiPayload.exception.handler.MemberException;
+import zipdabang.server.apiPayload.exception.handler.RefreshTokenExceptionHandler;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.redis.domain.LoginStatus;
 import zipdabang.server.redis.domain.RefreshToken;
@@ -40,7 +40,7 @@ public class RedisServiceImpl implements RedisService {
     @Override
     @Transactional
     public RefreshToken generateRefreshToken(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
 
         String token = UUID.randomUUID().toString();
         Long memberId = member.getMemberId();
@@ -62,17 +62,17 @@ public class RedisServiceImpl implements RedisService {
     @Transactional
     public RefreshToken reGenerateRefreshToken(MemberRequestDto.IssueTokenDto request) {
         if(request.getRefreshToken() == null)
-            throw new MemberException(Code.REFRESH_TOKEN_NOT_FOUND);
-        RefreshToken findRefreshToken = refreshTokenRepository.findById(request.getRefreshToken()).orElseThrow(() -> new RefreshTokenExceptionHandler(Code.JWT_REFRESH_TOKEN_EXPIRED));
+            throw new MemberException(CommonStatus.REFRESH_TOKEN_NOT_FOUND);
+        RefreshToken findRefreshToken = refreshTokenRepository.findById(request.getRefreshToken()).orElseThrow(() -> new RefreshTokenExceptionHandler(CommonStatus.JWT_REFRESH_TOKEN_EXPIRED));
         LocalDateTime expireTime = findRefreshToken.getExpireTime();
         LocalDateTime current = LocalDateTime.now();
         LocalDateTime expireDeadLine = current.plusSeconds(20);
 
-        Member member = memberRepository.findById(findRefreshToken.getMemberId()).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+        Member member = memberRepository.findById(findRefreshToken.getMemberId()).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
 
         if(current.isAfter(expireTime)) {
             logger.error("이미 만료된 리프레시 토큰 발견");
-            throw new RefreshTokenExceptionHandler(Code.JWT_REFRESH_TOKEN_EXPIRED);
+            throw new RefreshTokenExceptionHandler(CommonStatus.JWT_REFRESH_TOKEN_EXPIRED);
         }
 
         // 새로 발급할 accessToken보다 refreshToken이 먼저 만료 될 경우인가?
