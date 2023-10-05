@@ -348,7 +348,12 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<RecipeCategory> getAllRecipeCategories() {
-        return recipeCategoryRepository.findAll();
+
+        List<RecipeCategory> categoryList = recipeCategoryRepository.findAll();
+        RecipeCategory all = categoryList.remove(0);
+        categoryList.add(all);
+
+        return categoryList;
     }
 
     @Override
