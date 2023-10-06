@@ -49,9 +49,10 @@ public class RecipeResponseDto {
         private String nickname;
         private String thumbnailUrl;
         private Long likes;
-        private Long scraps;
+        private Long comments;
         private Boolean isLiked;
         private Boolean isScrapped;
+        private Integer rank;
     }
 
     @Builder
@@ -71,6 +72,34 @@ public class RecipeResponseDto {
         private Long scraps;
         private Boolean isLiked;
         private Boolean isScrapped;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RecipeSimpleDtoBest {
+        private Long recipeId;
+        private String recipeName;
+        private String nickname;
+        private String thumbnailUrl;
+        private String createdAt;
+        private String updatedAt;
+        private Long likes;
+        private Long comments;
+        private Long scraps;
+        private Boolean isLiked;
+        private Boolean isScrapped;
+        private Integer rank;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class WeekBestDtoList {
+        private List<RecipeSimpleDtoBest> recipeList;
+        Integer totalElements;
     }
 
     @Builder

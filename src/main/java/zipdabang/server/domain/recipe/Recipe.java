@@ -43,8 +43,9 @@ public class Recipe extends BaseEntity {
     @Column(nullable = false)
     private String time;
 
-    @Column(columnDefinition = "FLOAT DEFAULT 0")
-    private Float starScore;
+    @Column(columnDefinition = "BIGINT DEFAULT 0")
+    private Long totalComments;
+
     @Column(columnDefinition = "BIGINT DEFAULT 0")
     private Long totalView;
 
@@ -93,6 +94,11 @@ public class Recipe extends BaseEntity {
 
     public Recipe setThumbnail(String imageUrl) {
         this.thumbnailUrl = imageUrl;
+        return this;
+    }
+
+    public Recipe updateComment(Integer i) {
+        this.totalComments += i;
         return this;
     }
 

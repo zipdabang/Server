@@ -63,4 +63,6 @@ public interface RecipeService {
     List<Recipe> getRecipeByOwnerPreview(Long memberId);
 
     Page<Recipe> getRecipeByOwner(Integer pageIndex, String order, Long memberId);
+
+    List<WeeklyBestRecipe> WeekBestRecipe();
 }

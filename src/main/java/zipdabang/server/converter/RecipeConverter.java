@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,24 +65,28 @@ public class RecipeConverter {
     private static TimeConverter staticTimeConverter;
 
     public static RecipeResponseDto.PerCategoryPreview toPerCategoryPreview(Long categoryId, List<Recipe> recipeList, Member member) {
+
+        AtomicInteger index = new AtomicInteger(1);
+
         return RecipeResponseDto.PerCategoryPreview.builder()
                 .categoryId(categoryId)
                 .totalElements(recipeList.size())
                 .recipeList(recipeList.stream()
-                        .map(recipe -> toRecipePreviewDto(recipe,member))
+                        .map(recipe -> toRecipePreviewDto(recipe,member, index.getAndIncrement()))
                         .collect(Collectors.toList()))
                 .build();
     }
 
-    public static RecipeResponseDto.RecipePreviewDto toRecipePreviewDto(Recipe recipe, Member member) {
+    public static RecipeResponseDto.RecipePreviewDto toRecipePreviewDto(Recipe recipe, Member member, Integer rank) {
         return RecipeResponseDto.RecipePreviewDto.builder()
                 .recipeId(recipe.getId())
                 .recipeName(recipe.getName())
                 .nickname(recipe.getMember().getNickname())
                 .likes(recipe.getTotalLike())
-                .scraps(recipe.getTotalScrap())
+                .comments(recipe.getTotalComments())
                 .isLiked(staticLikesRepository.findByRecipeAndMember(recipe, member).isPresent())
                 .isScrapped(staticScrapRepository.findByRecipeAndMember(recipe,member).isPresent())
+                .rank(rank)
                 .build();
     }
 
@@ -112,6 +117,32 @@ public class RecipeConverter {
                 .isLast(recipes.isLast())
                 .build();
 
+    }
+
+    public static RecipeResponseDto.WeekBestDtoList toWeekBestDtoList(List<WeeklyBestRecipe> bestRecipes, Member member) {
+        return RecipeResponseDto.WeekBestDtoList.builder()
+                .recipeList(bestRecipes.stream()
+                        .map(bestRecipe -> toResponseWeekBestDto(bestRecipe.getRecipe(), member, bestRecipe.getRanking()))
+                        .collect(Collectors.toList()))
+                .totalElements(bestRecipes.size())
+                .build();
+    }
+
+    private static RecipeResponseDto.RecipeSimpleDtoBest toResponseWeekBestDto(Recipe recipe, Member member, Integer rank) {
+        return RecipeResponseDto.RecipeSimpleDtoBest.builder()
+                .rank(rank)
+                .recipeId(recipe.getId())
+                .recipeName(recipe.getName())
+                .nickname(recipe.getMember().getNickname())
+                .thumbnailUrl(recipe.getThumbnailUrl())
+                .createdAt(staticTimeConverter.ConvertTime(recipe.getCreatedAt()))
+                .updatedAt(staticTimeConverter.ConvertTime(recipe.getUpdatedAt()))
+                .likes(recipe.getTotalLike())
+                .comments(recipe.getTotalComments())
+                .scraps(recipe.getTotalScrap())
+                .isLiked(staticLikesRepository.findByRecipeAndMember(recipe, member).isPresent())
+                .isScrapped(staticScrapRepository.findByRecipeAndMember(recipe,member).isPresent())
+                .build();
     }
 
     public static RecipeResponseDto.RecipeListDto toPreviewRecipeDtoList(List<Recipe> recipes, Member member) {

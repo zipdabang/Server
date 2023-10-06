@@ -254,7 +254,7 @@ RecipeRestController {
     @Parameters({
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 안주면 1으로(최초 페이지) 설정함, 0 이런거 주면 에러 뱉음"),
-            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 이름순: name, 최신순: latest로 넘겨주세요, 기본값 latest")
+            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 팔로우순: follow, 최신순: latest로 넘겨주세요, 기본값 latest")
     })
     @GetMapping(value = "/members/recipes/categories/{categoryId}")
     public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "order", required = false) String order, @CheckPage @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
@@ -386,7 +386,7 @@ RecipeRestController {
         return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
     }
 
-    @Operation(summary = "🏠figma 홈1, 주간 베스트 레시피 API 🔑", description = "이번 주 베스트 레시피 API입니다.")
+    @Operation(summary = "🏠figma 홈1, 주간 베스트 레시피 API 🔑 ✔", description = "이번 주 베스트 레시피 API입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000", description = "OK, 목록이 있을 땐 이 응답임"),
             @ApiResponse(responseCode = "2100", description = "OK, 목록이 없을 경우, result = null", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -400,8 +400,10 @@ RecipeRestController {
             @Parameter(name = "member", hidden = true),
     })
     @GetMapping(value = "/members/recipes/week-best")
-    public ResponseDto<RecipeResponseDto.RecipeListDto> recipeWeekBest(@AuthMember Member member) {
-        return null;
+    public ResponseDto<RecipeResponseDto.WeekBestDtoList> recipeWeekBest(@AuthMember Member member) {
+        List<WeeklyBestRecipe> bestRecipes = recipeService.WeekBestRecipe();
+
+        return ResponseDto.of(RecipeConverter.toWeekBestDtoList(bestRecipes, member));
     }
 
     @Operation(summary = "레시피 스크랩/취소 API 🔑 ✔", description = "레시피 스크랩/취소 API입니다.")
