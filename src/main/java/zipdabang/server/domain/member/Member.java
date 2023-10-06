@@ -54,7 +54,7 @@ public class Member extends BaseEntity {
     private GenderType gender;
 
     @Column(columnDefinition = "boolean default false")
-    private boolean isInfluencer;
+    private boolean isBarista;
 
     @Column(length = 5)
     private String zipCode;

@@ -3,6 +3,7 @@ package zipdabang.server.validation.validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import zipdabang.server.apiPayload.code.CommonStatus;
+import zipdabang.server.apiPayload.code.RecipeStatus;
 import zipdabang.server.domain.recipe.RecipeCategory;
 import zipdabang.server.repository.recipeRepositories.RecipeCategoryRepository;
 import zipdabang.server.validation.annotation.ExistRecipeCategory;
@@ -27,7 +28,7 @@ public class ExistRecipeCategoryValidator implements ConstraintValidator<ExistRe
         Optional<RecipeCategory> findRecipeCategory = recipeCategoryRepository.findById(value);
         if(findRecipeCategory.isEmpty()){
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(CommonStatus.NO_RECIPE_CATEGORY_EXIST.toString()).addConstraintViolation();
+            context.buildConstraintViolationWithTemplate(RecipeStatus.NO_RECIPE_CATEGORY_EXIST.toString()).addConstraintViolation();
             return false;
         }
         return true;
