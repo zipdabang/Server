@@ -26,7 +26,10 @@ public class Recipe extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Boolean isInfluencer;
+    private Boolean isBarista;
+
+    @Column(nullable = false)
+    private Boolean isOfficial;
 
     @Column(nullable = false)
     private String name;

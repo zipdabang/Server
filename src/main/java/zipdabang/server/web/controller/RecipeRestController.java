@@ -286,12 +286,12 @@ RecipeRestController {
             @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4103", description = "BAD_REQUEST, 레시피 작성자 타입이 잘못되었습니다. all, influencer, common중 하나로 보내주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4103", description = "BAD_REQUEST, 레시피 작성자 타입이 잘못되었습니다. official, barista, common중 하나로 보내주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
-            @Parameter(name = "writtenby", description = "query string 누가 쓴 레시피 종류인지. 모든 사람: all, 인플루언서: influencer, 우리들: common으로 넘겨주세요")
+            @Parameter(name = "writtenby", description = "query string 누가 쓴 레시피 종류인지. 공식: official, 바리스타: barista, 우리들: common으로 넘겨주세요")
     })
     @GetMapping(value = "/members/recipes/types/preview")
     public ResponseDto<RecipeResponseDto.RecipeListDto> recipeListPreviewWrittenBy(@RequestParam(name = "writtenby") String writtenby, @AuthMember Member member) {
@@ -319,7 +319,7 @@ RecipeRestController {
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
-            @Parameter(name = "writtenby", description = "query string 누가 쓴 레시피 종류인지. 모든 사람: all, 인플루언서: influencer, 우리들: common으로 넘겨주세요"),
+            @Parameter(name = "writtenby", description = "query string 누가 쓴 레시피 종류인지. 공식: official, 바리스타: barista, 우리들: common으로 넘겨주세요"),
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, -1 이런거 주면 에러 뱉음"),
             @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 조회순: name, 최신순: latest로 넘겨주세요")
     })

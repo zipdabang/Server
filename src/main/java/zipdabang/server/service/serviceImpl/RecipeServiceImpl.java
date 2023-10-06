@@ -288,12 +288,12 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     private BooleanExpression checkWrittenBy(String writtenby) {
-        if (writtenby.equals("influencer"))
-            return recipe.isInfluencer.eq(true);
+        if (writtenby.equals("barista"))
+            return recipe.isBarista.eq(true);
         else if (writtenby.equals("common"))
-            return recipe.isInfluencer.eq(false);
-        else if (writtenby.equals("all"))
-            return null;
+            return recipe.isBarista.eq(false);
+        else if (writtenby.equals("official"))
+            return recipe.isOfficial.eq(true);
         else
             throw new RecipeException(RecipeStatus.WRITTEN_BY_TYPE_ERROR);
     }

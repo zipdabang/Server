@@ -307,7 +307,7 @@ public class RecipeConverter {
     public static Recipe toRecipe(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, Member member) throws IOException {
 
         Recipe recipe = Recipe.builder()
-                .isInfluencer(member.isInfluencer())
+                .isBarista(member.isBarista())
                 .name(request.getName())
                 .intro(request.getIntro())
                 .recipeTip(request.getRecipeTip())
@@ -328,7 +328,7 @@ public class RecipeConverter {
     public static TempRecipe toTempRecipe(RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, Member member) throws IOException {
 
         TempRecipe tempRecipe = TempRecipe.builder()
-                .isInfluencer(member.isInfluencer())
+                .isBarista(member.isBarista())
                 .name(request.getName())
                 .intro(request.getIntro())
                 .recipeTip(request.getRecipeTip())

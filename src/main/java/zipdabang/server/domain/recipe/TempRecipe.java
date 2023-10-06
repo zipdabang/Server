@@ -29,7 +29,7 @@ public class TempRecipe extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Boolean isInfluencer;
+    private Boolean isBarista;
 
     private String name;
 
