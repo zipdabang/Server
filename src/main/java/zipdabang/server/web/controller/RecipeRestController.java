@@ -14,10 +14,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import zipdabang.server.apiPayload.code.CommonStatus;
+import zipdabang.server.apiPayload.code.RecipeStatus;
+import zipdabang.server.apiPayload.reponse.ResponseDto;
 import zipdabang.server.auth.handler.annotation.AuthMember;
-import zipdabang.server.base.Code;
-import zipdabang.server.base.ResponseDto;
-import zipdabang.server.base.exception.handler.RecipeException;
+import zipdabang.server.apiPayload.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
@@ -146,7 +147,7 @@ RecipeRestController {
         if (recipeDeleteBoolean)
             return ResponseDto.of(recipeId + " 레시피 삭제 완료");
         else
-            throw new RecipeException(Code.INTERNAL_ERROR);
+            throw new RecipeException(CommonStatus.INTERNAL_ERROR);
     }
 
     @Operation(summary = "🍹figma 레시피2, 레시피 검색 카테고리 별 preview 화면 API 🔑 ✔", description = "검색한 레시피 카테고리별 조회 화면 API입니다.")
@@ -189,25 +190,25 @@ RecipeRestController {
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
-            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 안주면 1으로(최초 페이지) 설정함, 0 이런거 주면 에러 뱉음"),
+            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, 0 이런거 주면 에러 뱉음"),
             @Parameter(name = "keyword", description = "query string 검색할 단어")
     })
     @GetMapping(value = "/members/recipes/search/{categoryId}")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "keyword") String keyword, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "keyword") String keyword, @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
 
         if (pageIndex == null)
             pageIndex = 1;
         else if (pageIndex < 1)
-            throw new RecipeException(Code.UNDER_PAGE_INDEX_ERROR);
+            throw new RecipeException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
 
         pageIndex -= 1;
 
         Page<Recipe> recipes = recipeService.searchRecipe(categoryId, keyword, pageIndex, member);
 
         if (recipes.getTotalElements() == 0)
-            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+            throw new RecipeException(RecipeStatus.RECIPE_NOT_FOUND);
         if (pageIndex >= recipes.getTotalPages())
-            throw new RecipeException(Code.OVER_PAGE_INDEX_ERROR);
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
         return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
     }
@@ -253,11 +254,11 @@ RecipeRestController {
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
-            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 안주면 1으로(최초 페이지) 설정함, 0 이런거 주면 에러 뱉음"),
+            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, 0 이런거 주면 에러 뱉음"),
             @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 팔로우순: follow, 최신순: latest로 넘겨주세요, 기본값 latest")
     })
     @GetMapping(value = "/members/recipes/categories/{categoryId}")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "order", required = false) String order, @CheckPage @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "order", required = false) String order, @CheckPage @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
 
         if (pageIndex == null)
             pageIndex = 1;
@@ -270,9 +271,9 @@ RecipeRestController {
         log.info(recipes.toString());
 
         if (recipes.getTotalElements() == 0)
-            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+            throw new RecipeException(RecipeStatus.RECIPE_NOT_FOUND);
         if (pageIndex >= recipes.getTotalPages())
-            throw new RecipeException(Code.OVER_PAGE_INDEX_ERROR);
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
         return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
     }
@@ -299,7 +300,7 @@ RecipeRestController {
         log.info(recipes.toString());
 
         if (recipes.size() == 0)
-            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+            throw new RecipeException(RecipeStatus.RECIPE_NOT_FOUND);
 
         return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
     }
@@ -319,11 +320,11 @@ RecipeRestController {
     @Parameters({
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "writtenby", description = "query string 누가 쓴 레시피 종류인지. 모든 사람: all, 인플루언서: influencer, 우리들: common으로 넘겨주세요"),
-            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 안주면 0으로(최초 페이지) 설정함, -1 이런거 주면 에러 뱉음"),
+            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, -1 이런거 주면 에러 뱉음"),
             @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 조회순: name, 최신순: latest로 넘겨주세요")
     })
     @GetMapping(value = "/members/recipes/types")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListWrittenBy(@RequestParam(name = "writtenby") String writtenby, @RequestParam(name = "order") String order, @CheckPage @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListWrittenBy(@RequestParam(name = "writtenby") String writtenby, @RequestParam(name = "order") String order, @CheckPage @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
         return null;
     }
 
@@ -360,28 +361,25 @@ RecipeRestController {
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
-            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 안주면 0으로(최초 페이지) 설정함, -1 이런거 주면 에러 뱉음"),
-            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 조회순: name, 최신순: latest로 넘겨주세요")
+            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, -1 이런거 주면 에러 뱉음"),
     })
     @GetMapping(value = "/members/recipes/owner/{memberId}")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeByOwner(@RequestParam(name = "order") String order,
-                                                                      @CheckPage @RequestParam(name = "pageIndex", required = false) Integer pageIndex,
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeByOwner(@CheckPage @RequestParam(name = "pageIndex") Integer pageIndex,
                                                                       @PathVariable Long memberId,
                                                                       @AuthMember Member member) {
-
         if (pageIndex == null)
             pageIndex = 1;
 
         pageIndex -= 1;
 
-        Page<Recipe> recipes = recipeService.getRecipeByOwner(pageIndex, order, memberId);
+        Page<Recipe> recipes = recipeService.getRecipeByOwner(pageIndex, memberId);
 
         log.info(recipes.toString());
 
         if (recipes.getTotalElements() == 0)
-            throw new RecipeException(Code.RECIPE_NOT_FOUND);
+            throw new RecipeException(RecipeStatus.RECIPE_NOT_FOUND);
         if (pageIndex >= recipes.getTotalPages())
-            throw new RecipeException(Code.OVER_PAGE_INDEX_ERROR);
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
         return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
     }
@@ -536,15 +534,15 @@ RecipeRestController {
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
-            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 안주면 1으로(최초 페이지) 설정함, 0 이런거 주면 에러 뱉음"),
+            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, 0 이런거 주면 에러 뱉음"),
     })
     @GetMapping(value = "/members/recipes/{recipeId}/comments")
-    public ResponseDto<RecipeResponseDto.CommentPageListDto> searchRecipe(@PathVariable Long recipeId, @RequestParam(name = "pageIndex", required = false) Integer pageIndex, @AuthMember Member member) {
+    public ResponseDto<RecipeResponseDto.CommentPageListDto> searchRecipe(@PathVariable Long recipeId, @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
 
         if (pageIndex == null)
             pageIndex = 1;
         else if (pageIndex < 1)
-            throw new RecipeException(Code.UNDER_PAGE_INDEX_ERROR);
+            throw new RecipeException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
 
         pageIndex -= 1;
 
@@ -554,7 +552,7 @@ RecipeRestController {
         log.info(comments.toString());
 
         if (pageIndex >= comments.getTotalPages())
-            throw new RecipeException(Code.OVER_PAGE_INDEX_ERROR);
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
         return ResponseDto.of(RecipeConverter.toPagingCommentDtoList(comments, member));
     }
@@ -581,7 +579,7 @@ RecipeRestController {
         if (commentDeleteBoolean)
             return ResponseDto.of(commentId + " 댓글 삭제 완료");
         else
-            throw new RecipeException(Code.INTERNAL_ERROR);
+            throw new RecipeException(CommonStatus.INTERNAL_ERROR);
     }
 
     @Operation(summary = "댓글 수정 API 🔑 ✔", description = "댓글 수정 API입니다.")
@@ -628,5 +626,4 @@ RecipeRestController {
 
         return ResponseDto.of(reportedCommentId+"번 댓글이 신고되었습니다.");
     }
-
 }

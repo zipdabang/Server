@@ -2,14 +2,14 @@ package zipdabang.server.converter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.client.loadbalancer.RetryableStatusCodeException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 //import zipdabang.server.aws.s3.AmazonS3Manager;
+import zipdabang.server.apiPayload.code.CommonStatus;
+import zipdabang.server.apiPayload.code.RecipeStatus;
 import zipdabang.server.aws.s3.AmazonS3Manager;
-import zipdabang.server.base.Code;
-import zipdabang.server.base.exception.handler.RecipeException;
+import zipdabang.server.apiPayload.exception.handler.RecipeException;
 import zipdabang.server.domain.Report;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.Member;
@@ -21,7 +21,6 @@ import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,8 +28,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static org.apache.logging.log4j.ThreadContext.isEmpty;
 
 @Slf4j
 @Component
@@ -194,7 +191,7 @@ public class RecipeConverter {
         return request.getSteps().stream()
                 .map(step-> {
                     if (step.getDescription() == null)
-                        throw new RecipeException(Code.NULL_RECIPE_ERROR);
+                        throw new RecipeException(RecipeStatus.NULL_RECIPE_ERROR);
                     try {
                         return toStepDto(step, recipe, stepImages);
                     } catch (IOException e) {
@@ -322,7 +319,7 @@ public class RecipeConverter {
         if(thumbnail != null)
             imageUrl = uploadThumbnail(thumbnail);
         else
-            throw new RecipeException(Code.NULL_RECIPE_ERROR);
+            throw new RecipeException(RecipeStatus.NULL_RECIPE_ERROR);
         recipe.setThumbnail(imageUrl);
 
         return recipe;
@@ -385,7 +382,7 @@ public class RecipeConverter {
         if(stepImages != null)
             imageUrl = uploadStepImage(stepImage);
         else
-            throw new RecipeException(Code.NULL_RECIPE_ERROR);
+            throw new RecipeException(RecipeStatus.NULL_RECIPE_ERROR);
         createdStep.setImage(imageUrl);
 
         return createdStep;

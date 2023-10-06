@@ -1,7 +1,8 @@
 package zipdabang.server.sms.dto;
 
 import lombok.*;
-import zipdabang.server.base.Code;
+import zipdabang.server.apiPayload.code.CommonStatus;
+
 
 import java.time.LocalDateTime;
 
@@ -20,6 +21,6 @@ public class SmsResponseDto {
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class AuthNumResultDto{
-        Code responseCode;
+        CommonStatus responseCommonStatus;
     }
 }

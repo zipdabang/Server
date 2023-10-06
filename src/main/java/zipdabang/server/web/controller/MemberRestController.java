@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 import zipdabang.server.FeignClient.service.KakaoOauthService;
+import zipdabang.server.apiPayload.code.CommonStatus;
+import zipdabang.server.apiPayload.reponse.ResponseDto;
 import zipdabang.server.auth.handler.annotation.AuthMember;
-import zipdabang.server.base.Code;
-import zipdabang.server.base.ResponseDto;
-import zipdabang.server.base.exception.handler.MemberException;
+import zipdabang.server.apiPayload.exception.handler.MemberException;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.member.Follow;
@@ -105,7 +105,7 @@ public class MemberRestController {
             @RequestBody MemberRequestDto.OAuthRequestDto oAuthRequestDto, @RequestParam(name = "type") String type) {
         OAuthResult.OAuthResultDto oAuthResultDto = memberService.SocialLogin(oAuthRequestDto, type);
         MemberResponseDto.SocialLoginDto socialLoginDto = MemberConverter.toSocialLoginDto(oAuthResultDto.getAccessToken(), oAuthResultDto.getRefreshToken());
-        return oAuthResultDto.getIsLogin() ? ResponseDto.of(Code.OAUTH_LOGIN, socialLoginDto) : ResponseDto.of(Code.OAUTH_JOIN, null);
+        return oAuthResultDto.getIsLogin() ? ResponseDto.of(CommonStatus.OAUTH_LOGIN, socialLoginDto) : ResponseDto.of(CommonStatus.OAUTH_JOIN, null);
     }
 
 
@@ -119,7 +119,7 @@ public class MemberRestController {
             @ApiResponse(responseCode = "4053", description = "BAD_REQUEST, 선호하는 음료 카테고리 id가 이상할 경우", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping("/members/oauth/info")
-    public ResponseDto<MemberResponseDto.SocialJoinDto> memberInfoForSignUp(@RequestBody MemberRequestDto.MemberInfoDto request, @RequestParam(name = "type", required = true) String type) {
+    public ResponseDto<MemberResponseDto.SocialJoinDto> memberInfoForSignUp(@RequestBody @Valid MemberRequestDto.MemberInfoDto request, @RequestParam(name = "type", required = true) String type) {
         log.info("body로 넘겨온 사용자 정보: {}", request.toString());
         OAuthJoin.OAuthJoinDto oAuthJoinDto = memberService.joinInfoComplete(request, type);
         return ResponseDto.of(MemberConverter.toSocialJoinDto(oAuthJoinDto));
@@ -149,7 +149,7 @@ public class MemberRestController {
     @PostMapping("/members/phone/auth")
     public ResponseDto<SmsResponseDto.AuthNumResultDto> authPhoneNum(@RequestBody MemberRequestDto.PhoneNumAuthDto request) {
         SmsResponseDto.AuthNumResultDto authNumResultDto = smsService.authNumber(request.getAuthNum(), request.getPhoneNum());
-        return ResponseDto.of(authNumResultDto.getResponseCode(), authNumResultDto);
+        return ResponseDto.of(authNumResultDto.getResponseCommonStatus(), authNumResultDto);
     }
 
 
@@ -271,7 +271,7 @@ public class MemberRestController {
         Optional<Member> member = memberService.checkExistNickname(nickname);
 
         return member.isPresent() ?
-                ResponseDto.of(Code.NICKNAME_EXIST, nickname) : ResponseDto.of(Code.NICKNAME_OK, nickname);
+                ResponseDto.of(CommonStatus.NICKNAME_EXIST, nickname) : ResponseDto.of(CommonStatus.NICKNAME_OK, nickname);
     }
 
     @Operation(summary = "리프레쉬 토큰을 이용해 accessToken 재발급 API ✔️", description = "리프레쉬 토큰을 이용해 accessToken 재발급하는 API입니다.")
@@ -406,7 +406,7 @@ public class MemberRestController {
         if (page == null)
             page = 1;
         else if (page < 1)
-            throw new MemberException(Code.UNDER_PAGE_INDEX_ERROR);
+            throw new MemberException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
         page -= 1;
 
         Page<Member> blockedMembers = memberService.findBlockedMember(page, member);

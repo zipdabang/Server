@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.service.MemberService;
-import zipdabang.server.validation.annotation.ExistMember;
+import zipdabang.server.validation.annotation.ExistNickname;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -13,22 +13,22 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class ExistMemberRequestBodyValidator implements ConstraintValidator<ExistMember, Long>{
+public class ExistNicknameValidator implements ConstraintValidator<ExistNickname, String> {
 
     private final MemberService memberService;
 
     @Override
-    public void initialize(ExistMember constraintAnnotation) {
+    public void initialize(ExistNickname constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
-    public boolean isValid(Long value, ConstraintValidatorContext context) {
+    public boolean isValid(String value, ConstraintValidatorContext context) {
 
-        Optional<Member> memberById = memberService.findMemberById(value);
-        if(memberById.isEmpty()) {
+        Optional<Member> member = memberService.checkExistNickname(value);
+        if (member.isPresent()){
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(CommonStatus.TARGET_MEMBER_NOT_FOUND.toString()).addConstraintViolation();
+            context.buildConstraintViolationWithTemplate(CommonStatus.NICKNAME_EXIST.toString()).addConstraintViolation();
             return false;
         }
         return true;

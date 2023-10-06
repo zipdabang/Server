@@ -2,22 +2,17 @@ package zipdabang.server.sms.service.serviceImpl;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import zipdabang.server.FeignClient.NaverSmsFeignClient;
-import zipdabang.server.base.Code;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import zipdabang.server.base.exception.handler.AuthNumberException;
+import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.domain.etc.AuthNumber;
 import zipdabang.server.repository.AuthNumberRepository;
 import zipdabang.server.sms.dto.MessageDto;
@@ -28,7 +23,6 @@ import zipdabang.server.sms.service.SmsService;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -88,34 +82,34 @@ public class SmsServiceImpl implements SmsService {
         Optional<AuthNumber> authNumber = authNumberRepository.findByPhoneNum(phoneNum);//.orElseThrow(() ->
         if(authNumber.isEmpty()){
             return SmsResponseDto.AuthNumResultDto.builder()
-                    .responseCode(Code.PHONE_AUTH_NOT_FOUND)
+                    .responseCommonStatus(CommonStatus.PHONE_AUTH_NOT_FOUND)
                     .build();
         }
 
-               // new AuthNumberException(Code.PHONE_AUTH_NOT_FOUND));
-        Code code=Code.OK;
+               // new AuthNumberException(CommonStatus.PHONE_AUTH_NOT_FOUND));
+        CommonStatus commonStatus = CommonStatus.OK;
         if (!authNumber.get().getAuthNum().equals(authNum))
-            code = Code.PHONE_AUTH_ERROR;
+            commonStatus = CommonStatus.PHONE_AUTH_ERROR;
 //            return SmsResponseDto.AuthNumResultDto.builder()
-//                    .responseCode(Code.PHONE_AUTH_ERROR)
+//                    .responseCommonStatus(CommonStatus.PHONE_AUTH_ERROR)
 //                    .build();
-            //throw new AuthNumberException(Code.PHONE_AUTH_ERROR);
+            //throw new AuthNumberException(CommonStatus.PHONE_AUTH_ERROR);
         else{
             LocalDateTime nowTime = LocalDateTime.now();
 
             long timeCheck = ChronoUnit.MINUTES.between(authNumber.get().getAuthNumTime(), nowTime);
             if (timeCheck >= 5)
-                code = Code.PHONE_AUTH_TIMEOUT;
+                commonStatus = CommonStatus.PHONE_AUTH_TIMEOUT;
 //                return SmsResponseDto.AuthNumResultDto.builder()
-//                        .responseCode(Code.PHONE_AUTH_TIMEOUT)
+//                        .responseCommonStatus(CommonStatus.PHONE_AUTH_TIMEOUT)
 //                        .build();
-                //throw new AuthNumberException(Code.PHONE_AUTH_TIMEOUT);
+                //throw new AuthNumberException(CommonStatus.PHONE_AUTH_TIMEOUT);
         }
-        if(code.equals(Code.OK))
+        if(commonStatus.equals(CommonStatus.OK))
             authNumberRepository.deleteByPhoneNum(authNumber.get().getPhoneNum());
 
         return SmsResponseDto.AuthNumResultDto.builder()
-                .responseCode(code)
+                .responseCommonStatus(commonStatus)
                 .build();
     }
 
@@ -163,7 +157,7 @@ public class SmsServiceImpl implements SmsService {
         authNumberRepository.save(authNumber);
 
         return SmsResponseDto.AuthNumResultDto.builder()
-                .responseCode(Code.OK)
+                .responseCommonStatus(CommonStatus.OK)
                 .build();
     }
 

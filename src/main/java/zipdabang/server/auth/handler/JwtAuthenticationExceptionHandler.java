@@ -2,9 +2,9 @@ package zipdabang.server.auth.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
-import zipdabang.server.base.Code;
+import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.base.exception.common.ApiErrorResult;
-import zipdabang.server.base.exception.handler.JwtAuthenticationException;
+import zipdabang.server.apiPayload.exception.handler.JwtAuthenticationException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -25,12 +25,12 @@ public class JwtAuthenticationExceptionHandler extends OncePerRequestFilter {
 
             PrintWriter writer = response.getWriter();
             String errorCodeName = authException.getMessage();
-            Code code = Code.valueOf(errorCodeName);
+            CommonStatus commonStatus = CommonStatus.valueOf(errorCodeName);
 
             ApiErrorResult apiErrorResult = ApiErrorResult.builder()
                     .isSuccess(false)
-                    .code(code.getCode())
-                    .message(code.getMessage())
+                    .code(commonStatus.getCode())
+                    .message(commonStatus.getMessage())
                     .result(null)
                     .build();
 

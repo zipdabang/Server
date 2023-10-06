@@ -9,13 +9,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.auth.provider.TokenProvider;
 import zipdabang.server.aws.s3.AmazonS3Manager;
-import zipdabang.server.base.Code;
-import zipdabang.server.base.ResponseDto;
-import zipdabang.server.base.exception.handler.AuthNumberException;
-import zipdabang.server.base.exception.handler.MemberException;
-import zipdabang.server.base.exception.handler.RecipeException;
+import zipdabang.server.apiPayload.exception.handler.AuthNumberException;
+import zipdabang.server.apiPayload.exception.handler.MemberException;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.DeregisterType;
@@ -143,7 +141,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public void existByPhoneNumber(String phoneNum) {
         if (memberRepository.existsByPhoneNum(phoneNum)) {
-            throw new AuthNumberException(Code.PHONE_NUMBER_EXIST);
+            throw new AuthNumberException(CommonStatus.PHONE_NUMBER_EXIST);
         }
     }
 
@@ -213,7 +211,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public String regenerateAccessToken(RefreshToken refreshToken) {
-        Member member = memberRepository.findById(refreshToken.getMemberId()).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+        Member member = memberRepository.findById(refreshToken.getMemberId()).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
         return redisService.saveLoginStatus(member.getMemberId(), tokenProvider.createAccessToken(member.getMemberId(), member.getSocialType().toString(),member.getEmail(),Arrays.asList(new SimpleGrantedAuthority("USER"))));
     }
 
@@ -246,7 +244,7 @@ public class MemberServiceImpl implements MemberService {
         page -= 1;
         Page<Inquery> inqueries = inqueryRepository.findByMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
         if(inqueries.getTotalPages() <= page)
-            throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
+            throw new MemberException(CommonStatus.OVER_PAGE_INDEX_ERROR);
         return inqueries;
     }
 
@@ -259,7 +257,7 @@ public class MemberServiceImpl implements MemberService {
         request.getPreferBeverages().stream()
                 .map(prefer ->
                         {
-                            Category category = categoryRepository.findById(prefer).orElseThrow(() -> new MemberException(Code.NO_CATEGORY_EXIST));
+                            Category category = categoryRepository.findById(prefer).orElseThrow(() -> new MemberException(CommonStatus.NO_CATEGORY_EXIST));
                             MemberPreferCategory memberPreferCategory = MemberConverter.toMemberPreferCategory(joinUser, category);
                             return preferCategoryRepository.save(memberPreferCategory);
                         }
@@ -342,11 +340,11 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void blockMember(Member owner, Long blockedId) {
         if (owner.getMemberId() == blockedId) {
-            throw new MemberException(Code.BLOCK_SELF);
+            throw new MemberException(CommonStatus.BLOCK_SELF);
         }
-        Member blocked = memberRepository.findById(blockedId).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+        Member blocked = memberRepository.findById(blockedId).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
         if (blockedMemberRepository.existsByOwnerAndBlocked(owner, blocked)) {
-            throw new MemberException(Code.ALREADY_BLOCKED_MEMBER);
+            throw new MemberException(CommonStatus.ALREADY_BLOCKED_MEMBER);
         }
         blockedMemberRepository.save(
                 BlockedMember.builder()
@@ -358,7 +356,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void unblockMember(Member owner, Long blockedId) {
-        Member blocked = memberRepository.findById(blockedId).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+        Member blocked = memberRepository.findById(blockedId).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
         blockedMemberRepository.deleteByOwnerAndBlocked(owner, blocked);
     }
 
@@ -368,10 +366,10 @@ public class MemberServiceImpl implements MemberService {
 
         Page<Member> blockedMembers = blockedMemberRepository.findBlockedByOwner(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
         if (blockedMembers.getContent().isEmpty()) {
-            throw new MemberException(Code.BLOCKED_MEMBER_NOT_FOUND);
+            throw new MemberException(CommonStatus.BLOCKED_MEMBER_NOT_FOUND);
         }
         if(blockedMembers.getTotalPages() <= page)
-            throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
+            throw new MemberException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
         return blockedMembers;
 
@@ -381,7 +379,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public Follow toggleFollow(Long targetId, Member member) {
         if(targetId.equals(member.getMemberId()))
-            throw new MemberException(Code.SELF_FOLLOW_FORBIDDEN);
+            throw new MemberException(CommonStatus.SELF_FOLLOW_FORBIDDEN);
         Member target = memberRepository.findById(targetId).get();
 
         Optional<Follow> checkFollow = followRepository.findByFollowerAndFollowee(member, target);
@@ -408,7 +406,7 @@ public class MemberServiceImpl implements MemberService {
         Page<Follow> followingMember = followRepository.findAllByFollower(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
 
         if(followingMember.getTotalPages() <= page)
-            throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
+            throw new MemberException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
         return followingMember;
     }
@@ -425,7 +423,7 @@ public class MemberServiceImpl implements MemberService {
         Page<Follow> followerMember = followRepository.findAllByFollowee(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
 
         if(followerMember.getTotalPages() <= page)
-            throw new MemberException(Code.OVER_PAGE_INDEX_ERROR);
+            throw new MemberException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
         return followerMember;
     }
@@ -470,14 +468,14 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberResponseDto.MyZipdabangDto getMyZipdabang(Member member, Long targetId) {
-        Member target = memberRepository.findById(targetId).orElseThrow(() -> new MemberException(Code.MEMBER_NOT_FOUND));
+        Member target = memberRepository.findById(targetId).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
         boolean checkSelf = false;
         boolean isFollowing = false;
         if (member.getMemberId() == target.getMemberId()) {
             checkSelf=true;
         }
         else if(blockedMemberRepository.existsByOwnerAndBlocked(member,target)){
-            throw new MemberException(Code.BLOCKED_MEMBER);
+            throw new MemberException(CommonStatus.BLOCKED_MEMBER);
         }
 
         if (followRepository.existsByFollowerAndFollowee(member, target)) {
