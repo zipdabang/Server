@@ -65,4 +65,6 @@ public interface RecipeService {
     Page<Recipe> getRecipeByOwner(Integer pageIndex, Long memberId);
 
     List<WeeklyBestRecipe> WeekBestRecipe();
+
+    Boolean deleteTempRecipe(Long tempId, Member member);
 }

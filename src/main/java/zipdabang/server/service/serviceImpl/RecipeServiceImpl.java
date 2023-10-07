@@ -198,6 +198,23 @@ public class RecipeServiceImpl implements RecipeService {
 
     }
 
+    @Override
+    public Boolean deleteTempRecipe(Long tempId, Member member) {
+
+        TempRecipe findTempRecipe = tempRecipeRepository.findById(tempId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_TEMP_RECIPE_EXIST));
+
+        if (findTempRecipe.getMember().equals(member)) {
+            amazonS3Manager.deleteFile(RecipeConverter.toKeyName(findTempRecipe.getThumbnailUrl()).substring(1));
+            tempStepRepository.findAllByTempId(tempId).stream()
+                    .forEach(step -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(step.getImageUrl()).substring(1)));
+            tempRecipeRepository.deleteById(tempId);
+        }
+        else
+            throw new RecipeException(RecipeStatus.NOT_RECIPE_OWNER);
+
+        return tempRecipeRepository.existsById(tempId) == false;
+    }
+
     @Transactional(readOnly = false)
     @Override
     public Recipe getRecipe(Long recipeId, Member member) {
