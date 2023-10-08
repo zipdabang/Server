@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 //import zipdabang.server.aws.s3.AmazonS3Manager;
-import zipdabang.server.apiPayload.code.CommonStatus;
+import zipdabang.server.apiPayload.code.RecipeStatus;
 import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.apiPayload.exception.handler.RecipeException;
 import zipdabang.server.domain.Report;
@@ -22,6 +22,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -60,24 +61,70 @@ public class RecipeConverter {
     private static TimeConverter staticTimeConverter;
 
     public static RecipeResponseDto.PerCategoryPreview toPerCategoryPreview(Long categoryId, List<Recipe> recipeList, Member member) {
+
+        AtomicInteger index = new AtomicInteger(1);
+
         return RecipeResponseDto.PerCategoryPreview.builder()
                 .categoryId(categoryId)
                 .totalElements(recipeList.size())
                 .recipeList(recipeList.stream()
-                        .map(recipe -> toRecipePreviewDto(recipe,member))
+                        .map(recipe -> toRecipePreviewDto(recipe,member, index.getAndIncrement()))
                         .collect(Collectors.toList()))
                 .build();
     }
 
-    public static RecipeResponseDto.RecipePreviewDto toRecipePreviewDto(Recipe recipe, Member member) {
+    public static RecipeResponseDto.RecipePreviewDto toRecipePreviewDto(Recipe recipe, Member member, Integer rank) {
         return RecipeResponseDto.RecipePreviewDto.builder()
                 .recipeId(recipe.getId())
                 .recipeName(recipe.getName())
                 .nickname(recipe.getMember().getNickname())
                 .likes(recipe.getTotalLike())
-                .scraps(recipe.getTotalScrap())
+                .comments(recipe.getTotalComments())
                 .isLiked(staticLikesRepository.findByRecipeAndMember(recipe, member).isPresent())
                 .isScrapped(staticScrapRepository.findByRecipeAndMember(recipe,member).isPresent())
+                .rank(rank)
+                .build();
+    }
+
+    public static Recipe toRecipeFromTemp(TempRecipe tempRecipe, List<TempStep> tempSteps, List<TempIngredient> tempIngredients, Member member) {
+        return Recipe.builder()
+                .isBarista(member.isBarista())
+                .isOfficial(false)
+                .name(tempRecipe.getName())
+                .thumbnailUrl(tempRecipe.getThumbnailUrl())
+                .intro(tempRecipe.getIntro())
+                .recipeTip(tempRecipe.getRecipeTip())
+                .time(tempRecipe.getTime())
+                .member(member)
+                .build();
+    }
+
+    public static List<Step> toStepFromTemp(List<TempStep> tempSteps, Recipe recipe) {
+        return tempSteps.stream()
+                .map(tempStep -> toStepDtoFromTemp(tempStep, recipe))
+                .collect(Collectors.toList());
+    }
+
+    private static Step toStepDtoFromTemp(TempStep tempStep, Recipe recipe) {
+        return Step.builder()
+                .stepNum(tempStep.getStepNum())
+                .imageUrl(tempStep.getImageUrl())
+                .description(tempStep.getDescription())
+                .recipe(recipe)
+                .build();
+    }
+
+    public static List<Ingredient> toIngredientFromTemp(List<TempIngredient> tempIngredients, Recipe recipe) {
+        return tempIngredients.stream()
+                .map(tempIngredient -> toIngredientDtoFromTemp(tempIngredient, recipe))
+                .collect(Collectors.toList());
+    }
+
+    private static Ingredient toIngredientDtoFromTemp(TempIngredient tempIngredient, Recipe recipe) {
+        return Ingredient.builder()
+                .name(tempIngredient.getName())
+                .quantity(tempIngredient.getQuantity())
+                .recipe(recipe)
                 .build();
     }
 
@@ -108,6 +155,32 @@ public class RecipeConverter {
                 .isLast(recipes.isLast())
                 .build();
 
+    }
+
+    public static RecipeResponseDto.WeekBestDtoList toWeekBestDtoList(List<WeeklyBestRecipe> bestRecipes, Member member) {
+        return RecipeResponseDto.WeekBestDtoList.builder()
+                .recipeList(bestRecipes.stream()
+                        .map(bestRecipe -> toResponseWeekBestDto(bestRecipe.getRecipe(), member, bestRecipe.getRanking()))
+                        .collect(Collectors.toList()))
+                .totalElements(bestRecipes.size())
+                .build();
+    }
+
+    private static RecipeResponseDto.RecipeSimpleDtoBest toResponseWeekBestDto(Recipe recipe, Member member, Integer rank) {
+        return RecipeResponseDto.RecipeSimpleDtoBest.builder()
+                .rank(rank)
+                .recipeId(recipe.getId())
+                .recipeName(recipe.getName())
+                .nickname(recipe.getMember().getNickname())
+                .thumbnailUrl(recipe.getThumbnailUrl())
+                .createdAt(staticTimeConverter.ConvertTime(recipe.getCreatedAt()))
+                .updatedAt(staticTimeConverter.ConvertTime(recipe.getUpdatedAt()))
+                .likes(recipe.getTotalLike())
+                .comments(recipe.getTotalComments())
+                .scraps(recipe.getTotalScrap())
+                .isLiked(staticLikesRepository.findByRecipeAndMember(recipe, member).isPresent())
+                .isScrapped(staticScrapRepository.findByRecipeAndMember(recipe,member).isPresent())
+                .build();
     }
 
     public static RecipeResponseDto.RecipeListDto toPreviewRecipeDtoList(List<Recipe> recipes, Member member) {
@@ -159,7 +232,7 @@ public class RecipeConverter {
         return request.getSteps().stream()
                 .map(step-> {
                     if (step.getDescription() == null)
-                        throw new RecipeException(CommonStatus.NULL_RECIPE_ERROR);
+                        throw new RecipeException(RecipeStatus.NULL_RECIPE_ERROR);
                     try {
                         return toStepDto(step, recipe, stepImages);
                     } catch (IOException e) {
@@ -169,11 +242,11 @@ public class RecipeConverter {
                 .collect(Collectors.toList());
     }
 
-    public static List<TempStep> toTempStep(RecipeRequestDto.TempRecipeDto request, TempRecipe tempRecipe, List<MultipartFile> stepImages) {
+    public static List<TempStep> toTempStep(RecipeRequestDto.TempRecipeDto request, TempRecipe tempRecipe, List<MultipartFile> stepImages, List<String> presentImageUrls) {
         return request.getSteps().stream()
                 .map(step-> {
                     try {
-                        return toTempStepDto(step, tempRecipe, stepImages);
+                        return toTempStepDto(step, tempRecipe, stepImages, presentImageUrls);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -181,8 +254,45 @@ public class RecipeConverter {
                 .collect(Collectors.toList());
     }
 
-    public static List<RecipeCategoryMapping> toRecipeCategory(RecipeRequestDto.CreateRecipeDto request, Recipe recipe) {
-        return request.getCategoryId().stream()
+    public static RecipeResponseDto.TempRecipeInfoDto toTempRecipeInfoDto(TempRecipe tempRecipe, Member member) {
+        return RecipeResponseDto.TempRecipeInfoDto.builder()
+                .recipeInfo(toTempRecipeInfo(tempRecipe))
+                .steps(tempRecipe.getStepList().stream()
+                        .map(tempStep -> toTempStepInfo(tempStep))
+                        .collect(Collectors.toList()))
+                .ingredients(tempRecipe.getIngredientList().stream()
+                        .map(tempIngredient -> toTempIngredientInfo(tempIngredient))
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    private static RecipeResponseDto.TempIngredientDto toTempIngredientInfo(TempIngredient tempIngredient) {
+        return RecipeResponseDto.TempIngredientDto.builder()
+                .IngredientName(tempIngredient.getName())
+                .quantity(tempIngredient.getQuantity())
+                .build();
+    }
+
+    private static RecipeResponseDto.TempStepDto toTempStepInfo(TempStep tempStep) {
+        return RecipeResponseDto.TempStepDto.builder()
+                .stepNum(tempStep.getStepNum())
+                .description(tempStep.getDescription())
+                .image(tempStep.getImageUrl())
+                .build();
+    }
+
+    private static RecipeResponseDto.TempRecipeDto toTempRecipeInfo(TempRecipe tempRecipe) {
+        return RecipeResponseDto.TempRecipeDto.builder()
+                .recipeName(tempRecipe.getName())
+                .thumbnailUrl(tempRecipe.getThumbnailUrl())
+                .time(tempRecipe.getTime())
+                .intro(tempRecipe.getIntro())
+                .recipeTip(tempRecipe.getRecipeTip())
+                .build();
+    }
+
+    public static List<RecipeCategoryMapping> toRecipeCategory(List<Long> categoryIds, Recipe recipe) {
+        return categoryIds.stream()
                 .map(recipeCategoryId -> toRecipeCategoryMappingDto(recipeCategoryId, recipe))
                 .collect(Collectors.toList());
     }
@@ -217,6 +327,7 @@ public class RecipeConverter {
     public static RecipeResponseDto.RecipeInfoDto toRecipeInfoDto(Recipe recipe, Boolean isOwner, Boolean isLiked, Boolean isScrapped, Member member) {
         return RecipeResponseDto.RecipeInfoDto.builder()
                 .recipeInfo(toResponseRecipeDto(recipe, isLiked, isScrapped, member))
+                .ownerId(recipe.getMember().getMemberId())
                 .isOwner(isOwner)
                 .steps(toResponseStepDto(recipe))
                 .ingredients(toResponseIngredientDto(recipe))
@@ -274,7 +385,7 @@ public class RecipeConverter {
     public static Recipe toRecipe(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, Member member) throws IOException {
 
         Recipe recipe = Recipe.builder()
-                .isInfluencer(member.isInfluencer())
+                .isBarista(member.isBarista())
                 .name(request.getName())
                 .intro(request.getIntro())
                 .recipeTip(request.getRecipeTip())
@@ -286,7 +397,7 @@ public class RecipeConverter {
         if(thumbnail != null)
             imageUrl = uploadThumbnail(thumbnail);
         else
-            throw new RecipeException(CommonStatus.NULL_RECIPE_ERROR);
+            throw new RecipeException(RecipeStatus.NULL_RECIPE_ERROR);
         recipe.setThumbnail(imageUrl);
 
         return recipe;
@@ -295,7 +406,6 @@ public class RecipeConverter {
     public static TempRecipe toTempRecipe(RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, Member member) throws IOException {
 
         TempRecipe tempRecipe = TempRecipe.builder()
-                .isInfluencer(member.isInfluencer())
                 .name(request.getName())
                 .intro(request.getIntro())
                 .recipeTip(request.getRecipeTip())
@@ -308,7 +418,6 @@ public class RecipeConverter {
         if(thumbnail != null)
             imageUrl = uploadThumbnail(thumbnail);
         tempRecipe.setThumbnail(imageUrl);
-
 
         return tempRecipe;
     }
@@ -349,13 +458,13 @@ public class RecipeConverter {
         if(stepImages != null)
             imageUrl = uploadStepImage(stepImage);
         else
-            throw new RecipeException(CommonStatus.NULL_RECIPE_ERROR);
+            throw new RecipeException(RecipeStatus.NULL_RECIPE_ERROR);
         createdStep.setImage(imageUrl);
 
         return createdStep;
     }
 
-    private static TempStep toTempStepDto(RecipeRequestDto.TempStepDto step, TempRecipe tempRecipe, List<MultipartFile> stepImages) throws IOException {
+    private static TempStep toTempStepDto(RecipeRequestDto.TempStepDto step, TempRecipe tempRecipe, List<MultipartFile> stepImages, List<String> presentImageUrls) throws IOException {
         TempStep createdTempStep = TempStep.builder()
                 .imageUrl(step.getStepUrl())
                 .stepNum(step.getStepNum())
@@ -363,12 +472,8 @@ public class RecipeConverter {
                 .tempRecipe(tempRecipe)
                 .build();
 
-        Optional<TempStep> findTempStep = staticTempStepRepository.findByTempRecipeAndStepNum(tempRecipe, step.getStepNum());
 
         if(step.getStepUrl() == null) {
-            if(findTempStep.isPresent() && findTempStep.get().getImageUrl() != null) {
-                staticAmazonS3Manager.deleteFile(RecipeConverter.toKeyName(findTempStep.get().getImageUrl()).substring(1));
-            }
 
             if (stepImages != null) {
                 MultipartFile stepImage = null;
@@ -389,10 +494,8 @@ public class RecipeConverter {
             }
         }
         else{
-            createdTempStep.setImage(step.getStepUrl());
+            presentImageUrls.remove(step.getStepUrl());
         }
-
-        staticTempStepRepository.delete(findTempStep.get());
 
         return createdTempStep;
     }

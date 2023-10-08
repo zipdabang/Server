@@ -13,6 +13,11 @@ import java.util.List;
 public class RecipeRequestDto {
 
     @Getter @Setter
+    public static class RecipeCategoryList{
+        List<Long> categoryId;
+    }
+
+    @Getter @Setter
     public static class CreateRecipeDto{
         List<Long> categoryId;
         String name;

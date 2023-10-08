@@ -44,9 +44,10 @@ public class RecipeResponseDto {
         private String nickname;
         private String thumbnailUrl;
         private Long likes;
-        private Long scraps;
+        private Long comments;
         private Boolean isLiked;
         private Boolean isScrapped;
+        private Integer rank;
     }
 
     @Builder
@@ -66,6 +67,34 @@ public class RecipeResponseDto {
         private Long scraps;
         private Boolean isLiked;
         private Boolean isScrapped;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RecipeSimpleDtoBest {
+        private Long recipeId;
+        private String recipeName;
+        private String nickname;
+        private String thumbnailUrl;
+        private String createdAt;
+        private String updatedAt;
+        private Long likes;
+        private Long comments;
+        private Long scraps;
+        private Boolean isLiked;
+        private Boolean isScrapped;
+        private Integer rank;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class WeekBestDtoList {
+        private List<RecipeSimpleDtoBest> recipeList;
+        Integer totalElements;
     }
 
     @Builder
@@ -137,6 +166,7 @@ public class RecipeResponseDto {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class RecipeInfoDto {
         private RecipeDto recipeInfo;
+        private Long ownerId;
         private boolean isOwner;
         private List<StepDto> steps;
         private List<IngredientDto> ingredients;
@@ -159,6 +189,47 @@ public class RecipeResponseDto {
         private Integer stepNum;
         private String description;
         private String image;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TempRecipeInfoDto {
+        private TempRecipeDto recipeInfo;
+        private List<TempStepDto> steps;
+        private List<TempIngredientDto> ingredients;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TempRecipeDto {
+        private String recipeName;
+        private String thumbnailUrl;
+        private String time;
+        private String intro;
+        private String recipeTip;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TempStepDto{
+        private Integer stepNum;
+        private String description;
+        private String image;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TempIngredientDto{
+        private String IngredientName;
+        private String quantity;
     }
 
     @Builder
