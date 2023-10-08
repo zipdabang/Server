@@ -24,7 +24,6 @@ public class ResponseDto<T> {
     @Schema(description = "응답 메시지", requiredMode = Schema.RequiredMode.REQUIRED, example = "요청에 성공하였습니다.")
     private final String message;
     @Schema(description = "응답 결과", requiredMode = Schema.RequiredMode.REQUIRED, example = "응답 결과")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private T result;
 
 
@@ -35,7 +34,8 @@ public class ResponseDto<T> {
     }
 
     public static <T> ResponseDto<T> of(BaseCode code,T result){
-        return new ResponseDto<>(true, 2000 , code.getReasonHttpStatus().getMessage(), result);
+        ResponseDto<T> tResponseDto = new ResponseDto<>(true, code.getReasonHttpStatus().getCode(), code.getReasonHttpStatus().getMessage(), result);
+        return tResponseDto;
     }
 
     // 실패한 경우 응답 생성
