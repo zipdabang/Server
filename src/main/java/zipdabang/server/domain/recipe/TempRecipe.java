@@ -28,9 +28,6 @@ public class TempRecipe extends BaseEntity {
     @Column(nullable = false)
     private Long id;
 
-    @Column(nullable = false)
-    private Boolean isBarista;
-
     private String name;
 
     @Column(columnDefinition = "TEXT")

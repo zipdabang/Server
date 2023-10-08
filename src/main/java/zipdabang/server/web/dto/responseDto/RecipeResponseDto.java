@@ -195,6 +195,47 @@ public class RecipeResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TempRecipeInfoDto {
+        private TempRecipeDto recipeInfo;
+        private List<TempStepDto> steps;
+        private List<TempIngredientDto> ingredients;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TempRecipeDto {
+        private String recipeName;
+        private String thumbnailUrl;
+        private String time;
+        private String intro;
+        private String recipeTip;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TempStepDto{
+        private Integer stepNum;
+        private String description;
+        private String image;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TempIngredientDto{
+        private String IngredientName;
+        private String quantity;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class CommentDto{
         private String ownerNickname;
         private String ownerImage;

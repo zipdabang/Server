@@ -14,5 +14,5 @@ public interface TempStepRepository extends JpaRepository<TempStep, Long> {
 
     List<TempStep> findAllByTempRecipe(TempRecipe tempRecipe);
 
-    List<TempStep> findAllByTempId(Long tempId);
+    List<String> findAllImageUrlByTempRecipe(TempRecipe tempRecipe);
 }

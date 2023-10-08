@@ -89,7 +89,7 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe buildRecipe = RecipeConverter.toRecipe(request, thumbnail, member);
         Recipe recipe = recipeRepository.save(buildRecipe);
 
-        RecipeConverter.toRecipeCategory(request,recipe).stream()
+        RecipeConverter.toRecipeCategory(request.getCategoryId(),recipe).stream()
                 .map(categoryMapping -> recipeCategoryMappingRepository.save(categoryMapping))
                 .collect(Collectors.toList())
                 .stream()
@@ -119,9 +119,11 @@ public class RecipeServiceImpl implements RecipeService {
 
         TempRecipe buildTempRecipe = RecipeConverter.toTempRecipe(request, thumbnail, member);
         TempRecipe tempRecipe = tempRecipeRepository.save(buildTempRecipe);
+        List<String> presentImageUrls = new ArrayList<>();
+
 
         if (request.getStepCount() > 0) {
-            RecipeConverter.toTempStep(request, tempRecipe, stepImages).stream()
+            RecipeConverter.toTempStep(request, tempRecipe, stepImages, presentImageUrls).stream()
                     .map(step -> tempStepRepository.save(step))
                     .collect(Collectors.toList())
                     .stream()
@@ -149,16 +151,16 @@ public class RecipeServiceImpl implements RecipeService {
 
         //recipe
         String thumbnailUrl = null;
-        if (request.getThumbnailUrl() == null){
+        if (thumbnail != null) {
             if (tempRecipe.getThumbnailUrl() != null)
                 amazonS3Manager.deleteFile(RecipeConverter.toKeyName(tempRecipe.getThumbnailUrl()).substring(1));
-
-            if(thumbnail != null)
-                thumbnailUrl = RecipeConverter.uploadThumbnail(thumbnail);
-
+            thumbnailUrl = RecipeConverter.uploadThumbnail(thumbnail);
         }
-        else {
-            thumbnailUrl = request.getThumbnailUrl();
+        else{
+            if (request.getThumbnailUrl() == null && tempRecipe.getThumbnailUrl() != null)
+                amazonS3Manager.deleteFile(RecipeConverter.toKeyName(tempRecipe.getThumbnailUrl()).substring(1));
+            else if (request.getThumbnailUrl() != null)
+                thumbnailUrl = request.getThumbnailUrl();
         }
 
         tempRecipe.setThumbnail(thumbnailUrl);
@@ -166,19 +168,22 @@ public class RecipeServiceImpl implements RecipeService {
 
 
         //step
+        List<String> presentImageUrls = tempStepRepository.findAllByTempRecipe(tempRecipe).stream()
+                .filter(steps -> steps.getImageUrl() != null)
+                .map(tempStep -> tempStep.getImageUrl())
+                .collect(Collectors.toList());
+
+        tempStepRepository.deleteAllByTempRecipe(tempRecipe);
+
         if(request.getStepCount() > 0) {
-            RecipeConverter.toTempStep(request, tempRecipe, stepImages).stream()
+            RecipeConverter.toTempStep(request, tempRecipe, stepImages, presentImageUrls).stream()
                     .map(step -> tempStepRepository.save(step))
                     .collect(Collectors.toList())
                     .stream()
                     .map(step -> step.setTempRecipe(tempRecipe));
         }
-        else{
-            tempStepRepository.findAllByTempRecipe(tempRecipe).stream()
-                    .filter(step -> step.getImageUrl() != null)
-                    .forEach(step -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(step.getImageUrl()).substring(1)));
-            tempStepRepository.deleteAllByTempRecipe(tempRecipe);
-        }
+        if(!presentImageUrls.isEmpty())
+            presentImageUrls.forEach(imageUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(imageUrl).substring(1)));
 
         //ingredient
         if(request.getIngredientCount() >0) {
@@ -199,20 +204,67 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
+    public TempRecipe getTempRecipe(Long tempId) {
+        return tempRecipeRepository.findById(tempId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_TEMP_RECIPE_EXIST));
+    }
+
+    @Override
+    @Transactional(readOnly = false)
     public Boolean deleteTempRecipe(Long tempId, Member member) {
 
         TempRecipe findTempRecipe = tempRecipeRepository.findById(tempId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_TEMP_RECIPE_EXIST));
 
         if (findTempRecipe.getMember().equals(member)) {
-            amazonS3Manager.deleteFile(RecipeConverter.toKeyName(findTempRecipe.getThumbnailUrl()).substring(1));
-            tempStepRepository.findAllByTempId(tempId).stream()
-                    .forEach(step -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(step.getImageUrl()).substring(1)));
+            if(findTempRecipe.getThumbnailUrl() != null)
+                amazonS3Manager.deleteFile(RecipeConverter.toKeyName(findTempRecipe.getThumbnailUrl()).substring(1));
+
+            List<TempStep> tempSteps = tempStepRepository.findAllByTempRecipe(findTempRecipe);
+            if (!tempSteps.isEmpty()) {
+                    tempSteps.stream()
+                        .forEach(step -> {
+                                    if (step.getImageUrl() != null)
+                                        amazonS3Manager.deleteFile(RecipeConverter.toKeyName(step.getImageUrl()).substring(1));
+                                }
+                        );
+            }
             tempRecipeRepository.deleteById(tempId);
         }
         else
             throw new RecipeException(RecipeStatus.NOT_RECIPE_OWNER);
 
         return tempRecipeRepository.existsById(tempId) == false;
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public Recipe createFromTempRecipe(Long tempId, RecipeRequestDto.RecipeCategoryList categoryList, Member member) {
+        TempRecipe tempRecipe = tempRecipeRepository.findById(tempId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_TEMP_RECIPE_EXIST));
+        List<TempStep> tempSteps = tempStepRepository.findAllByTempRecipe(tempRecipe);
+        List<TempIngredient> tempIngredients = tempIngredientRepository.findAllByTempRecipe(tempRecipe);
+
+        Recipe recipe = recipeRepository.save(RecipeConverter.toRecipeFromTemp(tempRecipe, tempSteps, tempIngredients, member));
+
+        RecipeConverter.toRecipeCategory(categoryList.getCategoryId(),recipe).stream()
+                .map(categoryMapping -> recipeCategoryMappingRepository.save(categoryMapping))
+                .collect(Collectors.toList())
+                .stream()
+                .map(categoryMapping -> categoryMapping.setRecipe(recipe));
+
+        RecipeConverter.toStepFromTemp(tempSteps, recipe).stream()
+                .map(step -> stepRepository.save(step))
+                .collect(Collectors.toList())
+                .stream()
+                .map(step -> step.setRecipe(recipe));
+
+        RecipeConverter.toIngredientFromTemp(tempIngredients, recipe).stream()
+                .map(ingredient -> ingredientRepository.save(ingredient))
+                .collect(Collectors.toList())
+                .stream()
+                .map(ingredient -> ingredient.setRecipe(recipe));
+
+        tempRecipeRepository.deleteById(tempId);
+
+        return recipe;
     }
 
     @Transactional(readOnly = false)

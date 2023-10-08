@@ -17,7 +17,7 @@ public enum RecipeStatus implements BaseCode{
     //BAD_REQUEST
     BLOCKED_USER_RECIPE(HttpStatus.OK, 4102, "차단한 사용자의 레시피입니다."),
     //BAD_REQUEST
-    WRITTEN_BY_TYPE_ERROR(HttpStatus.OK, 4103, "레시피 작성자 타입이 잘못되었습니다. all, influencer, common중 하나로 보내주세요."),
+    WRITTEN_BY_TYPE_ERROR(HttpStatus.OK, 4103, "레시피 작성자 타입이 잘못되었습니다. official, barista, common중 하나로 보내주세요."),
     //BAD_REQUEST
     ORDER_BY_TYPE_ERROR(HttpStatus.OK, 4104, "조회 방식 타입이 잘못되었습니다. likes, views, latest중 하나로 보내주세요."),
     //BAD_REQUEST
