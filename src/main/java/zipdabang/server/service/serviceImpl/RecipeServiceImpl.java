@@ -32,6 +32,7 @@ import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
+import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -370,7 +371,7 @@ public class RecipeServiceImpl implements RecipeService {
     private BooleanExpression blockedMemberNotInForRecipe(Member member) {
         List<Member> blockedMember = getBlockedMember(member);
 
-        return blockedMember.isEmpty() ? null : recipe.member.notIn(blockedMember);
+            return blockedMember.isEmpty() ? null : recipe.member.notIn(blockedMember);
     }
 
     private List<Member> getBlockedMember(Member member) {
@@ -727,5 +728,21 @@ public class RecipeServiceImpl implements RecipeService {
         }
         else
             throw new RecipeException(RecipeStatus.COMMENT_OWNER);
+    }
+
+    // 내가 좋아요 누른 레시피 목록 DTO 조회
+    @Override
+    @Transactional
+    public RecipeResponseDto.RecipePageListDto getLikeRecipes(Integer page, Member member) {
+        Page<Recipe> likesRecipes = likesRepository.findRecipeByMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        return RecipeConverter.toPagingRecipeDtoList(likesRecipes, member);
+    }
+
+    // 내가 스크랩 누른 레시피 목록 DTO 조회
+    @Override
+    @Transactional
+    public RecipeResponseDto.RecipePageListDto getScrapRecipes(Integer page, Member member) {
+        Page<Recipe> scrapRecipes = scrapRepository.findRecipeByMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        return RecipeConverter.toPagingRecipeDtoList(scrapRecipes, member);
     }
 }

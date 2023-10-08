@@ -154,7 +154,6 @@ public class RecipeConverter {
                 .isFirst(recipes.isFirst())
                 .isLast(recipes.isLast())
                 .build();
-
     }
 
     public static RecipeResponseDto.WeekBestDtoList toWeekBestDtoList(List<WeeklyBestRecipe> bestRecipes, Member member) {
