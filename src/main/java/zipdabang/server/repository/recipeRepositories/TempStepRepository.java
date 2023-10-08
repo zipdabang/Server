@@ -13,4 +13,6 @@ public interface TempStepRepository extends JpaRepository<TempStep, Long> {
     void deleteAllByTempRecipe(TempRecipe tempRecipe);
 
     List<TempStep> findAllByTempRecipe(TempRecipe tempRecipe);
+
+    List<String> findAllImageUrlByTempRecipe(TempRecipe tempRecipe);
 }

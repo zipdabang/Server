@@ -65,4 +65,10 @@ public interface RecipeService {
     Page<Recipe> getRecipeByOwner(Integer pageIndex, Long memberId);
 
     List<WeeklyBestRecipe> WeekBestRecipe();
+
+    Boolean deleteTempRecipe(Long tempId, Member member);
+
+    Recipe createFromTempRecipe(Long tempId, RecipeRequestDto.RecipeCategoryList categoryList, Member member);
+
+    TempRecipe getTempRecipe(Long tempId);
 }

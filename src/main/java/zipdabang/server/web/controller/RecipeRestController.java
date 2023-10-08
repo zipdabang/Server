@@ -101,6 +101,76 @@ RecipeRestController {
         return ResponseDto.of(RecipeConverter.toTempRecipeStatusDto(tempRecipe));
     }
 
+    @Operation(summary = "임시저장 레시피 가져오기 API 🔑 ✔", description = "임시저장 레시피 가져오기 화면 API입니다. ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000"),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4111", description = "BAD_REQUEST, 해당 임시저장 Id가 존재하지 않습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @GetMapping(value = "/members/recipes/temp/{tempId}")
+    public ResponseDto<RecipeResponseDto.TempRecipeInfoDto> getTempRecipe(@PathVariable Long tempId, @AuthMember Member member) {
+
+        TempRecipe tempRecipe = recipeService.getTempRecipe(tempId);
+
+        return ResponseDto.of(RecipeConverter.toTempRecipeInfoDto(tempRecipe,  member));
+    }
+
+
+    @Operation(summary = "임시저장 레시피 삭제 API 🔑 ✔", description = "임시저장 레시피 삭제 API입니다. ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000"),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4111", description = "BAD_REQUEST, 해당 임시저장 Id가 존재하지 않습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @DeleteMapping(value = "/members/recipes/temp/{tempId}")
+    public ResponseDto<String> deleteTempRecipe(
+            @PathVariable Long tempId,
+            @CheckTempMember @AuthMember Member member) {
+        Boolean recipeDeleteBoolean = recipeService.deleteTempRecipe(tempId, member);
+
+        if (recipeDeleteBoolean)
+            return ResponseDto.of(tempId + " 임시저장 레시피 삭제 완료");
+        else
+            throw new RecipeException(CommonStatus.INTERNAL_ERROR);
+    }
+
+    @Operation(summary = "레시피 임시저장 ➡ 최종 저장 API 🔑 ✔", description = "\"레시피 임시저장 ➡ 최종 저장 API입니다. ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000"),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4111", description = "BAD_REQUEST, 해당 임시저장 Id가 존재하지 않습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @PostMapping(value = "/members/recipes/temp/{tempId}/save")
+    public ResponseDto<RecipeResponseDto.RecipeStatusDto> tempRecipeToRecipe(
+            @PathVariable Long tempId,
+            @RequestBody RecipeRequestDto.RecipeCategoryList categoryList,
+            @CheckTempMember @AuthMember Member member) {
+
+        Recipe recipe = recipeService.createFromTempRecipe(tempId, categoryList, member);
+        return ResponseDto.of(RecipeConverter.toRecipeStatusDto(recipe));
+    }
+
     @Operation(summary = "🍹figma 레시피 상세페이지, 레시피 상세 정보 조회 API 🔑 ✔", description = "레시피 조회 화면 API입니다. 댓글은 처음 10개만 가져오고 나머지는 댓글 page api 드림")
     @ApiResponses({
             @ApiResponse(responseCode = "2000"),

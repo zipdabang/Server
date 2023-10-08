@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface TempIngredientRepository extends JpaRepository<TempIngredient, Long> {
 
     void deleteAllByTempRecipe(TempRecipe tempRecipe);
+
+    List<TempIngredient> findAllByTempRecipe(TempRecipe tempRecipe);
 }
