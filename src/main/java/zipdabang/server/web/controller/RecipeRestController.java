@@ -698,7 +698,7 @@ RecipeRestController {
         return ResponseDto.of(reportedCommentId+"번 댓글이 신고되었습니다.");
     }
 
-    @Operation(summary = "내가 좋아요 누른 레시피 목록 조회 API 🔑", description = "내가 좋아요 누른 레시피 목록 조회 API입니다.")
+    @Operation(summary = "내가 좋아요 누른 레시피 목록 조회 API 🔑 ✔", description = "내가 좋아요 누른 레시피 목록 조회 API입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000", description = "OK, 좋아요 누른 레시피 조회 성공"),
             @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -714,7 +714,7 @@ RecipeRestController {
             @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
     })
     @GetMapping("/members/likeRecipes")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> memberRecipeList(@CheckTempMember @AuthMember Member member, @RequestParam(name = "page", required = true) @CheckPage Integer page) {
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> memberLikeRecipeList(@CheckTempMember @AuthMember Member member, @RequestParam(name = "page", required = true) @CheckPage Integer page) {
         if (page == null)
             page = 1;
         else if (page < 1)
@@ -722,10 +722,33 @@ RecipeRestController {
         page -= 1;
 
         return ResponseDto.of(recipeService.getLikeRecipes(page, member));
+    }
 
-        // 1. 내가 좋아요 누른 레시피 목록 조회
-        // 2. 레시피 목록중 작성자가 내가 차단한 사람이면 제외
-        // 3. DTO List 형태로 return
+
+    @Operation(summary = "내가 스크랩 누른 레시피 목록 조회 API 🔑 ✔", description = "내가 스크랩 누른 레시피 목록 조회 API입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK, 스크랩 누른 레시피 조회 성공"),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4054", description = "BAD_REQEUST , 페이지 번호가 없거나 0 이하", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQEUST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
+    })
+    @GetMapping("/members/scrapRecipes")
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> memberScrapRecipeList(@CheckTempMember @AuthMember Member member, @RequestParam(name = "page", required = true) @CheckPage Integer page) {
+        if (page == null)
+            page = 1;
+        else if (page < 1)
+            throw new MemberException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
+        page -= 1;
+
+        return ResponseDto.of(recipeService.getScrapRecipes(page, member));
     }
 
 

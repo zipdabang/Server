@@ -73,4 +73,5 @@ public interface RecipeService {
 
     TempRecipe getTempRecipe(Long tempId);
     RecipeResponseDto.RecipePageListDto getLikeRecipes(Integer page, Member member);
+    RecipeResponseDto.RecipePageListDto getScrapRecipes(Integer page, Member member);
 }

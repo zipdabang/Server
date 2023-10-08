@@ -733,28 +733,16 @@ public class RecipeServiceImpl implements RecipeService {
     // 내가 좋아요 누른 레시피 목록 DTO 조회
     @Override
     @Transactional
-    public RecipeResponseDto.RecipePageListDto getLikeRecipes(Integer page,Member member) {
-//        List<Member> blockedList = blockedMemberRepository.findBlockedByOwner(member);
+    public RecipeResponseDto.RecipePageListDto getLikeRecipes(Integer page, Member member) {
         Page<Recipe> likesRecipes = likesRepository.findRecipeByMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
-        log.info("서비스단에서 시작!");
-        log.info("엘리먼트 사이즈 : " + likesRecipes.getTotalElements());
-        log.info("컨텐츠 사이즈: " + likesRecipes.getContent().size());
-        List<Recipe> content = likesRecipes.getContent();
-        for (Recipe r : content) {
-            log.info("아이디 : " + r.getId());
-            log.info("인트로 : " + r.getIntro());
-        }
-//        List<Recipe> filteredRecipes = likesRecipes.getContent()
-//                .stream()
-//                .filter(likes -> !isBlockedMember(likes.getMember(), blockedList))
-//                .collect(Collectors.toList());
-//
-//        Page<Recipe> recipes = new PageImpl<>(filteredRecipes);
         return RecipeConverter.toPagingRecipeDtoList(likesRecipes, member);
     }
 
-    private boolean isBlockedMember(Member recipeAuthor, List<Member> blockedMembers) {
-        return blockedMembers.stream()
-                .anyMatch(blockedMember -> blockedMember.equals(recipeAuthor));
+    // 내가 스크랩 누른 레시피 목록 DTO 조회
+    @Override
+    @Transactional
+    public RecipeResponseDto.RecipePageListDto getScrapRecipes(Integer page, Member member) {
+        Page<Recipe> scrapRecipes = scrapRepository.findRecipeByMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        return RecipeConverter.toPagingRecipeDtoList(scrapRecipes, member);
     }
 }
