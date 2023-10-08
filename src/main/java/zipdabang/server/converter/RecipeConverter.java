@@ -154,7 +154,6 @@ public class RecipeConverter {
                 .isFirst(recipes.isFirst())
                 .isLast(recipes.isLast())
                 .build();
-
     }
 
     public static RecipeResponseDto.WeekBestDtoList toWeekBestDtoList(List<WeeklyBestRecipe> bestRecipes, Member member) {
@@ -213,6 +212,9 @@ public class RecipeConverter {
     }
 
     private static RecipeResponseDto.RecipeSimpleDto toResponseRecipeSimpleDto(Recipe recipe, Member member) {
+        log.info("시작");
+        log.info("레시피 정보: "+recipe.getId().toString());
+        log.info(recipe.getIntro());
         return RecipeResponseDto.RecipeSimpleDto.builder()
                 .recipeId(recipe.getId())
                 .categoryId(getCategoryIds(recipe))

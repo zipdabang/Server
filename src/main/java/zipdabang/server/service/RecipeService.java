@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
+import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
 import java.io.IOException;
 import java.util.List;
@@ -71,4 +72,5 @@ public interface RecipeService {
     Recipe createFromTempRecipe(Long tempId, RecipeRequestDto.RecipeCategoryList categoryList, Member member);
 
     TempRecipe getTempRecipe(Long tempId);
+    RecipeResponseDto.RecipePageListDto getLikeRecipes(Integer page, Member member);
 }
