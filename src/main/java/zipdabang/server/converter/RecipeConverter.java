@@ -129,7 +129,6 @@ public class RecipeConverter {
                 .build();
     }
 
-
     @PostConstruct
     public void init() {
         this.staticRecipeRepository = this.recipeRepository;
@@ -142,6 +141,28 @@ public class RecipeConverter {
         this.staticScrapRepository = this.scrapRepository;
         this.staticTimeConverter = this.timeConverter;
         this.staticTempStepRepository = this.tempStepRepository;
+    }
+
+    public static RecipeResponseDto.TempRecipePaging toTempRecipePaging(Page<TempRecipe> tempRecipes) {
+        return RecipeResponseDto.TempRecipePaging.builder()
+                .TempRecipeList(tempRecipes.stream()
+                        .map(tempRecipe -> toTempRecipeSimpleDto(tempRecipe))
+                        .collect(Collectors.toList()))
+                .totalElements(tempRecipes.getTotalElements())
+                .currentPageElements(tempRecipes.getNumberOfElements())
+                .totalPage(tempRecipes.getTotalPages())
+                .isFirst(tempRecipes.isFirst())
+                .isLast(tempRecipes.isLast())
+                .build();
+    }
+
+    private static RecipeResponseDto.TempRecipeSimpleDto toTempRecipeSimpleDto(TempRecipe tempRecipe) {
+        return RecipeResponseDto.TempRecipeSimpleDto.builder()
+                .tempId(tempRecipe.getId())
+                .thumbnailUrl(tempRecipe.getThumbnailUrl())
+                .recipeName(tempRecipe.getName())
+                .updatedAt(TimeConverter.ConvertTime(tempRecipe.getUpdatedAt()))
+                .build();
     }
 
     public static RecipeResponseDto.RecipePageListDto toPagingRecipeDtoList(Page<Recipe> recipes, Member member) {
@@ -221,6 +242,7 @@ public class RecipeConverter {
                 .thumbnailUrl(recipe.getThumbnailUrl())
                 .createdAt(staticTimeConverter.ConvertTime(recipe.getCreatedAt()))
                 .updatedAt(staticTimeConverter.ConvertTime(recipe.getUpdatedAt()))
+                .comments(recipe.getTotalComments())
                 .likes(recipe.getTotalLike())
                 .scraps(recipe.getTotalScrap())
                 .isLiked(staticLikesRepository.findByRecipeAndMember(recipe, member).isPresent())
@@ -252,6 +274,54 @@ public class RecipeConverter {
                     }
                 })
                 .collect(Collectors.toList());
+    }
+
+    public static List<Step> toUpdateStep(RecipeRequestDto.UpdateRecipeDto request, Recipe recipe, List<MultipartFile> stepImages, List<String> presentImageUrls) {
+        return request.getSteps().stream()
+                .map(step-> {
+                    try {
+                        return toUpdateStepDto(step, recipe, stepImages, presentImageUrls);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    private static Step toUpdateStepDto(RecipeRequestDto.UpdateStepDto step, Recipe recipe, List<MultipartFile> stepImages, List<String> presentImageUrls) throws IOException {
+        Step updatedStep = Step.builder()
+                .imageUrl(step.getStepUrl())
+                .stepNum(step.getStepNum())
+                .description(step.getDescription())
+                .recipe(recipe)
+                .build();
+
+
+        if(step.getStepUrl() == null) {
+
+            if (stepImages != null) {
+                MultipartFile stepImage = null;
+
+                for (int i = 0; i < stepImages.size(); i++) {
+                    Integer imageNum = Integer.parseInt(stepImages.get(i).getOriginalFilename().substring(0, 1)) + 1;
+                    if (imageNum == step.getStepNum()) {
+                        stepImage = stepImages.get(i);
+                        break;
+                    }
+                }
+
+                String imageUrl = null;
+                if (stepImage != null) {
+                    imageUrl = uploadStepImage(stepImage);
+                    updatedStep.setImage(imageUrl);
+                }
+            }
+        }
+        else{
+            presentImageUrls.remove(step.getStepUrl());
+        }
+
+        return updatedStep;
     }
 
     public static RecipeResponseDto.TempRecipeInfoDto toTempRecipeInfoDto(TempRecipe tempRecipe, Member member) {
@@ -288,6 +358,7 @@ public class RecipeConverter {
                 .time(tempRecipe.getTime())
                 .intro(tempRecipe.getIntro())
                 .recipeTip(tempRecipe.getRecipeTip())
+                .updatedAt(TimeConverter.ConvertTime(tempRecipe.getUpdatedAt()))
                 .build();
     }
 
@@ -298,6 +369,12 @@ public class RecipeConverter {
     }
 
     public static List<Ingredient> toIngredient(RecipeRequestDto.CreateRecipeDto request, Recipe recipe) {
+        return request.getIngredients().stream()
+                .map(ingredient -> toIngredientDto(ingredient, recipe))
+                .collect(Collectors.toList());
+    }
+
+    public static List<Ingredient> toUpdateIngredient(RecipeRequestDto.UpdateRecipeDto request, Recipe recipe) {
         return request.getIngredients().stream()
                 .map(ingredient -> toIngredientDto(ingredient, recipe))
                 .collect(Collectors.toList());

@@ -10,6 +10,7 @@ public enum RecipeStatus implements BaseCode{
 
     RECIPE_NOT_FOUND(HttpStatus.OK, 2100, "조회된 레시피 목록이 없습니다"),
     COMMENT_NOT_FOUND(HttpStatus.OK, 2101, "조회된 댓글 목록이 없습니다"),
+    TEMP_RECIPE_NOT_FOUND(HttpStatus.OK, 2102, "조회된 임시저장 레시피 목록이 없습니다"),
 
     //BAD_REQUEST
     NULL_RECIPE_ERROR(HttpStatus.OK, 4100, "레시피 작성시 누락된 내용이 있습니다."),

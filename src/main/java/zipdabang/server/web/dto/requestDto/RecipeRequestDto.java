@@ -31,6 +31,19 @@ public class RecipeRequestDto {
     }
 
     @Getter @Setter
+    public static class UpdateRecipeDto{
+        List<Long> categoryId;
+        String name;
+        String time;
+        String intro;
+        String recipeTip;
+        Integer stepCount;
+        Integer ingredientCount;
+        List<UpdateStepDto> steps;
+        List<NewIngredientDto> ingredients;
+    }
+
+    @Getter @Setter
     public static class TempRecipeDto{
 
         String thumbnailUrl;
@@ -52,6 +65,13 @@ public class RecipeRequestDto {
 
     @Getter
     public static class StepDto{
+        private Integer stepNum;
+        private String description;
+    }
+
+    @Getter
+    public static class UpdateStepDto{
+        private String stepUrl;
         private Integer stepNum;
         private String description;
     }
