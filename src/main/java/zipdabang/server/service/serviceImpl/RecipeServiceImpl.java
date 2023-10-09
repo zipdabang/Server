@@ -44,6 +44,7 @@ import static zipdabang.server.domain.member.QFollow.follow;
 import static zipdabang.server.domain.recipe.QComment.comment;
 import static zipdabang.server.domain.recipe.QRecipe.recipe;
 import static zipdabang.server.domain.recipe.QRecipeCategoryMapping.*;
+import static zipdabang.server.domain.recipe.QTempRecipe.tempRecipe;
 
 @Slf4j
 @Service
@@ -104,6 +105,65 @@ public class RecipeServiceImpl implements RecipeService {
                 .map(step -> step.setRecipe(recipe));
 
         RecipeConverter.toIngredient(request, recipe).stream()
+                .map(ingredient -> ingredientRepository.save(ingredient))
+                .collect(Collectors.toList())
+                .stream()
+                .map(ingredient -> ingredient.setRecipe(recipe));
+
+        return recipe;
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public Recipe update(Long recipeId, RecipeRequestDto.UpdateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException {
+        log.info("service: ", request.toString());
+
+        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_RECIPE_EXIST));
+
+        if(!recipe.getMember().equals(member))
+            throw new RecipeException(RecipeStatus.NOT_RECIPE_OWNER);
+
+        recipeCategoryMappingRepository.deleteAllByRecipe(recipe);
+
+        RecipeConverter.toRecipeCategory(request.getCategoryId(),recipe).stream()
+                .map(categoryMapping -> recipeCategoryMappingRepository.save(categoryMapping))
+                .collect(Collectors.toList())
+                .stream()
+                .map(categoryMapping -> categoryMapping.setRecipe(recipe));
+
+        //recipe
+        String thumbnailUrl = null;
+        if (thumbnail != null) {
+            amazonS3Manager.deleteFile(RecipeConverter.toKeyName(recipe.getThumbnailUrl()).substring(1));
+            thumbnailUrl = RecipeConverter.uploadThumbnail(thumbnail);
+            recipe.setThumbnail(thumbnailUrl);
+        }
+
+        recipe.updateInfo(request);
+
+
+        //step
+        List<String> presentImageUrls = stepRepository.findAllByRecipeId(recipeId).stream()
+                .filter(steps -> steps.getImageUrl() != null)
+                .map(tempStep -> tempStep.getImageUrl())
+                .collect(Collectors.toList());
+
+        stepRepository.deleteAllByRecipe(recipe);
+
+
+        RecipeConverter.toUpdateStep(request, recipe, stepImages, presentImageUrls).stream()
+                .map(step -> stepRepository.save(step))
+                .collect(Collectors.toList())
+                .stream()
+                .map(step -> step.setRecipe(recipe));
+
+        if(!presentImageUrls.isEmpty())
+            presentImageUrls.forEach(imageUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(imageUrl).substring(1)));
+
+        //ingredient
+        ingredientRepository.deleteAllByRecipe(recipe);
+
+        RecipeConverter.toUpdateIngredient(request, recipe).stream()
                 .map(ingredient -> ingredientRepository.save(ingredient))
                 .collect(Collectors.toList())
                 .stream()
@@ -266,6 +326,30 @@ public class RecipeServiceImpl implements RecipeService {
         tempRecipeRepository.deleteById(tempId);
 
         return recipe;
+    }
+
+    @Override
+    public Page<TempRecipe> getTempRecipeList(Integer pageIndex, Member member) {
+
+        QTempRecipe qTempRecipe = tempRecipe;
+
+        List<TempRecipe> content = queryFactory
+                .selectFrom(tempRecipe)
+                .where(
+                        tempRecipe.member.eq(member)
+                )
+                .orderBy(tempRecipe.updatedAt.desc())
+                .offset(pageIndex*pageSize)
+                .limit(pageSize)
+                .fetch();
+
+        JPAQuery<Long> count = queryFactory
+                .select(tempRecipe.count())
+                .from(tempRecipe)
+                .where(tempRecipe.member.eq(member)
+                );
+
+        return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count.fetchOne());
     }
 
     @Transactional(readOnly = false)

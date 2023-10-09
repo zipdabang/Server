@@ -8,6 +8,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
 import zipdabang.server.domain.member.Member;
+import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 
 import java.util.List;
 
@@ -121,6 +122,15 @@ public class Recipe extends BaseEntity {
         this.weekView += 1;
         this.totalView += 1;
         log.info("totalLike= ", this.totalView, ", weekView= ", this.weekView);
+        return this;
+    }
+
+    public Recipe updateInfo(RecipeRequestDto.UpdateRecipeDto request) {
+        this.name = request.getName();
+        this.intro = request.getIntro();
+        this.recipeTip = request.getRecipeTip();
+        this.time = request.getTime();
+
         return this;
     }
 }

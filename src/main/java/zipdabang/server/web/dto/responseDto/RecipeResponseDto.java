@@ -38,6 +38,30 @@ public class RecipeResponseDto {
     @Getter
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TempRecipePaging {
+        private List<TempRecipeSimpleDto> TempRecipeList;
+        Long totalElements;
+        Integer currentPageElements;
+        Integer totalPage;
+        Boolean isFirst;
+        Boolean isLast;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class TempRecipeSimpleDto {
+        private Long tempId;
+        private String thumbnailUrl;
+        private String recipeName;
+        private String updatedAt;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class RecipePreviewDto {
         private Long recipeId;
         private String recipeName;
@@ -211,6 +235,7 @@ public class RecipeResponseDto {
         private String time;
         private String intro;
         private String recipeTip;
+        private String updatedAt;
     }
 
     @Builder
@@ -297,4 +322,5 @@ public class RecipeResponseDto {
         Boolean isFirst;
         Boolean isLast;
     }
+
 }
