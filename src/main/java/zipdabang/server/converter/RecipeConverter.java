@@ -76,6 +76,7 @@ public class RecipeConverter {
     public static RecipeResponseDto.RecipePreviewDto toRecipePreviewDto(Recipe recipe, Member member, Integer rank) {
         return RecipeResponseDto.RecipePreviewDto.builder()
                 .recipeId(recipe.getId())
+                .thumbnailUrl(recipe.getThumbnailUrl())
                 .recipeName(recipe.getName())
                 .nickname(recipe.getMember().getNickname())
                 .likes(recipe.getTotalLike())

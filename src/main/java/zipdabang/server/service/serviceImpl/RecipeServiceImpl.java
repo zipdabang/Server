@@ -443,24 +443,17 @@ public class RecipeServiceImpl implements RecipeService {
 
         List<Recipe> recipeList = new ArrayList<>();
 
-        if (categoryId == 0){
-            recipeList = queryFactory
-                    .selectFrom(recipe)
-                    .limit(5)
-                    .orderBy(recipe.totalLike.desc(), recipe.createdAt.desc())
-                    .fetch();
-        }
-        else {
-            recipeList = queryFactory
-                    .selectFrom(recipe)
-                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                    .where(
-                            recipeCategoryMapping.category.id.eq(categoryId)
-                    )
-                    .limit(5)
-                    .orderBy(recipe.totalLike.desc(), recipe.createdAt.desc())
-                    .fetch();
-        }
+
+        recipeList = queryFactory
+                .selectFrom(recipe)
+                .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
+                .where(
+                        recipeCategoryMapping.category.id.eq(categoryId)
+                )
+                .limit(5)
+                .orderBy(recipe.totalLike.desc(), recipe.createdAt.desc())
+                .fetch();
+
 
         log.info(recipeList.toString());
 
@@ -656,13 +649,14 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Page<Comment> commentList(Integer pageIndex, Long recipeId, Member member) {
-        recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_RECIPE_EXIST));
+        Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_RECIPE_EXIST));
 
         QComment qComment = comment;
 
         List<Comment> content = queryFactory
                 .selectFrom(comment)
-                .where(blockedMemberNotInForComment(member))
+                .where(blockedMemberNotInForComment(member),
+                        comment.recipe.eq(findRecipe))
                 .orderBy(comment.createdAt.desc())
                 .offset(pageIndex*pageSize)
                 .limit(pageSize)
@@ -672,7 +666,12 @@ public class RecipeServiceImpl implements RecipeService {
         JPAQuery<Long> count = queryFactory
                 .select(comment.count())
                 .from(comment)
-                .where(blockedMemberNotInForComment(member));
+                .where(blockedMemberNotInForComment(member),
+                        comment.recipe.eq(findRecipe)
+                );
+
+        if (count.fetchOne() == 0)
+            throw new RecipeException(RecipeStatus.COMMENT_NOT_FOUND);
 
         return PageableExecutionUtils.getPage(content,PageRequest.of(pageIndex,pageSize), ()->count.fetchOne());
     }
@@ -689,12 +688,14 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_RECIPE_EXIST));
         Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_COMMENT_EXIST));
 
-        if (findComment.getMember().equals(member) && findComment.getRecipe().equals(findRecipe)) {
+        if (!findComment.getMember().equals(member))
+            throw new RecipeException(RecipeStatus.NOT_COMMENT_OWNER);
+        else if (!findComment.getRecipe().equals(findRecipe))
+            throw new RecipeException(RecipeStatus.NOT_MATCH_RECIPE);
+        else{
             commentRepository.deleteById(commentId);
             findRecipe.updateComment(-1);
         }
-        else
-            throw new RecipeException(RecipeStatus.NOT_COMMENT_OWNER);
 
         return commentRepository.existsById(recipeId) == false;
     }
@@ -705,12 +706,13 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_RECIPE_EXIST));
         Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_COMMENT_EXIST));
 
-
-        if (findComment.getMember().equals(member) && findComment.getRecipe().equals(findRecipe)) {
+        if (!findComment.getMember().equals(member))
+            throw new RecipeException(RecipeStatus.NOT_COMMENT_OWNER);
+        else if (!findComment.getRecipe().equals(findRecipe))
+            throw new RecipeException(RecipeStatus.NOT_MATCH_RECIPE);
+        else{
             return findComment.updateContent(request.getComment());
         }
-        else
-            throw new RecipeException(RecipeStatus.NOT_COMMENT_OWNER);
     }
 
     @Transactional(readOnly = false)
@@ -720,14 +722,16 @@ public class RecipeServiceImpl implements RecipeService {
         Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_COMMENT_EXIST));
         Report findReport = reportRepository.findById(reportId).orElseThrow(() -> new RecipeException(CommonStatus.NO_REPORT_EXIST));
 
-        if (!findComment.getMember().equals(member) && findComment.getRecipe().equals(findRecipe)) {
+        if (findComment.getMember().equals(member))
+            throw new RecipeException(RecipeStatus.COMMENT_OWNER);
+        else if (!findComment.getRecipe().equals(findRecipe))
+            throw new RecipeException(RecipeStatus.NOT_MATCH_RECIPE);
+        else{
             ReportedComment mapping = RecipeConverter.toCommentReport(findReport, findComment, member);
             reportedCommentRepository.save(mapping);
 
             return findComment.getId();
         }
-        else
-            throw new RecipeException(RecipeStatus.COMMENT_OWNER);
     }
 
     // 내가 좋아요 누른 레시피 목록 DTO 조회
