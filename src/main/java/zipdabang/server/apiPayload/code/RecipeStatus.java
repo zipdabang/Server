@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum RecipeStatus implements BaseCode{
 
-    RECIPE_NOT_FOUND(HttpStatus.OK, 2100, "조회된 목록이 없습니다"),
+    RECIPE_NOT_FOUND(HttpStatus.OK, 2100, "조회된 레시피 목록이 없습니다"),
+    COMMENT_NOT_FOUND(HttpStatus.OK, 2101, "조회된 댓글 목록이 없습니다"),
 
     //BAD_REQUEST
     NULL_RECIPE_ERROR(HttpStatus.OK, 4100, "레시피 작성시 누락된 내용이 있습니다."),
@@ -33,7 +34,9 @@ public enum RecipeStatus implements BaseCode{
     //BAD_REQUEST
     COMMENT_OWNER(HttpStatus.OK, 4110, "본인의 댓글입니다. 좋아요/스크랩/신고/차단할 수 없습니다"),
     //BAD_REQUEST
-    NO_TEMP_RECIPE_EXIST(HttpStatus.OK, 4111, "해당 임시저장 Id가 존재하지 않습니다.");
+    NO_TEMP_RECIPE_EXIST(HttpStatus.OK, 4111, "해당 임시저장 Id가 존재하지 않습니다."),
+    NOT_MATCH_RECIPE(HttpStatus.OK, 4112, "해당 댓글은 넘겨준 레시피 Id에 존재하지 않습니다. 레시피 Id를 올바르게 보내주세요")
+    ;
 
     private final HttpStatus httpStatus;
     private final Integer code;
