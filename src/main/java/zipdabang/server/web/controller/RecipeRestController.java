@@ -817,4 +817,5 @@ RecipeRestController {
 
         return ResponseDto.of(recipeService.getScrapRecipes(page, member));
     }
+
 }

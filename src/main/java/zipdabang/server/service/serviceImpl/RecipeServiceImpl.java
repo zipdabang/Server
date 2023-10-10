@@ -833,4 +833,5 @@ public class RecipeServiceImpl implements RecipeService {
         Page<Recipe> scrapRecipes = scrapRepository.findRecipeByMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
         return RecipeConverter.toPagingRecipeDtoList(scrapRecipes, member);
     }
+
 }
