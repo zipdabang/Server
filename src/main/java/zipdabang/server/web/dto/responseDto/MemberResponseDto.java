@@ -278,6 +278,7 @@ public class MemberResponseDto {
         String imageUrl;
         boolean checkSelf;
         boolean checkFollowing;
+        boolean checkFollower;
         String nickname;
         String caption;
         MemberPreferCategoryDto memberPreferCategoryDto;

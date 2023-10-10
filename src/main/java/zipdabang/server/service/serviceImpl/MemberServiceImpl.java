@@ -470,22 +470,19 @@ public class MemberServiceImpl implements MemberService {
     public MemberResponseDto.MyZipdabangDto getMyZipdabang(Member member, Long targetId) {
         Member target = memberRepository.findById(targetId).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
         boolean checkSelf = false;
-        boolean isFollowing = false;
         if (member.getMemberId() == target.getMemberId()) {
             checkSelf=true;
         }
         else if(blockedMemberRepository.existsByOwnerAndBlocked(member,target)){
             throw new MemberException(CommonStatus.BLOCKED_MEMBER);
         }
-
-        if (followRepository.existsByFollowerAndFollowee(member, target)) {
-            isFollowing=true;
-        }
+        boolean isFollowing = followRepository.existsByFollowerAndFollowee(member, target);
+        boolean isFollower = followRepository.existsByFollowerAndFollowee(target, member);
 
         List<Category> categories = findMemberPreferCategories(member);
         MemberResponseDto.MemberPreferCategoryDto memberPreferCategoryDto = MemberConverter.toMemberPreferCategoryDto(categories);
 
-        return MemberConverter.toMyZipdabangDto(target, checkSelf, isFollowing, memberPreferCategoryDto);
+        return MemberConverter.toMyZipdabangDto(target, checkSelf, isFollowing, isFollower, memberPreferCategoryDto);
 
     }
 }

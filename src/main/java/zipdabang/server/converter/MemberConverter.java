@@ -405,13 +405,14 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDto.MyZipdabangDto toMyZipdabangDto(Member member, boolean checkSelf, boolean isFollowing,MemberResponseDto.MemberPreferCategoryDto memberPreferCategoryDto) {
+    public static MemberResponseDto.MyZipdabangDto toMyZipdabangDto(Member member, boolean checkSelf, boolean isFollowing, boolean isFollower, MemberResponseDto.MemberPreferCategoryDto memberPreferCategoryDto) {
 
         return MemberResponseDto.MyZipdabangDto.builder()
                 .memberId(member.getMemberId())
                 .imageUrl(member.getProfileUrl())
                 .checkSelf(checkSelf)
                 .checkFollowing(isFollowing)
+                .checkFollower(isFollower)
                 .nickname(member.getNickname())
                 .caption(member.getCaption())
                 .memberPreferCategoryDto(memberPreferCategoryDto)
