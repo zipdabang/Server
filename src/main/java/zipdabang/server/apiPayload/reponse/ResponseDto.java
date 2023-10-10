@@ -16,14 +16,10 @@ import zipdabang.server.apiPayload.code.CommonStatus;
 @Schema(description = "기본 응답")
 public class ResponseDto<T> {
 
-    @Schema(description = "성공 유무", requiredMode = Schema.RequiredMode.REQUIRED, example = "true")
     @JsonProperty("isSuccess")
     private final Boolean isSuccess;
-    @Schema(description = "응답 코드", requiredMode = Schema.RequiredMode.REQUIRED, example = "2000")
     private final Integer code;
-    @Schema(description = "응답 메시지", requiredMode = Schema.RequiredMode.REQUIRED, example = "요청에 성공하였습니다.")
     private final String message;
-    @Schema(description = "응답 결과", requiredMode = Schema.RequiredMode.REQUIRED, example = "응답 결과")
     private T result;
 
 
