@@ -44,6 +44,7 @@ import static zipdabang.server.domain.member.QFollow.follow;
 import static zipdabang.server.domain.recipe.QComment.comment;
 import static zipdabang.server.domain.recipe.QRecipe.recipe;
 import static zipdabang.server.domain.recipe.QRecipeCategoryMapping.*;
+import static zipdabang.server.domain.recipe.QTempRecipe.tempRecipe;
 
 @Slf4j
 @Service
@@ -104,6 +105,65 @@ public class RecipeServiceImpl implements RecipeService {
                 .map(step -> step.setRecipe(recipe));
 
         RecipeConverter.toIngredient(request, recipe).stream()
+                .map(ingredient -> ingredientRepository.save(ingredient))
+                .collect(Collectors.toList())
+                .stream()
+                .map(ingredient -> ingredient.setRecipe(recipe));
+
+        return recipe;
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public Recipe update(Long recipeId, RecipeRequestDto.UpdateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException {
+        log.info("service: ", request.toString());
+
+        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_RECIPE_EXIST));
+
+        if(!recipe.getMember().equals(member))
+            throw new RecipeException(RecipeStatus.NOT_RECIPE_OWNER);
+
+        recipeCategoryMappingRepository.deleteAllByRecipe(recipe);
+
+        RecipeConverter.toRecipeCategory(request.getCategoryId(),recipe).stream()
+                .map(categoryMapping -> recipeCategoryMappingRepository.save(categoryMapping))
+                .collect(Collectors.toList())
+                .stream()
+                .map(categoryMapping -> categoryMapping.setRecipe(recipe));
+
+        //recipe
+        String thumbnailUrl = null;
+        if (thumbnail != null) {
+            amazonS3Manager.deleteFile(RecipeConverter.toKeyName(recipe.getThumbnailUrl()).substring(1));
+            thumbnailUrl = RecipeConverter.uploadThumbnail(thumbnail);
+            recipe.setThumbnail(thumbnailUrl);
+        }
+
+        recipe.updateInfo(request);
+
+
+        //step
+        List<String> presentImageUrls = stepRepository.findAllByRecipeId(recipeId).stream()
+                .filter(steps -> steps.getImageUrl() != null)
+                .map(tempStep -> tempStep.getImageUrl())
+                .collect(Collectors.toList());
+
+        stepRepository.deleteAllByRecipe(recipe);
+
+
+        RecipeConverter.toUpdateStep(request, recipe, stepImages, presentImageUrls).stream()
+                .map(step -> stepRepository.save(step))
+                .collect(Collectors.toList())
+                .stream()
+                .map(step -> step.setRecipe(recipe));
+
+        if(!presentImageUrls.isEmpty())
+            presentImageUrls.forEach(imageUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(imageUrl).substring(1)));
+
+        //ingredient
+        ingredientRepository.deleteAllByRecipe(recipe);
+
+        RecipeConverter.toUpdateIngredient(request, recipe).stream()
                 .map(ingredient -> ingredientRepository.save(ingredient))
                 .collect(Collectors.toList())
                 .stream()
@@ -266,6 +326,30 @@ public class RecipeServiceImpl implements RecipeService {
         tempRecipeRepository.deleteById(tempId);
 
         return recipe;
+    }
+
+    @Override
+    public Page<TempRecipe> getTempRecipeList(Integer pageIndex, Member member) {
+
+        QTempRecipe qTempRecipe = tempRecipe;
+
+        List<TempRecipe> content = queryFactory
+                .selectFrom(tempRecipe)
+                .where(
+                        tempRecipe.member.eq(member)
+                )
+                .orderBy(tempRecipe.updatedAt.desc())
+                .offset(pageIndex*pageSize)
+                .limit(pageSize)
+                .fetch();
+
+        JPAQuery<Long> count = queryFactory
+                .select(tempRecipe.count())
+                .from(tempRecipe)
+                .where(tempRecipe.member.eq(member)
+                );
+
+        return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count.fetchOne());
     }
 
     @Transactional(readOnly = false)
@@ -443,24 +527,17 @@ public class RecipeServiceImpl implements RecipeService {
 
         List<Recipe> recipeList = new ArrayList<>();
 
-        if (categoryId == 0){
-            recipeList = queryFactory
-                    .selectFrom(recipe)
-                    .limit(5)
-                    .orderBy(recipe.totalLike.desc(), recipe.createdAt.desc())
-                    .fetch();
-        }
-        else {
-            recipeList = queryFactory
-                    .selectFrom(recipe)
-                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                    .where(
-                            recipeCategoryMapping.category.id.eq(categoryId)
-                    )
-                    .limit(5)
-                    .orderBy(recipe.totalLike.desc(), recipe.createdAt.desc())
-                    .fetch();
-        }
+
+        recipeList = queryFactory
+                .selectFrom(recipe)
+                .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
+                .where(
+                        recipeCategoryMapping.category.id.eq(categoryId)
+                )
+                .limit(5)
+                .orderBy(recipe.totalLike.desc(), recipe.createdAt.desc())
+                .fetch();
+
 
         log.info(recipeList.toString());
 
@@ -656,13 +733,14 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Page<Comment> commentList(Integer pageIndex, Long recipeId, Member member) {
-        recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_RECIPE_EXIST));
+        Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_RECIPE_EXIST));
 
         QComment qComment = comment;
 
         List<Comment> content = queryFactory
                 .selectFrom(comment)
-                .where(blockedMemberNotInForComment(member))
+                .where(blockedMemberNotInForComment(member),
+                        comment.recipe.eq(findRecipe))
                 .orderBy(comment.createdAt.desc())
                 .offset(pageIndex*pageSize)
                 .limit(pageSize)
@@ -672,7 +750,12 @@ public class RecipeServiceImpl implements RecipeService {
         JPAQuery<Long> count = queryFactory
                 .select(comment.count())
                 .from(comment)
-                .where(blockedMemberNotInForComment(member));
+                .where(blockedMemberNotInForComment(member),
+                        comment.recipe.eq(findRecipe)
+                );
+
+        if (count.fetchOne() == 0)
+            throw new RecipeException(RecipeStatus.COMMENT_NOT_FOUND);
 
         return PageableExecutionUtils.getPage(content,PageRequest.of(pageIndex,pageSize), ()->count.fetchOne());
     }
@@ -689,12 +772,14 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_RECIPE_EXIST));
         Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_COMMENT_EXIST));
 
-        if (findComment.getMember().equals(member) && findComment.getRecipe().equals(findRecipe)) {
+        if (!findComment.getMember().equals(member))
+            throw new RecipeException(RecipeStatus.NOT_COMMENT_OWNER);
+        else if (!findComment.getRecipe().equals(findRecipe))
+            throw new RecipeException(RecipeStatus.NOT_MATCH_RECIPE);
+        else{
             commentRepository.deleteById(commentId);
             findRecipe.updateComment(-1);
         }
-        else
-            throw new RecipeException(RecipeStatus.NOT_COMMENT_OWNER);
 
         return commentRepository.existsById(recipeId) == false;
     }
@@ -705,12 +790,13 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_RECIPE_EXIST));
         Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_COMMENT_EXIST));
 
-
-        if (findComment.getMember().equals(member) && findComment.getRecipe().equals(findRecipe)) {
+        if (!findComment.getMember().equals(member))
+            throw new RecipeException(RecipeStatus.NOT_COMMENT_OWNER);
+        else if (!findComment.getRecipe().equals(findRecipe))
+            throw new RecipeException(RecipeStatus.NOT_MATCH_RECIPE);
+        else{
             return findComment.updateContent(request.getComment());
         }
-        else
-            throw new RecipeException(RecipeStatus.NOT_COMMENT_OWNER);
     }
 
     @Transactional(readOnly = false)
@@ -720,14 +806,16 @@ public class RecipeServiceImpl implements RecipeService {
         Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_COMMENT_EXIST));
         Report findReport = reportRepository.findById(reportId).orElseThrow(() -> new RecipeException(CommonStatus.NO_REPORT_EXIST));
 
-        if (!findComment.getMember().equals(member) && findComment.getRecipe().equals(findRecipe)) {
+        if (findComment.getMember().equals(member))
+            throw new RecipeException(RecipeStatus.COMMENT_OWNER);
+        else if (!findComment.getRecipe().equals(findRecipe))
+            throw new RecipeException(RecipeStatus.NOT_MATCH_RECIPE);
+        else{
             ReportedComment mapping = RecipeConverter.toCommentReport(findReport, findComment, member);
             reportedCommentRepository.save(mapping);
 
             return findComment.getId();
         }
-        else
-            throw new RecipeException(RecipeStatus.COMMENT_OWNER);
     }
 
     // 내가 좋아요 누른 레시피 목록 DTO 조회
@@ -745,4 +833,5 @@ public class RecipeServiceImpl implements RecipeService {
         Page<Recipe> scrapRecipes = scrapRepository.findRecipeByMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
         return RecipeConverter.toPagingRecipeDtoList(scrapRecipes, member);
     }
+
 }

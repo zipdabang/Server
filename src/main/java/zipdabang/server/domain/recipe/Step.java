@@ -1,6 +1,7 @@
 package zipdabang.server.domain.recipe;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
