@@ -1,6 +1,7 @@
 package zipdabang.server.web.dto.responseDto;
 
 import lombok.*;
+import zipdabang.server.domain.enums.AlarmType;
 import zipdabang.server.domain.enums.GenderType;
 
 
@@ -284,5 +285,30 @@ public class MemberResponseDto {
         Long followerCount;
         Long followingCount;
 
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class PushAlarmDto{
+        String title;
+        String body;
+        AlarmType alarmType;
+        Long targetPK;
+        Boolean isConfirmed;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class PushAlarmListDto{
+        List<PushAlarmDto> pushAlarmDtoList;
+        Long totalElements;
+        Integer currentPageElements;
+        Integer totalPage;
+        Boolean isFirst;
+        Boolean isLast;
     }
 }

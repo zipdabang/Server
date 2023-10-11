@@ -9,9 +9,11 @@ import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.aws.s3.AmazonS3Manager;
 import zipdabang.server.apiPayload.exception.handler.MemberException;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.enums.AlarmType;
 import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.etc.Uuid;
+import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.*;
 import zipdabang.server.domain.member.Deregister;
 import zipdabang.server.domain.member.Terms;
@@ -417,6 +419,47 @@ public class MemberConverter {
                 .memberPreferCategoryDto(memberPreferCategoryDto)
                 .followerCount(staticMemberService.getFollowerCount(member))
                 .followingCount(staticMemberService.getFollowingCount(member))
+                .build();
+    }
+
+    public static MemberResponseDto.PushAlarmDto toPushAlarmDto(PushAlarm pushAlarm){
+
+        AlarmType name = pushAlarm.getAlarmCategory().getName();
+        Long targetPK = null;
+        switch (name){
+            case USER:
+                targetPK = pushAlarm.getTargetMember().getMemberId();
+                break;
+            case RECIPE:
+                targetPK = pushAlarm.getTargetRecipe().getId();
+                break;
+            case MYPAGE:
+                break;
+            case NOTIFICATION:
+                targetPK = pushAlarm.getTargetNotification().getId();
+                break;
+        }
+
+        return MemberResponseDto.PushAlarmDto.builder()
+                .title(pushAlarm.getTitle())
+                .body(pushAlarm.getBody())
+                .isConfirmed(pushAlarm.getIsConfirmed())
+                .alarmType(name)
+                .targetPK(targetPK)
+                .build();
+    }
+
+    public static MemberResponseDto.PushAlarmListDto toPushAlarmListDto(Page<PushAlarm> pushAlarmPage){
+        List<MemberResponseDto.PushAlarmDto> pushAlarmDtoList = pushAlarmPage.stream()
+                .map(MemberConverter::toPushAlarmDto).collect(Collectors.toList());
+
+        return MemberResponseDto.PushAlarmListDto.builder()
+                .pushAlarmDtoList(pushAlarmDtoList)
+                .isLast(pushAlarmPage.isLast())
+                .isFirst(pushAlarmPage.isFirst())
+                .totalPage(pushAlarmPage.getTotalPages())
+                .totalElements(pushAlarmPage.getTotalElements())
+                .currentPageElements(pushAlarmDtoList.size())
                 .build();
     }
 }

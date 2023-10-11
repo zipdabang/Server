@@ -3,6 +3,7 @@ package zipdabang.server.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.Follow;
 import zipdabang.server.domain.member.Inquery;
 import zipdabang.server.domain.enums.DeregisterType;
@@ -72,4 +73,6 @@ public interface MemberService {
     public void updateProfileDefault(Member member);
     Boolean checkFollowing(Member loginMember, Member targetMember);
     public MemberResponseDto.MyZipdabangDto getMyZipdabang(Member member, Long targetId);
-    }
+
+    Page<PushAlarm> getPushAlarms(Member member, Integer page);
+}

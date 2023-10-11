@@ -19,12 +19,14 @@ import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.DeregisterType;
 import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.etc.Uuid;
+import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.MemberPreferCategory;
 import zipdabang.server.domain.member.Terms;
 import zipdabang.server.domain.member.TermsAgree;
 import zipdabang.server.domain.member.*;
 import zipdabang.server.redis.domain.RefreshToken;
+import zipdabang.server.repository.AlarmRepository.PushAlarmRepository;
 import zipdabang.server.repository.TermsAgreeRepository;
 import zipdabang.server.repository.TermsRepository;
 import zipdabang.server.redis.service.RedisService;
@@ -79,6 +81,9 @@ public class MemberServiceImpl implements MemberService {
     private final DeregisterReasonRepository deregisterReasonRepository;
     private final BlockedMemberRepository blockedMemberRepository;
     private final FollowRepository followRepository;
+
+    private final PushAlarmRepository pushAlarmRepository;
+
     private static String defaultProfileImage;
 
     @Value("${paging.size}")
@@ -488,10 +493,16 @@ public class MemberServiceImpl implements MemberService {
         return MemberConverter.toMyZipdabangDto(target, checkSelf, isFollowing, memberPreferCategoryDto);
 
     }
+
+    @Override
+    public Page<PushAlarm> getPushAlarms(Member member, Integer page) {
+        page -= 1;
+
+        Page<PushAlarm> pushAlarms = pushAlarmRepository.findByOwnerMember(member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+
+        if(pushAlarms.getTotalPages() <= page)
+            throw new MemberException(CommonStatus.OVER_PAGE_INDEX_ERROR);
+
+        return pushAlarms;
+    }
 }
-
-
-
-
-
-

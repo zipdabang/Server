@@ -53,7 +53,7 @@ public class FirebaseServiceImpl implements FirebaseService{
                                         .title(title)
                                         .body(body)
                                         .targetView(targetView)
-                                        .targetNotification(targetNotification)
+                                        .targetNotificationPK(targetNotification)
                                         .targetPK(targetPK).build()
                                 ).
                                 build()
