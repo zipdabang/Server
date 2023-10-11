@@ -77,6 +77,7 @@ public class MemberResponseDto {
     public static class MemberInfoResponseDto {
         private String profileUrl;
         private String email;
+        private String caption;
         private MemberBasicInfoDto memberBasicInfoDto;
         private MemberDetailInfoDto memberDetailInfoDto;
         private String nickname;
