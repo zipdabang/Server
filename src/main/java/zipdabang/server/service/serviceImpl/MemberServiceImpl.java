@@ -169,6 +169,9 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public String updateMemberProfileImage(Member member, MemberRequestDto.changeProfileDto profileDto) throws IOException {
+        if (!member.getProfileUrl().equals(defaultProfileImage)) {
+            s3Manager.deleteFile(toKeyName(member.getProfileUrl()).substring(1));
+        }
         Uuid uuid = s3Manager.createUUID();
         String KeyName = s3Manager.generateMemberKeyName(uuid);
         String fileUrl = s3Manager.uploadFile(KeyName, profileDto.getNewProfile());
@@ -457,6 +460,9 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void updateProfileDefault(Member member) {
+        if (member.getProfileUrl().equals(defaultProfileImage)) {
+            return;
+        }
         s3Manager.deleteFile(toKeyName(member.getProfileUrl()).substring(1));
         member.setProfileUrl(defaultProfileImage);
     }

@@ -485,7 +485,6 @@ public class MemberRestController {
     })
     public ResponseDto<MemberResponseDto.MemberStatusDto> updateProfileDefault(@AuthMember Member member) {
         memberService.updateProfileDefault(member);
-
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "UpdateProfileDefault"));
     }
 
