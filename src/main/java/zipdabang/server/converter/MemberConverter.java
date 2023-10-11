@@ -155,13 +155,13 @@ public class MemberConverter {
         return MemberResponseDto.MemberInfoResponseDto.builder()
                 .profileUrl(member.getProfileUrl())
                 .email(member.getEmail())
+                .caption(member.getCaption())
                 .memberBasicInfoDto(memberBasicInfoDto(member))
                 .memberDetailInfoDto(memberDetailInfoDto(member))
                 .nickname(member.getNickname())
                 .preferCategories(preferCategories)
                 .build();
     }
-
     public static Member toMember(Long memberId) {
         return staticMemberRepository.findById(memberId).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
     }
