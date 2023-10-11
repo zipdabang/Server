@@ -30,6 +30,6 @@ public class FcmAOSMessage {
         private String body;
         private String targetView;
         private String targetPK;
-        private String targetNotification;
+        private String targetNotificationPK;
     }
 }

@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.enums.SocialType;
+import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.inform.Question;
 import zipdabang.server.domain.recipe.Recipe;
 import zipdabang.server.domain.recipe.Scrap;
@@ -114,6 +115,9 @@ public class Member extends BaseEntity {
     // 내가 따르는 놈들
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
     private List<Follow> myFollowingList;
+
+    @OneToMany(mappedBy = "ownerMember", cascade = CascadeType.ALL)
+    private List<PushAlarm> pushAlarmList;
 
     public void setProfileUrl(String profileUrl) {
         this.profileUrl = profileUrl;
