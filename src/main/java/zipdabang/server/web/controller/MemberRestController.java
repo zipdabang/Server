@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -26,6 +27,7 @@ import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.apiPayload.exception.handler.MemberException;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.Follow;
 import zipdabang.server.domain.member.Inquery;
 import zipdabang.server.domain.member.Member;
@@ -507,6 +509,15 @@ public class MemberRestController {
         return ResponseDto.of(memberService.getMyZipdabang(member, targetMemberId));
 
 
+    }
+
+    @GetMapping("/members/push-alarms")
+    @Parameters({
+            @Parameter(name = "member", hidden = true)
+    })
+    public ResponseDto<MemberResponseDto.PushAlarmListDto> showPushAlarms(@CheckTempMember @AuthMember Member member, @CheckPage @RequestParam(name = "page") Integer page){
+        Page<PushAlarm> pushAlarms = memberService.getPushAlarms(member, page);
+        return ResponseDto.of(MemberConverter.toPushAlarmListDto(pushAlarms));
     }
 
 }
