@@ -490,11 +490,22 @@ public class MemberServiceImpl implements MemberService {
         boolean isFollowing = followRepository.existsByFollowerAndFollowee(member, target);
         boolean isFollower = followRepository.existsByFollowerAndFollowee(target, member);
 
-        List<Category> categories = findMemberPreferCategories(member);
+        List<Category> categories = findMemberPreferCategories(target);
         MemberResponseDto.MemberPreferCategoryDto memberPreferCategoryDto = MemberConverter.toMemberPreferCategoryDto(categories);
 
         return MemberConverter.toMyZipdabangDto(target, checkSelf, isFollowing, isFollower, memberPreferCategoryDto);
+    }
 
+    @Override
+    public MemberResponseDto.MyZipdabangDto getSelfMyZipdabang(Member member) {
+        boolean checkSelf = true;
+        boolean isFollowing = false;
+        boolean isFollower = false;
+
+        List<Category> categories = findMemberPreferCategories(member);
+        MemberResponseDto.MemberPreferCategoryDto memberPreferCategoryDto = MemberConverter.toMemberPreferCategoryDto(categories);
+
+        return MemberConverter.toMyZipdabangDto(member, checkSelf, isFollowing, isFollower, memberPreferCategoryDto);
     }
 
     @Override

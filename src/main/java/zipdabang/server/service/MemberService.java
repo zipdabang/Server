@@ -73,6 +73,7 @@ public interface MemberService {
     public void updateProfileDefault(Member member);
     Boolean checkFollowing(Member loginMember, Member targetMember);
     public MemberResponseDto.MyZipdabangDto getMyZipdabang(Member member, Long targetId);
+    public MemberResponseDto.MyZipdabangDto getSelfMyZipdabang(Member member);
 
     Page<PushAlarm> getPushAlarms(Member member, Integer page);
 }

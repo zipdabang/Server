@@ -507,8 +507,21 @@ public class MemberRestController {
     public ResponseDto<MemberResponseDto.MyZipdabangDto> getMyZipdabang(@CheckTempMember @AuthMember Member member, Long targetMemberId) {
 
         return ResponseDto.of(memberService.getMyZipdabang(member, targetMemberId));
+    }
 
 
+    @Operation(summary = "🎪figma[내집다방 - 원본] 나의 내집다방 화면 조회 API ✔️🔑", description = "나의 내집다방 화면 조회 API 입니다.")
+    @GetMapping("/members/selfMyZipdabang")
+    @Parameters({
+            @Parameter(name = "member", hidden = true)
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+            @ApiResponse(responseCode = "4059", description = "로그인 후 조회 가능합니다."),
+    })
+    public ResponseDto<MemberResponseDto.MyZipdabangDto> getSelfMyZipdabang(@CheckTempMember @AuthMember Member member) {
+
+        return ResponseDto.of(memberService.getSelfMyZipdabang(member));
     }
 
     @GetMapping("/members/push-alarms")
