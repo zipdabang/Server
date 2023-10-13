@@ -18,6 +18,7 @@ public enum CommonStatus implements BaseCode {
     AUTO_LOGIN_MAIN(HttpStatus.OK, 2055, "홈 화면으로 이동하세요"),
     AUTO_LOGIN_NOT_MAIN(HttpStatus.OK, 2056, "로그인 화면으로 이동하세요"),
     BLOCKED_MEMBER_NOT_FOUND(HttpStatus.OK, 2057, "차단한 유저가 없습니다"),
+    NICKNAME_MEMBER_NOT_EXIST(HttpStatus.OK, 2058, "해당 키워드를 포함한 닉네임을 가진 유저가 없습니다."),
 
 
 

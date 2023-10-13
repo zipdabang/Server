@@ -76,4 +76,7 @@ public interface MemberService {
     public MemberResponseDto.MyZipdabangDto getSelfMyZipdabang(Member member);
 
     Page<PushAlarm> getPushAlarms(Member member, Integer page);
+    public Page<Member> findByNicknameContains(Integer page, String nickname);
+    public Page<Member> findFollowerByNicknameContains(Integer page, Long targetId, String nickname);
+    public Page<Member> findFollowingByNicknameContains(Integer page, Long targetId, String nickname);
 }
