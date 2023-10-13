@@ -483,6 +483,25 @@ RecipeRestController {
         return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
     }
 
+    @Operation(summary = "내 레시피 미리보기 목록 API 🔑 ✔", description = "내 레시피 미리기보기 목록")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK, 목록이 있을 땐 이 응답임"),
+            @ApiResponse(responseCode = "2100", description = "OK, 목록이 없을 경우, result = null", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+    })
+    @GetMapping(value = "/members/recipes/owner/preview/")
+    public ResponseDto<RecipeResponseDto.RecipeListDto> myRecipePreview(@AuthMember Member member) {
+        List<Recipe> recipes = recipeService.getmyRecipePreview(member);
+
+        return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
+    }
+
     @Operation(summary = "특정 유저의 레시피 목록 API 🔑 ✔", description = "특정 유저의 레시피 목록")
     @ApiResponses({
             @ApiResponse(responseCode = "2000", description = "OK, 목록이 있을 땐 이 응답임"),
@@ -508,6 +527,40 @@ RecipeRestController {
         pageIndex -= 1;
 
         Page<Recipe> recipes = recipeService.getRecipeByOwner(pageIndex, memberId);
+
+        log.info(recipes.toString());
+
+        if (recipes.getTotalElements() == 0)
+            throw new RecipeException(RecipeStatus.RECIPE_NOT_FOUND);
+        if (pageIndex >= recipes.getTotalPages())
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
+
+        return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
+    }
+
+    @Operation(summary = "내 레시피 목록 API 🔑 ✔", description = "내 레시피 목록")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK, 목록이 있을 땐 이 응답임"),
+            @ApiResponse(responseCode = "2100", description = "OK, 목록이 없을 경우, result = null", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST, 페이지 인덱스 범위 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, -1 이런거 주면 에러 뱉음"),
+    })
+    @GetMapping(value = "/members/recipes/owner/")
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> myRecipeList(@CheckPage @RequestParam(name = "pageIndex") Integer pageIndex,
+                                                                          @AuthMember Member member) {
+        if (pageIndex == null)
+            pageIndex = 1;
+
+        pageIndex -= 1;
+
+        Page<Recipe> recipes = recipeService.getMyRecipeList(pageIndex, member);
 
         log.info(recipes.toString());
 
