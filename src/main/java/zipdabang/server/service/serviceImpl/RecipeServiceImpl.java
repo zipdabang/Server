@@ -22,10 +22,17 @@ import zipdabang.server.apiPayload.exception.handler.RecipeException;
 
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.Report;
+import zipdabang.server.domain.enums.AlarmType;
+import zipdabang.server.domain.inform.AlarmCategory;
+import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.BlockedMember;
+import zipdabang.server.domain.member.FcmToken;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.member.QFollow;
 import zipdabang.server.domain.recipe.*;
+import zipdabang.server.firebase.fcm.service.FirebaseService;
+import zipdabang.server.repository.AlarmRepository.AlarmCategoryRepository;
+import zipdabang.server.repository.AlarmRepository.PushAlarmRepository;
 import zipdabang.server.repository.ReportRepository;
 import zipdabang.server.repository.memberRepositories.BlockedMemberRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
@@ -74,6 +81,9 @@ public class RecipeServiceImpl implements RecipeService {
     private final WeeklyBestRecipeRepository weeklyBestRecipeRepository;
 
     private final JPAQueryFactory queryFactory;
+    private final PushAlarmRepository pushAlarmRepository;
+    private final AlarmCategoryRepository alarmCategoryRepository;
+    private final FirebaseService firebaseService;
 
 
     @Value("${paging.size}")
@@ -723,9 +733,56 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Transactional(readOnly = false)
     @Override
-    public Comment createComment(String content, Long recipeId, Member member) {
+    public Comment createComment(String content, Long recipeId, Member member){
         Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(RecipeStatus.NO_RECIPE_EXIST));
         findRecipe.updateComment(1);
+
+        List<PushAlarm> existAlarms = pushAlarmRepository.findByTitleAndIsConfirmedFalse("나의 글에 댓글이 달렸어요. 확인해보세요!");
+        Boolean isMoreThan5Comments = !pushAlarmRepository.findByTitleAndIsConfirmedFalse("확인하지 않은 댓글 알림이 5개 이상 있어요.").isEmpty();
+
+        String title = "나의 글에 댓글이 달렸어요. 확인해보세요!";
+        String body = content;
+        String targetView = AlarmType.RECIPE.toString();
+        String targetPK = findRecipe.getId().toString();
+
+        PushAlarm pushAlarm = pushAlarmRepository.save(PushAlarm.builder()
+                .title(title)
+                .body(body)
+                .isConfirmed(false)
+                .targetRecipe(findRecipe)
+                .alarmCategory(alarmCategoryRepository.findByName(AlarmType.RECIPE).get())
+                .build());
+
+        pushAlarm.setMember(findRecipe.getMember());
+
+        if (!isMoreThan5Comments) {
+
+            if(existAlarms.size() == 4) {
+
+                title = "확인하지 않은 댓글 알림이 5개 이상 있어요.";
+                body = "확인해보세요!";
+                targetView = AlarmType.ALARMPAGE.toString();
+                targetPK = findRecipe.getMember().getMemberId().toString();
+
+
+                pushAlarm = pushAlarmRepository.save(PushAlarm.builder()
+                        .title(title)
+                        .body(body)
+                        .isConfirmed(false)
+                        .alarmCategory(alarmCategoryRepository.findByName(AlarmType.ALARMPAGE).get())
+                        .build());
+
+                pushAlarm.setMember(findRecipe.getMember());
+            }
+
+            for (FcmToken fcmToken : findRecipe.getMember().getFcmTokenList()) {
+                try {
+                    firebaseService.sendMessageTo(fcmToken.getToken(), title, body, targetView, targetPK, pushAlarm.getId().toString());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
 
         Comment buildComment = RecipeConverter.toComment(content, findRecipe, member);
         return commentRepository.save(buildComment);
