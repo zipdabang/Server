@@ -533,5 +533,28 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toPushAlarmListDto(pushAlarms));
     }
 
+    @Operation(summary = "전체 유저 중 닉네임으로 검색 API ✔️🔑", description = "전체 유저 중 닉네임으로 검색 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 전체 유저 중 닉네임으로 검색 완료"),
+            @ApiResponse(responseCode = "2058", description = "해당 키워드를 포함한 닉네임을 가진 유저가 없습니다."),
+            @ApiResponse(responseCode = "4052", description = "해당 사용자가 존재하지 않습니다"),
+            @ApiResponse(responseCode = "4054", description = "BAD_REQUEST , 페이지 번호가 없거나 0 이하", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/members/")
+    public ResponseDto<MemberResponseDto.PagingMemberListDto> getAllUsersByNickname(@RequestParam(name = "page", required = false) Integer page, @CheckTempMember @AuthMember Member member, @RequestParam(name = "nickname", required = false)String nickname) {
+        if (page == null)
+            page = 1;
+        else if (page < 1)
+            throw new MemberException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
+        page -= 1;
+        Page<Member> findByNickname = memberService.findByNicknameContains(page, nickname);
+        return ResponseDto.of(MemberConverter.toPagingMemberListDto(findByNickname));
+    }
+
 }
 
