@@ -13,6 +13,6 @@ public interface PushAlarmRepository extends JpaRepository<PushAlarm, Long> {
 
     Page<PushAlarm> findByOwnerMember(Member member, PageRequest pageRequest);
 
-    List<PushAlarm> findByTitleAndIsConfirmedFalse(String s);
 
+    List<PushAlarm> findByTitleAndOwnerMemberAndIsConfirmedFalse(String s, Member member);
 }
