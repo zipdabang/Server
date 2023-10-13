@@ -285,6 +285,15 @@ public class MemberServiceImpl implements MemberService {
                     return savedTermsAgree;
                 }).collect(Collectors.toList());
 
+        FcmToken fcmToken = FcmToken.builder()
+                .token(request.getFcmToken())
+                .serialNumber(request.getSerialNumber())
+                .build();
+
+        fcmToken.setMember(joinUser);
+
+        fcmTokenRepository.save(fcmToken);
+
         return OAuthJoin.OAuthJoinDto.builder()
                 .refreshToken(redisService.generateRefreshToken(request.getEmail()).getToken())
                 .accessToken(redisService.saveLoginStatus(joinUser.getMemberId(), tokenProvider.createAccessToken(joinUser.getMemberId(), type.equals("kakao") ? SocialType.KAKAO.toString() : SocialType.GOOGLE.toString(),request.getEmail(),Arrays.asList(new SimpleGrantedAuthority("USER")))))
