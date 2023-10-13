@@ -532,4 +532,31 @@ public class MemberServiceImpl implements MemberService {
 
         return searchByNicknameMembers;
     }
+
+    @Override
+    public Page<Member> findFollowerByNicknameContains(Integer page, Long targetId, String nickname) {
+        Member member = memberRepository.findById(targetId).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
+        Page<Member> searchByNicknameMembers = memberRepository.qFindFollowerByNicknameContains(nickname, member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        if (searchByNicknameMembers.getContent().isEmpty()) {
+            throw new MemberException(CommonStatus.NICKNAME_MEMBER_NOT_EXIST);
+        }
+        if(searchByNicknameMembers.getTotalPages() <= page)
+            throw new MemberException(CommonStatus.OVER_PAGE_INDEX_ERROR);
+
+        return searchByNicknameMembers;
+    }
+
+    @Override
+    public Page<Member> findFollowingByNicknameContains(Integer page, Long targetId, String nickname) {
+        Member member = memberRepository.findById(targetId).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
+        Page<Member> searchByNicknameMembers = memberRepository.qFindFollowingByNicknameContains(nickname, member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        if (searchByNicknameMembers.getContent().isEmpty()) {
+            throw new MemberException(CommonStatus.NICKNAME_MEMBER_NOT_EXIST);
+        }
+        if(searchByNicknameMembers.getTotalPages() <= page)
+            throw new MemberException(CommonStatus.OVER_PAGE_INDEX_ERROR);
+
+        return searchByNicknameMembers;
+    }
+
 }
