@@ -30,7 +30,7 @@ public class FcmToken {
 
     public void setMember(Member member){
         if(this.member != null)
-            member.getFcmTokenList().remove(this);
+            this.member.getFcmTokenList().remove(this);
         this.member = member;
         member.getFcmTokenList().add(this);
     }

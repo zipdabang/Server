@@ -107,6 +107,7 @@ public class MemberConverter {
                 .name(request.getName())
                 .phoneNum(request.getPhoneNum())
                 .termsAgree(new ArrayList<>())
+                .fcmTokenList(new ArrayList<>())
                 .build();
         return staticMemberRepository.save(member);
     }
