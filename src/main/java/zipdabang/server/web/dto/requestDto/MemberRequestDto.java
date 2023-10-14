@@ -196,4 +196,5 @@ public class MemberRequestDto {
         private List<DeregisterType> deregisterTypes;
         private String feedback;
     }
+
 }

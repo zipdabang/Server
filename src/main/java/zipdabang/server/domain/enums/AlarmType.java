@@ -2,5 +2,5 @@ package zipdabang.server.domain.enums;
 
 public enum AlarmType {
 
-    USER, RECIPE,MYPAGE,NOTIFICATION
+    USER, RECIPE,MYPAGE,NOTIFICATION,ALARMPAGE
 }
