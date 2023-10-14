@@ -114,7 +114,7 @@ spring:
     ansi:
       enabled: always
   redis:
-    host: zipdabang-dev-redis.fkcewd.ng.0001.apne1.cache.amazonaws.com
+    host: briefing-dev-redis.bjyb5r.ng.0001.apne1.cache.amazonaws.com
   batch:
     jdbc:
       initialize-schema: always
