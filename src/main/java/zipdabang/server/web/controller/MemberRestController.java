@@ -36,10 +36,7 @@ import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.service.MemberService;
 import zipdabang.server.sms.service.SmsService;
 import zipdabang.server.utils.dto.OAuthJoin;
-import zipdabang.server.validation.annotation.CheckPage;
-import zipdabang.server.validation.annotation.CheckTempMember;
-import zipdabang.server.validation.annotation.CheckDeregister;
-import zipdabang.server.validation.annotation.ExistMember;
+import zipdabang.server.validation.annotation.*;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
@@ -338,6 +335,23 @@ public class MemberRestController {
     public ResponseDto<MemberResponseDto.InqueryListDto> showInquery(@CheckTempMember @AuthMember Member member, @RequestParam(name = "page", required = true) @CheckPage Integer page) {
         Page<Inquery> inqueryPage = memberService.findInquery(member, page);
         return ResponseDto.of(MemberConverter.toInqueryListDto(inqueryPage));
+    }
+
+    @Operation(summary = "🎪[더보기 - 나의 문의내역2] 내 문의내역 상세조회 ✔️🔑", description = "내 문의 상세조회 API")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "inqueryId", description = "문의 아이디"),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+            @ApiResponse(responseCode = "4067", description = "NOT_FOUND , 문의가 없음", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4068", description = "BAD_REQEUST , 내 문의 아님", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+
+    })
+    @GetMapping("/members/inquiries/{inqueryId}")
+    public ResponseDto<MemberResponseDto.InquerySpecDto> showInquerySepc(@CheckTempMember @AuthMember Member member,@ExistInquery @PathVariable(name = "inqueryId") Long inqueryId){
+        Inquery myInquryById = memberService.findMyInqueryById(member,inqueryId);
+        return ResponseDto.of(MemberConverter.toInquerySpecDto(myInquryById));
     }
 
     @Operation(summary = "[figma 더보기 - 회원 탈퇴] 회원 탈퇴 API ✔️🔑", description = "회원 탈퇴 API입니다.<br> 테스트를 위해 임시로 해당 유저의 상세주소를 \"TEST\" 로 설정하면(상세정보 수정 API - zipCode) 탈퇴 불가능한 경우로 처리되도록 해놨습니다.<br> deregisterTypes 종류 <br>" +

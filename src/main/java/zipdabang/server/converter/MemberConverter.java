@@ -464,6 +464,18 @@ public class MemberConverter {
                 .currentPageElements(pushAlarmDtoList.size())
                 .build();
     }
+
+    public static MemberResponseDto.InquerySpecDto toInquerySpecDto(Inquery inquery){
+        List<String> imageList = inquery.getInqueryImageList().stream()
+                .map(InqueryImage::getImageUrl).collect(Collectors.toList());
+
+        return MemberResponseDto.InquerySpecDto.builder()
+                .title(inquery.getTitle())
+                .body(inquery.getBody())
+                .receiveEmail(inquery.getReceiveEmail())
+                .imageList(imageList)
+                .build();
+    }
 }
 
 
