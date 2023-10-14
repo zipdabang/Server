@@ -46,10 +46,7 @@ import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -568,4 +565,20 @@ public class MemberServiceImpl implements MemberService {
         return searchByNicknameMembers;
     }
 
+
+    @Override
+    public Optional<Inquery> findInqueryById(Long inqueryId) {
+        return inqueryRepository.findById(inqueryId);
+    }
+
+    @Override
+    public Inquery findMyInqueryById(Member member,Long inqueryId) {
+
+        Inquery inquery = inqueryRepository.findById(inqueryId).get();
+
+        if(!Objects.equals(inquery.getMember().getMemberId(), member.getMemberId()))
+            throw new MemberException(CommonStatus.NOT_MY_INQUERY);
+
+        return inquery;
+    }
 }

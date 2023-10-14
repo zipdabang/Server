@@ -10,13 +10,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.apiPayload.code.CommonStatus;
-import zipdabang.server.apiPayload.code.RecipeStatus;
 import zipdabang.server.apiPayload.exception.handler.MemberException;
 import zipdabang.server.apiPayload.reponse.ResponseDto;
 import zipdabang.server.auth.handler.annotation.AuthMember;
@@ -229,7 +227,7 @@ RecipeRestController {
         log.info(tempRecipes.toString());
 
         if (tempRecipes.getTotalElements() == 0)
-            throw new RecipeException(RecipeStatus.TEMP_RECIPE_NOT_FOUND);
+            throw new RecipeException(CommonStatus.TEMP_RECIPE_NOT_FOUND);
         if (pageIndex >= tempRecipes.getTotalPages())
             throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
@@ -341,7 +339,7 @@ RecipeRestController {
         Page<Recipe> recipes = recipeService.searchRecipe(categoryId, keyword, pageIndex, member);
 
         if (recipes.getTotalElements() == 0)
-            throw new RecipeException(RecipeStatus.RECIPE_NOT_FOUND);
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
         if (pageIndex >= recipes.getTotalPages())
             throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
@@ -406,7 +404,7 @@ RecipeRestController {
         log.info(recipes.toString());
 
         if (recipes.getTotalElements() == 0)
-            throw new RecipeException(RecipeStatus.RECIPE_NOT_FOUND);
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
         if (pageIndex >= recipes.getTotalPages())
             throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
@@ -435,7 +433,7 @@ RecipeRestController {
         log.info(recipes.toString());
 
         if (recipes.size() == 0)
-            throw new RecipeException(RecipeStatus.RECIPE_NOT_FOUND);
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
 
         return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
     }
@@ -531,7 +529,7 @@ RecipeRestController {
         log.info(recipes.toString());
 
         if (recipes.getTotalElements() == 0)
-            throw new RecipeException(RecipeStatus.RECIPE_NOT_FOUND);
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
         if (pageIndex >= recipes.getTotalPages())
             throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
@@ -565,7 +563,7 @@ RecipeRestController {
         log.info(recipes.toString());
 
         if (recipes.getTotalElements() == 0)
-            throw new RecipeException(RecipeStatus.RECIPE_NOT_FOUND);
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
         if (pageIndex >= recipes.getTotalPages())
             throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
