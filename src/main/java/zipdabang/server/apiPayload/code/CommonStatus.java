@@ -57,6 +57,8 @@ public enum CommonStatus implements BaseCode {
     FEIGN_CLIENT_ERROR_400(HttpStatus.BAD_REQUEST, 4009, "feign에서 400번대 에러가 발생했습니다."),
     //NOT_FOUND
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, 4010, "공지를 찾을 수 없습니다."),
+    PUSH_ALARM_NOT_FOUND(HttpStatus.NOT_FOUND, 4011, "푸쉬알림을 찾을 수 없습니다."),
+    NOT_MY_PUSH_ALARM(HttpStatus.FORBIDDEN, 4012, "내 푸쉬알림이 아닙니다."),
 
 
     // member error
