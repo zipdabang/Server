@@ -1,5 +1,6 @@
 package zipdabang.server.service.serviceImpl;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -75,6 +76,7 @@ public class RecipeServiceImpl implements RecipeService {
     private final ReportedCommentRepository reportedCommentRepository;
     private final ReportedRecipeRepository reportedRecipeRepository;
     private final WeeklyBestRecipeRepository weeklyBestRecipeRepository;
+    private final MemberViewMethodRepository memberViewMethodRepository;
 
     private final JPAQueryFactory queryFactory;
     private final PushAlarmRepository pushAlarmRepository;
@@ -466,11 +468,26 @@ public class RecipeServiceImpl implements RecipeService {
 
     private BooleanExpression getFollowerRecipeCondition(Member member) {
         List<Member> followee = queryFactory
-                .selectFrom(follow.followee)
+                .select(follow.followee)
+                .from(follow)
                 .where(follow.follower.eq(member))
                 .fetch();
 
-        return followee.isEmpty() ? null : recipe.member.in(followee);
+        return followee.isEmpty() ? null : recipe.member.in(followee).and(recipe.createdAt.after(LocalDateTime.now().minusWeeks(1)));
+    }
+    private BooleanExpression getNotFollowerRecipeCondition(Member member) {
+        Long count = queryFactory
+                .select(follow.count())
+                .from(follow)
+                .where(follow.follower.eq(member))
+                .fetchOne();
+
+        List<Recipe> blacklist = queryFactory
+                .selectFrom(recipe)
+                .where(getFollowerRecipeCondition(member))
+                .fetch();
+
+        return count == 0 ? null : recipe.notIn(blacklist);
     }
 
     private List<Member> getBlockedMember(Member member) {
@@ -559,6 +576,7 @@ public class RecipeServiceImpl implements RecipeService {
         return recipeList;
     }
 
+    @Transactional(readOnly = false)
     @Override
     public Page<Recipe> recipeListByCategory(Long categoryId, Integer pageIndex, Member member, String order) {
 
@@ -567,58 +585,30 @@ public class RecipeServiceImpl implements RecipeService {
         if(recipeCategory.isEmpty())
             throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
 
+        order = updateMemberViewMethod(member, order);
+
         QRecipe qRecipe = recipe;
         QRecipeCategoryMapping qRecipeCategoryMapping = recipeCategoryMapping;
-        QFollow qFollow = follow;
-
-        //팔로잉 레시피 갯수 계산(일주일 전 것까지)
-        Long followingCount = queryFactory
-                .select(recipe.count())
-                .from(recipe)
-                .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                .where(blockedMemberNotInForRecipe(member),
-                        recipeCategoryMapping.category.id.eq(categoryId),
-                        getFollowerRecipeCondition(member),
-                        recipe.createdAt.after(LocalDateTime.now().minusWeeks(1))
-                )
-                .fetchOne();
-
         List<Recipe> content = new ArrayList<>();
 
-        if(followingCount >= pageIndex*pageSize){
-            //index를 넘지 않으면 팔로잉 레시피 먼저
+        if(order.equals("follow")) {
+            BooleanExpression whereCondition = recipeCategoryMapping.category.id.eq(categoryId);
+
+            content = recipesOrderByFollow(categoryId, pageIndex, member, whereCondition);
+        }
+        else{
             content = queryFactory
                     .selectFrom(recipe)
                     .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
                     .where(blockedMemberNotInForRecipe(member),
-                            recipeCategoryMapping.category.id.eq(categoryId),
-                            getFollowerRecipeCondition(member),
-                            recipe.createdAt.after(LocalDateTime.now().minusWeeks(1))
+                            recipeCategoryMapping.category.id.eq(categoryId)
                     )
-                    .orderBy(recipe.createdAt.desc())
-                    .offset(pageIndex*pageSize)
+                    .orderBy(order(order, member), recipe.createdAt.desc())
+                    .offset(pageIndex * pageSize)
                     .limit(pageSize)
                     .fetch();
-
-        } else if(followingCount >(pageIndex-1)*pageSize) {
-            //index에 끼어있으면 팔로잉,일반 레시피 둘 다. offset과 pagesize 잘 계산해야함
-
-        } else{
-            //일반 레시피만. offset 잘 계산해야함
-
         }
 
-
-        content = queryFactory
-                .selectFrom(recipe)
-                .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                .where(blockedMemberNotInForRecipe(member),
-                        recipeCategoryMapping.category.id.eq(categoryId)
-                )
-                .orderBy(order(order, member), recipe.createdAt.desc())
-                .offset(pageIndex*pageSize)
-                .limit(pageSize)
-                .fetch();
 
         JPAQuery<Long> count = queryFactory
                 .select(recipe.count())
@@ -631,23 +621,123 @@ public class RecipeServiceImpl implements RecipeService {
         return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count.fetchOne());
     }
 
+    private List<Recipe> recipesOrderByFollow(Long categoryId, Integer pageIndex, Member member, BooleanExpression... booleanExpressions) {
+
+        BooleanExpression combinedExpression = null;
+
+        for (BooleanExpression expression : booleanExpressions) {
+            if (combinedExpression == null) {
+                combinedExpression = expression;
+            } else {
+                combinedExpression = combinedExpression.and(expression);
+            }
+        }
+
+        List<Recipe> content = new ArrayList<>();
+
+        QFollow qFollow = follow;
+
+        //팔로잉 레시피 갯수 계산(일주일 전 것까지)
+        Long followingCount = queryFactory
+                .select(recipe.count())
+                .from(recipe)
+//                .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
+                .where(blockedMemberNotInForRecipe(member),
+                        combinedExpression,
+                        getFollowerRecipeCondition(member)
+                )
+                .fetchOne();
+
+        log.info("팔로잉 레시피 개수: ", followingCount);
+
+        if (followingCount >= pageIndex * pageSize) {
+            //index를 넘지 않으면 팔로잉 레시피 먼저
+            content = queryFactory
+                    .selectFrom(recipe)
+//                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
+                    .where(blockedMemberNotInForRecipe(member),
+                            combinedExpression,
+                            getFollowerRecipeCondition(member)
+                    )
+                    .orderBy(recipe.createdAt.desc())
+                    .offset(pageIndex * pageSize)
+                    .limit(pageSize)
+                    .fetch();
+
+        } else if (followingCount > (pageIndex - 1) * pageSize) {
+            //index에 끼어있으면 팔로잉,일반 레시피 둘 다. offset과 pagesize 잘 계산해야함
+
+            //팔로잉 추가
+            content.addAll(queryFactory
+                    .selectFrom(recipe)
+//                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
+                    .where(blockedMemberNotInForRecipe(member),
+                            combinedExpression,
+                            getFollowerRecipeCondition(member)
+                    )
+                    .orderBy(recipe.createdAt.desc())
+                    .offset(pageIndex * pageSize)
+                    .limit(pageSize)
+                    .fetch());
+
+            content.addAll(queryFactory
+                    .selectFrom(recipe)
+//                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
+                    .where(blockedMemberNotInForRecipe(member),
+                            combinedExpression,
+                            getNotFollowerRecipeCondition(member)
+                    )
+                    .orderBy(recipe.createdAt.desc())
+                    .offset(0)
+                    .limit(pageSize - content.size())
+                    .fetch());
+
+        } else {
+            //일반 레시피만. offset 잘 계산해야함
+            content = queryFactory
+                    .selectFrom(recipe)
+                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
+                    .where(blockedMemberNotInForRecipe(member),
+                            recipeCategoryMapping.category.id.eq(categoryId),
+                            getNotFollowerRecipeCondition(member)
+                    )
+                    .orderBy(recipe.createdAt.desc())
+                    .offset(pageIndex * pageSize - followingCount)
+                    .limit(pageSize)
+                    .fetch();
+        }
+        return content;
+    }
+
+    private String updateMemberViewMethod(Member member, String order) {
+        Optional<MemberViewMethod> settedOrder = memberViewMethodRepository.findByMember(member);
+
+        if (settedOrder.isEmpty()){
+            if(order == null)
+                order = "latest";
+
+            MemberViewMethod savedOrder = memberViewMethodRepository.save(MemberViewMethod.builder()
+                    .member(member)
+                    .method(order)
+                    .build()
+            );
+            savedOrder.setMember(member);
+        }
+        else{
+            if(order == null)
+                order = settedOrder.get().getMethod();
+
+            if (settedOrder.get().getMethod() != order)
+                settedOrder.get().setMethod(order);
+        }
+        return order;
+    }
+
     private OrderSpecifier order(String order, Member member) {
-        if(order == null)
-            order = "latest";
 
         if(order.equals("likes"))
             return new OrderSpecifier<>(Order.DESC, recipe.totalLike);
-        else if(order.equals("follow"))
-            return new OrderSpecifier(Order.DESC, recipe.member.eq(queryFactory
-                    .select(follow.followee)
-                    .from(follow)
-                    .where(
-                            follow.follower.eq(member)
-                    )
-                    .orderBy(recipe.createdAt.desc())
-                )
-            );
-        else if(order.equals("latest"))
+        else if(order.equals("latest") || order.equals("follow"))
             return new OrderSpecifier(Order.DESC, recipe.createdAt);
         else
             throw new RecipeException(CommonStatus.ORDER_BY_TYPE_ERROR);
