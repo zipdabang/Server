@@ -27,6 +27,7 @@ import zipdabang.server.service.RootService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -129,5 +130,16 @@ public class RootServiceImpl implements RootService {
 
 
         firebaseService.sendMessageTo(fcmToken,title,body,targetView,targetPK,pushAlarm.getId().toString());
+    }
+
+    @Override
+    @Transactional
+    public void readPushAlarm(Long PushAlarmId) {
+        pushAlarmRepository.deleteById(PushAlarmId);
+    }
+
+    @Override
+    public Optional<PushAlarm> findPushAlarmById(Long pushAlarmId) {
+        return pushAlarmRepository.findById(pushAlarmId);
     }
 }

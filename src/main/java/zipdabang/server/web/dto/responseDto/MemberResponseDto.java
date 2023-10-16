@@ -313,4 +313,15 @@ public class MemberResponseDto {
         Boolean isFirst;
         Boolean isLast;
     }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class InquerySpecDto{
+        String receiveEmail;
+        String title;
+        String body;
+        List<String> imageList;
+    }
 }

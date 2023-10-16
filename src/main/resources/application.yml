@@ -1,7 +1,19 @@
-
-
-
+# default profile
 spring:
+  profiles:
+    active: app_profiles
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha            # alpha: 알파벳 순 태그 정렬, method: HTTP Method 순 정렬
+    operations-sorter: alpha      # alpha: 알파벳 순 태그 정렬, method: HTTP Method 순 정렬
+  cache:
+    disabled: true
+  use-fqn: true
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${aws.db.username}
@@ -17,6 +29,7 @@ spring:
 #
   redis:
     host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com
+
   batch:
     jdbc:
       initialize-schema: always
@@ -27,8 +40,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
-#        show_sql: true
-#        format_sql: true
         use_sql_comments: true
         hbm2ddl:
           auto: update
