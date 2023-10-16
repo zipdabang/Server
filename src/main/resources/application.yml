@@ -22,8 +22,14 @@ spring:
   output:
     ansi:
       enabled: always
+
+##  # local redis
+#  redis:
+#    host: localhost
+#
   redis:
-    host: zipdabang-dev-redis.fkcewd.ng.0001.apne1.cache.amazonaws.com
+    host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com
+
   batch:
     jdbc:
       initialize-schema: always
@@ -68,7 +74,7 @@ cloud:
         zipdabang-recipe-steps : recipe/steps
         zipdabang-proifile : user
         zipdabang-inquery : inquery
-      #        zipdabang-facilities : facilities
+    #        zipdabang-facilities : facilities
       user-default-image: ${USER_DEFAULT_IMAGE}
     region:
       static: ap-northeast-2
