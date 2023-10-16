@@ -24,12 +24,14 @@ spring:
       enabled: always
 
 ##  # local redis
-#  redis:
-#    host: localhost
-#
   redis:
     host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com
 
+#  redis:
+#    host: localhost
+#
+#  redis:
+#    host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com
   batch:
     jdbc:
       initialize-schema: always
@@ -40,6 +42,8 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+        show_sql: true
+        format_sql: true
         use_sql_comments: true
         hbm2ddl:
           auto: update

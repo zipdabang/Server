@@ -1,5 +1,5 @@
 package zipdabang.server.domain.enums;
 
 public enum StatusType {
-    ACTIVE, INACTIVE
+    ACTIVE, INACTIVE, DORMANT, DEREGISTER
 }

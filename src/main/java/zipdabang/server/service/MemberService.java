@@ -55,8 +55,6 @@ public interface MemberService {
     public Long saveDeregisterInfo(String phoneNum, MemberRequestDto.DeregisterDto request);
     public void inactivateMember(Member member);
 
-    public void saveDeregisterReasons(Long deregisterId, List<DeregisterType> deregisterTypeList);
-
     public void blockMember(Member owner, Long blocked);
     public void unblockMember(Member owner, Long blockedId);
     public Page<Member> findBlockedMember(Integer page, Member member);
@@ -83,4 +81,7 @@ public interface MemberService {
     Optional<Inquery> findInqueryById(Long inqueryId);
 
     Inquery findMyInqueryById(Member member,Long inqueryId);
+
+    public List<Member> getInactiveMembers();
+    public void deleteMemberInfo(Member member);
 }

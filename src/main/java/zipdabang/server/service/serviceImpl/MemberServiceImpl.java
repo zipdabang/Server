@@ -314,7 +314,6 @@ public class MemberServiceImpl implements MemberService {
     public void memberDeregister(Member member, MemberRequestDto.DeregisterDto request) {
         inactivateMember(member);
         Long deregisterId = saveDeregisterInfo(member.getPhoneNum(), request);
-        saveDeregisterReasons(deregisterId,request.getDeregisterTypes());
 
     }
 
@@ -342,14 +341,6 @@ public class MemberServiceImpl implements MemberService {
         return deregister.getId();
     }
 
-    @Override
-    @Transactional
-    public void saveDeregisterReasons(Long deregisterId, List<DeregisterType> deregisterTypeList) {
-//        for (DeregisterType deregisterType : deregisterTypeList) {
-//            DeregisterReason.builder()
-//                    .
-//        }
-    }
 
     @Override
     @Transactional
@@ -576,9 +567,21 @@ public class MemberServiceImpl implements MemberService {
 
         Inquery inquery = inqueryRepository.findById(inqueryId).get();
 
-        if(!Objects.equals(inquery.getMember().getMemberId(), member.getMemberId()))
+        if (!Objects.equals(inquery.getMember().getMemberId(), member.getMemberId()))
             throw new MemberException(CommonStatus.NOT_MY_INQUERY);
 
         return inquery;
+    }
+
+    public List<Member> getInactiveMembers() {
+        return memberRepository.findByStatus(StatusType.INACTIVE);
+    }
+
+    @Override
+    @Transactional
+    public void deleteMemberInfo(Member member) {
+        member.deleteMemberInfo();
+        memberRepository.save(member);
+
     }
 }

@@ -18,6 +18,7 @@ import zipdabang.server.domain.recipe.Likes;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -38,7 +39,7 @@ public class Member extends BaseEntity {
     @Column(unique = true, length = 30)
     private String nickname;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String email;
 
     @Column(length = 18)
@@ -72,7 +73,7 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private StatusType status = StatusType.ACTIVE;
 
-    //inactive_date DATE
+    private LocalDateTime inactivatedAt;
 
     @Column(columnDefinition = "TEXT")
     private String password;
@@ -146,4 +147,21 @@ public class Member extends BaseEntity {
 
     public void inactivateStatus(){
         this.status = StatusType.INACTIVE;}
+
+    public void deleteMemberInfo(){
+        String delete = "X";
+        this.name=delete;
+        this.email=delete;
+        this.phoneNum=delete;
+        this.caption=delete;
+        this.birth=delete;
+        this.age=0;
+        this.gender=GenderType.DELETED;
+        this.isBarista=false;
+        this.zipCode=delete;
+        this.address=delete;
+        this.detailAddress=delete;
+        this.socialType=SocialType.DELETED;
+        this.status=StatusType.DEREGISTER;
+    }
 }

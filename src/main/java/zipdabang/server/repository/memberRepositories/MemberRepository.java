@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import zipdabang.server.domain.enums.StatusType;
 import zipdabang.server.domain.member.Member;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -22,4 +23,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Page<Member> qFindFollowingByNicknameContains(@Param("nickname")String nickname, @Param("owner")Member member, PageRequest pageRequest);
 
     boolean existsByPhoneNum(String phoneNum);
+
+    List<Member> findByStatus(StatusType status);
 }
