@@ -23,10 +23,10 @@ spring:
     ansi:
       enabled: always
 
-##  # local redis
-#  redis:
-#    host: localhost
-#
+  ##  # local redis
+  #  redis:
+  #    host: localhost
+  #
   redis:
     host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com
 
@@ -74,7 +74,7 @@ cloud:
         zipdabang-recipe-steps : recipe/steps
         zipdabang-proifile : user
         zipdabang-inquery : inquery
-    #        zipdabang-facilities : facilities
+      #        zipdabang-facilities : facilities
       user-default-image: ${USER_DEFAULT_IMAGE}
     region:
       static: ap-northeast-2
@@ -118,7 +118,7 @@ spring:
     ansi:
       enabled: always
 
-  ##  # local redis
+    ##  # local redis
     redis:
       host: localhost
 
