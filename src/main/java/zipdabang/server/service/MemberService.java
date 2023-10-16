@@ -73,6 +73,14 @@ public interface MemberService {
     public void updateProfileDefault(Member member);
     Boolean checkFollowing(Member loginMember, Member targetMember);
     public MemberResponseDto.MyZipdabangDto getMyZipdabang(Member member, Long targetId);
+    public MemberResponseDto.MyZipdabangDto getSelfMyZipdabang(Member member);
 
     Page<PushAlarm> getPushAlarms(Member member, Integer page);
+    public Page<Member> findByNicknameContains(Integer page, String nickname);
+    public Page<Member> findFollowerByNicknameContains(Integer page, Long targetId, String nickname);
+    public Page<Member> findFollowingByNicknameContains(Integer page, Long targetId, String nickname);
+
+    Optional<Inquery> findInqueryById(Long inqueryId);
+
+    Inquery findMyInqueryById(Member member,Long inqueryId);
 }

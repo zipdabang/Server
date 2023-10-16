@@ -79,4 +79,8 @@ public interface RecipeService {
     Page<TempRecipe> getTempRecipeList(Integer pageIndex, Member member);
 
     Recipe update(Long recipeId, RecipeRequestDto.UpdateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException;
+
+    List<Recipe> getmyRecipePreview(Member member);
+
+    Page<Recipe> getMyRecipeList(Integer pageIndex, Member member);
 }

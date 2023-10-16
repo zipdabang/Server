@@ -18,6 +18,7 @@ import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.DeregisterType;
 import zipdabang.server.domain.enums.SocialType;
+import zipdabang.server.domain.enums.StatusType;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.Member;
@@ -45,10 +46,7 @@ import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -285,6 +283,15 @@ public class MemberServiceImpl implements MemberService {
                     return savedTermsAgree;
                 }).collect(Collectors.toList());
 
+        FcmToken fcmToken = FcmToken.builder()
+                .token(request.getFcmToken())
+                .serialNumber(request.getSerialNumber())
+                .build();
+
+        fcmToken.setMember(joinUser);
+
+        fcmTokenRepository.save(fcmToken);
+
         return OAuthJoin.OAuthJoinDto.builder()
                 .refreshToken(redisService.generateRefreshToken(request.getEmail()).getToken())
                 .accessToken(redisService.saveLoginStatus(joinUser.getMemberId(), tokenProvider.createAccessToken(joinUser.getMemberId(), type.equals("kakao") ? SocialType.KAKAO.toString() : SocialType.GOOGLE.toString(),request.getEmail(),Arrays.asList(new SimpleGrantedAuthority("USER")))))
@@ -490,11 +497,22 @@ public class MemberServiceImpl implements MemberService {
         boolean isFollowing = followRepository.existsByFollowerAndFollowee(member, target);
         boolean isFollower = followRepository.existsByFollowerAndFollowee(target, member);
 
-        List<Category> categories = findMemberPreferCategories(member);
+        List<Category> categories = findMemberPreferCategories(target);
         MemberResponseDto.MemberPreferCategoryDto memberPreferCategoryDto = MemberConverter.toMemberPreferCategoryDto(categories);
 
         return MemberConverter.toMyZipdabangDto(target, checkSelf, isFollowing, isFollower, memberPreferCategoryDto);
+    }
 
+    @Override
+    public MemberResponseDto.MyZipdabangDto getSelfMyZipdabang(Member member) {
+        boolean checkSelf = true;
+        boolean isFollowing = false;
+        boolean isFollower = false;
+
+        List<Category> categories = findMemberPreferCategories(member);
+        MemberResponseDto.MemberPreferCategoryDto memberPreferCategoryDto = MemberConverter.toMemberPreferCategoryDto(categories);
+
+        return MemberConverter.toMyZipdabangDto(member, checkSelf, isFollowing, isFollower, memberPreferCategoryDto);
     }
 
     @Override
@@ -507,5 +525,60 @@ public class MemberServiceImpl implements MemberService {
             throw new MemberException(CommonStatus.OVER_PAGE_INDEX_ERROR);
 
         return pushAlarms;
+    }
+
+    @Override
+    public Page<Member> findByNicknameContains(Integer page, String nickname) {
+        Page<Member> searchByNicknameMembers = memberRepository.findByNicknameContains(nickname, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        if (searchByNicknameMembers.getContent().isEmpty()) {
+            throw new MemberException(CommonStatus.NICKNAME_MEMBER_NOT_EXIST);
+        }
+        if(searchByNicknameMembers.getTotalPages() <= page)
+            throw new MemberException(CommonStatus.OVER_PAGE_INDEX_ERROR);
+
+        return searchByNicknameMembers;
+    }
+
+    @Override
+    public Page<Member> findFollowerByNicknameContains(Integer page, Long targetId, String nickname) {
+        Member member = memberRepository.findById(targetId).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
+        Page<Member> searchByNicknameMembers = memberRepository.qFindFollowerByNicknameContains(nickname, member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        if (searchByNicknameMembers.getContent().isEmpty()) {
+            throw new MemberException(CommonStatus.NICKNAME_MEMBER_NOT_EXIST);
+        }
+        if(searchByNicknameMembers.getTotalPages() <= page)
+            throw new MemberException(CommonStatus.OVER_PAGE_INDEX_ERROR);
+
+        return searchByNicknameMembers;
+    }
+
+    @Override
+    public Page<Member> findFollowingByNicknameContains(Integer page, Long targetId, String nickname) {
+        Member member = memberRepository.findById(targetId).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
+        Page<Member> searchByNicknameMembers = memberRepository.qFindFollowingByNicknameContains(nickname, member, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
+        if (searchByNicknameMembers.getContent().isEmpty()) {
+            throw new MemberException(CommonStatus.NICKNAME_MEMBER_NOT_EXIST);
+        }
+        if(searchByNicknameMembers.getTotalPages() <= page)
+            throw new MemberException(CommonStatus.OVER_PAGE_INDEX_ERROR);
+
+        return searchByNicknameMembers;
+    }
+
+
+    @Override
+    public Optional<Inquery> findInqueryById(Long inqueryId) {
+        return inqueryRepository.findById(inqueryId);
+    }
+
+    @Override
+    public Inquery findMyInqueryById(Member member,Long inqueryId) {
+
+        Inquery inquery = inqueryRepository.findById(inqueryId).get();
+
+        if(!Objects.equals(inquery.getMember().getMemberId(), member.getMemberId()))
+            throw new MemberException(CommonStatus.NOT_MY_INQUERY);
+
+        return inquery;
     }
 }

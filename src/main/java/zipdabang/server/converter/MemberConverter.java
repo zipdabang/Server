@@ -107,6 +107,7 @@ public class MemberConverter {
                 .name(request.getName())
                 .phoneNum(request.getPhoneNum())
                 .termsAgree(new ArrayList<>())
+                .fcmTokenList(new ArrayList<>())
                 .build();
         return staticMemberRepository.save(member);
     }
@@ -461,6 +462,18 @@ public class MemberConverter {
                 .totalPage(pushAlarmPage.getTotalPages())
                 .totalElements(pushAlarmPage.getTotalElements())
                 .currentPageElements(pushAlarmDtoList.size())
+                .build();
+    }
+
+    public static MemberResponseDto.InquerySpecDto toInquerySpecDto(Inquery inquery){
+        List<String> imageList = inquery.getInqueryImageList().stream()
+                .map(InqueryImage::getImageUrl).collect(Collectors.toList());
+
+        return MemberResponseDto.InquerySpecDto.builder()
+                .title(inquery.getTitle())
+                .body(inquery.getBody())
+                .receiveEmail(inquery.getReceiveEmail())
+                .imageList(imageList)
                 .build();
     }
 }

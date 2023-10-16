@@ -36,10 +36,7 @@ import zipdabang.server.redis.service.RedisService;
 import zipdabang.server.service.MemberService;
 import zipdabang.server.sms.service.SmsService;
 import zipdabang.server.utils.dto.OAuthJoin;
-import zipdabang.server.validation.annotation.CheckPage;
-import zipdabang.server.validation.annotation.CheckTempMember;
-import zipdabang.server.validation.annotation.CheckDeregister;
-import zipdabang.server.validation.annotation.ExistMember;
+import zipdabang.server.validation.annotation.*;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
@@ -340,6 +337,23 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toInqueryListDto(inqueryPage));
     }
 
+    @Operation(summary = "🎪[더보기 - 나의 문의내역2] 내 문의내역 상세조회 ✔️🔑", description = "내 문의 상세조회 API")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "inqueryId", description = "문의 아이디"),
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+            @ApiResponse(responseCode = "4067", description = "NOT_FOUND , 문의가 없음", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4068", description = "BAD_REQEUST , 내 문의 아님", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+
+    })
+    @GetMapping("/members/inquiries/{inqueryId}")
+    public ResponseDto<MemberResponseDto.InquerySpecDto> showInquerySepc(@CheckTempMember @AuthMember Member member,@ExistInquery @PathVariable(name = "inqueryId") Long inqueryId){
+        Inquery myInquryById = memberService.findMyInqueryById(member,inqueryId);
+        return ResponseDto.of(MemberConverter.toInquerySpecDto(myInquryById));
+    }
+
     @Operation(summary = "[figma 더보기 - 회원 탈퇴] 회원 탈퇴 API ✔️🔑", description = "회원 탈퇴 API입니다.<br> 테스트를 위해 임시로 해당 유저의 상세주소를 \"TEST\" 로 설정하면(상세정보 수정 API - zipCode) 탈퇴 불가능한 경우로 처리되도록 해놨습니다.<br> deregisterTypes 종류 <br>" +
             "- NOTHING_TO_BUY(\"사고싶은 물건이 없어요.\"),<br>" +
             "- DISINTERESTED(\"앱을 이용하지 않아요.\"),<br>" +
@@ -507,8 +521,21 @@ public class MemberRestController {
     public ResponseDto<MemberResponseDto.MyZipdabangDto> getMyZipdabang(@CheckTempMember @AuthMember Member member, Long targetMemberId) {
 
         return ResponseDto.of(memberService.getMyZipdabang(member, targetMemberId));
+    }
 
 
+    @Operation(summary = "🎪figma[내집다방 - 원본] 나의 내집다방 화면 조회 API ✔️🔑", description = "나의 내집다방 화면 조회 API 입니다.")
+    @GetMapping("/members/selfMyZipdabang")
+    @Parameters({
+            @Parameter(name = "member", hidden = true)
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+            @ApiResponse(responseCode = "4059", description = "로그인 후 조회 가능합니다."),
+    })
+    public ResponseDto<MemberResponseDto.MyZipdabangDto> getSelfMyZipdabang(@CheckTempMember @AuthMember Member member) {
+
+        return ResponseDto.of(memberService.getSelfMyZipdabang(member));
     }
 
     @GetMapping("/members/push-alarms")
@@ -519,6 +546,121 @@ public class MemberRestController {
         Page<PushAlarm> pushAlarms = memberService.getPushAlarms(member, page);
         return ResponseDto.of(MemberConverter.toPushAlarmListDto(pushAlarms));
     }
+
+    @Operation(summary = "전체 유저 중 닉네임으로 검색 API ✔️🔑", description = "전체 유저 중 닉네임으로 검색 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 전체 유저 중 닉네임으로 검색 완료"),
+            @ApiResponse(responseCode = "2058", description = "해당 키워드를 포함한 닉네임을 가진 유저가 없습니다."),
+            @ApiResponse(responseCode = "4054", description = "BAD_REQUEST , 페이지 번호가 없거나 0 이하", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/members/nickname")
+    public ResponseDto<MemberResponseDto.PagingMemberListDto> getAllUsersByNickname(@RequestParam(name = "page", required = false) Integer page, @CheckTempMember @AuthMember Member member, @RequestParam(name = "nickname", required = false)String nickname) {
+        if (page == null)
+            page = 1;
+        else if (page < 1)
+            throw new MemberException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
+        page -= 1;
+        Page<Member> findByNickname = memberService.findByNicknameContains(page, nickname);
+        return ResponseDto.of(MemberConverter.toPagingMemberListDto(findByNickname));
+    }
+
+    @Operation(summary = "나의 팔로워 중 닉네임으로 검색 API ✔️🔑", description = "나의 팔로워 중 닉네임으로 검색 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 전체 유저 중 닉네임으로 검색 완료"),
+            @ApiResponse(responseCode = "2058", description = "해당 키워드를 포함한 닉네임을 가진 유저가 없습니다."),
+            @ApiResponse(responseCode = "4054", description = "BAD_REQUEST , 페이지 번호가 없거나 0 이하", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/members/followers-nickname")
+    public ResponseDto<MemberResponseDto.PagingMemberListDto> getMyFollowerByNickname(@RequestParam(name = "page", required = false) Integer page, @CheckTempMember @AuthMember Member member, @RequestParam(name = "nickname", required = false)String nickname) {
+        if (page == null)
+            page = 1;
+        else if (page < 1)
+            throw new MemberException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
+        page -= 1;
+        Page<Member> findMyFollowerByNickname = memberService.findFollowerByNicknameContains(page, member.getMemberId(), nickname);
+        return ResponseDto.of(MemberConverter.toPagingMemberListDto(findMyFollowerByNickname));
+    }
+
+
+    @Operation(summary = "특정 유저의 팔로워 중 닉네임으로 검색 API ✔️🔑", description = "특정 유저의 팔로워 중 닉네임으로 검색 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 전체 유저 중 닉네임으로 검색 완료"),
+            @ApiResponse(responseCode = "2058", description = "해당 키워드를 포함한 닉네임을 가진 유저가 없습니다."),
+            @ApiResponse(responseCode = "4052", description = "해당 사용자가 존재하지 않습니다"),
+            @ApiResponse(responseCode = "4054", description = "BAD_REQUEST , 페이지 번호가 없거나 0 이하", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/members/followers-nickname/{targetId}")
+    public ResponseDto<MemberResponseDto.PagingMemberListDto> getFollowerByNickname(@RequestParam(name = "page", required = false) Integer page, @CheckTempMember @AuthMember Member member, @PathVariable(name = "targetId") Long targetId, @RequestParam(name = "nickname", required = false)String nickname) {
+        if (page == null)
+            page = 1;
+        else if (page < 1)
+            throw new MemberException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
+        page -= 1;
+        Page<Member> findFollowerByNickname = memberService.findFollowerByNicknameContains(page, targetId, nickname);
+        return ResponseDto.of(MemberConverter.toPagingMemberListDto(findFollowerByNickname));
+    }
+
+    @Operation(summary = "나의 팔로잉 중 닉네임으로 검색 API ✔️🔑", description = "나의 팔로잉 중 닉네임으로 검색 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 전체 유저 중 닉네임으로 검색 완료"),
+            @ApiResponse(responseCode = "2058", description = "해당 키워드를 포함한 닉네임을 가진 유저가 없습니다."),
+            @ApiResponse(responseCode = "4054", description = "BAD_REQUEST , 페이지 번호가 없거나 0 이하", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/members/followings-nickname")
+    public ResponseDto<MemberResponseDto.PagingMemberListDto> getMyFollowingByNickname(@RequestParam(name = "page", required = false) Integer page, @CheckTempMember @AuthMember Member member, @RequestParam(name = "nickname", required = false)String nickname) {
+        if (page == null)
+            page = 1;
+        else if (page < 1)
+            throw new MemberException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
+        page -= 1;
+        Page<Member> findMyFollowingByNickname = memberService.findFollowingByNicknameContains(page, member.getMemberId(), nickname);
+        return ResponseDto.of(MemberConverter.toPagingMemberListDto(findMyFollowingByNickname));
+    }
+
+    @Operation(summary = "특정 유저의 팔로잉 중 닉네임으로 검색 API ✔️🔑", description = "특정 유저의 팔로잉 중 닉네임으로 검색 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "page", description = "페이지 번호, 1부터 시작")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공, 전체 유저 중 닉네임으로 검색 완료"),
+            @ApiResponse(responseCode = "2058", description = "해당 키워드를 포함한 닉네임을 가진 유저가 없습니다."),
+            @ApiResponse(responseCode = "4052", description = "해당 사용자가 존재하지 않습니다"),
+            @ApiResponse(responseCode = "4054", description = "BAD_REQUEST , 페이지 번호가 없거나 0 이하", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST , 페이지 번호가 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping("/members/followings-nickname/{targetId}")
+    public ResponseDto<MemberResponseDto.PagingMemberListDto> getFollowingByNickname(@RequestParam(name = "page", required = false) Integer page, @CheckTempMember @AuthMember Member member, @PathVariable(name = "targetId") Long targetId, @RequestParam(name = "nickname", required = false)String nickname) {
+        if (page == null)
+            page = 1;
+        else if (page < 1)
+            throw new MemberException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
+        page -= 1;
+        Page<Member> findFollowingByNickname = memberService.findFollowingByNicknameContains(page, targetId, nickname);
+        return ResponseDto.of(MemberConverter.toPagingMemberListDto(findFollowingByNickname));
+    }
+
+
 
 }
 

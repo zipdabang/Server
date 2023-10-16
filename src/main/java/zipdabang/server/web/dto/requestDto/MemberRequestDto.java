@@ -80,6 +80,12 @@ public class MemberRequestDto {
         @NotBlank
         private String phoneNum;
 
+        @NotBlank
+        private String fcmToken;
+
+        @NotBlank
+        private String serialNumber;
+
         private List<Long> agreeTermsIdList;
 
         private List<Long> preferBeverages;
@@ -190,4 +196,5 @@ public class MemberRequestDto {
         private List<DeregisterType> deregisterTypes;
         private String feedback;
     }
+
 }
