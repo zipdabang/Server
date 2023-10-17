@@ -25,10 +25,14 @@ spring:
 
 ##  # local redis
   redis:
+<<<<<<< Updated upstream
     host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com
 
 #  redis:
 #    host: localhost
+=======
+    host: localhost
+>>>>>>> Stashed changes
 #
 #  redis:
 #    host: zipdabang-redis.osattk.ng.0001.apn2.cache.amazonaws.com
