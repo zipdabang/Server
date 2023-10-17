@@ -567,46 +567,46 @@ public class RecipeServiceImpl implements RecipeService {
         if(recipeCategory.isEmpty())
             throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
 
-        QRecipe qRecipe = recipe;
-        QRecipeCategoryMapping qRecipeCategoryMapping = recipeCategoryMapping;
-        QFollow qFollow = follow;
-
-        //팔로잉 레시피 갯수 계산(일주일 전 것까지)
-        Long followingCount = queryFactory
-                .select(recipe.count())
-                .from(recipe)
-                .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                .where(blockedMemberNotInForRecipe(member),
-                        recipeCategoryMapping.category.id.eq(categoryId),
-                        getFollowerRecipeCondition(member),
-                        recipe.createdAt.after(LocalDateTime.now().minusWeeks(1))
-                )
-                .fetchOne();
-
+//        QRecipe qRecipe = recipe;
+//        QRecipeCategoryMapping qRecipeCategoryMapping = recipeCategoryMapping;
+//        QFollow qFollow = follow;
+//
+//        //팔로잉 레시피 갯수 계산(일주일 전 것까지)
+//        Long followingCount = queryFactory
+//                .select(recipe.count())
+//                .from(recipe)
+//                .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
+//                .where(blockedMemberNotInForRecipe(member),
+//                        recipeCategoryMapping.category.id.eq(categoryId),
+//                        getFollowerRecipeCondition(member),
+//                        recipe.createdAt.after(LocalDateTime.now().minusWeeks(1))
+//                )
+//                .fetchOne();
+//
         List<Recipe> content = new ArrayList<>();
-
-        if(followingCount >= pageIndex*pageSize){
-            //index를 넘지 않으면 팔로잉 레시피 먼저
-            content = queryFactory
-                    .selectFrom(recipe)
-                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                    .where(blockedMemberNotInForRecipe(member),
-                            recipeCategoryMapping.category.id.eq(categoryId),
-                            getFollowerRecipeCondition(member),
-                            recipe.createdAt.after(LocalDateTime.now().minusWeeks(1))
-                    )
-                    .orderBy(recipe.createdAt.desc())
-                    .offset(pageIndex*pageSize)
-                    .limit(pageSize)
-                    .fetch();
-
-        } else if(followingCount >(pageIndex-1)*pageSize) {
-            //index에 끼어있으면 팔로잉,일반 레시피 둘 다. offset과 pagesize 잘 계산해야함
-
-        } else{
-            //일반 레시피만. offset 잘 계산해야함
-
-        }
+//
+//        if(followingCount >= pageIndex*pageSize){
+//            //index를 넘지 않으면 팔로잉 레시피 먼저
+//            content = queryFactory
+//                    .selectFrom(recipe)
+//                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
+//                    .where(blockedMemberNotInForRecipe(member),
+//                            recipeCategoryMapping.category.id.eq(categoryId),
+//                            getFollowerRecipeCondition(member),
+//                            recipe.createdAt.after(LocalDateTime.now().minusWeeks(1))
+//                    )
+//                    .orderBy(recipe.createdAt.desc())
+//                    .offset(pageIndex*pageSize)
+//                    .limit(pageSize)
+//                    .fetch();
+//
+//        } else if(followingCount >(pageIndex-1)*pageSize) {
+//            //index에 끼어있으면 팔로잉,일반 레시피 둘 다. offset과 pagesize 잘 계산해야함
+//
+//        } else{
+//            //일반 레시피만. offset 잘 계산해야함
+//
+//        }
 
 
         content = queryFactory
