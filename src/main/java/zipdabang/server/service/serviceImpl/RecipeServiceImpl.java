@@ -487,6 +487,8 @@ public class RecipeServiceImpl implements RecipeService {
                 .where(getFollowerRecipeCondition(member))
                 .fetch();
 
+        log.info("blacklist count: ", blacklist);
+
         return count == 0 ? null : recipe.notIn(blacklist);
     }
 
@@ -592,9 +594,13 @@ public class RecipeServiceImpl implements RecipeService {
         List<Recipe> content = new ArrayList<>();
 
         if(order.equals("follow")) {
-            BooleanExpression whereCondition = recipeCategoryMapping.category.id.eq(categoryId);
+            BooleanExpression whereCondition = recipe.in(queryFactory
+                    .select(recipeCategoryMapping.recipe)
+                            .from(recipeCategoryMapping)
+                            .where(recipeCategoryMapping.category.id.eq(categoryId))
+                    .fetch());
 
-            content = recipesOrderByFollow(categoryId, pageIndex, member, whereCondition);
+            content = recipesOrderByFollow(pageIndex, member, whereCondition);
         }
         else{
             content = queryFactory
@@ -621,7 +627,7 @@ public class RecipeServiceImpl implements RecipeService {
         return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count.fetchOne());
     }
 
-    private List<Recipe> recipesOrderByFollow(Long categoryId, Integer pageIndex, Member member, BooleanExpression... booleanExpressions) {
+    private List<Recipe> recipesOrderByFollow(Integer pageIndex, Member member, BooleanExpression... booleanExpressions) {
 
         BooleanExpression combinedExpression = null;
 
@@ -641,39 +647,40 @@ public class RecipeServiceImpl implements RecipeService {
         Long followingCount = queryFactory
                 .select(recipe.count())
                 .from(recipe)
-//                .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                .where(blockedMemberNotInForRecipe(member),
-                        combinedExpression,
-                        getFollowerRecipeCondition(member)
+                .where(
+                        combinedExpression
+                                .and(blockedMemberNotInForRecipe(member))
+                                .and(getFollowerRecipeCondition(member))
                 )
                 .fetchOne();
 
-        log.info("팔로잉 레시피 개수: ", followingCount);
 
-        if (followingCount >= pageIndex * pageSize) {
+        if (followingCount >= (pageIndex+1) * pageSize) {
+            log.info("if로 넘어옴");
             //index를 넘지 않으면 팔로잉 레시피 먼저
             content = queryFactory
                     .selectFrom(recipe)
-//                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                    .where(blockedMemberNotInForRecipe(member),
-                            combinedExpression,
-                            getFollowerRecipeCondition(member)
+                    .where(
+                            combinedExpression
+                            .and(blockedMemberNotInForRecipe(member))
+                            .and(getFollowerRecipeCondition(member))
                     )
                     .orderBy(recipe.createdAt.desc())
                     .offset(pageIndex * pageSize)
                     .limit(pageSize)
                     .fetch();
 
-        } else if (followingCount > (pageIndex - 1) * pageSize) {
+        } else if (followingCount > pageIndex * pageSize) {
+            log.info("else if로 넘어옴");
             //index에 끼어있으면 팔로잉,일반 레시피 둘 다. offset과 pagesize 잘 계산해야함
 
             //팔로잉 추가
             content.addAll(queryFactory
                     .selectFrom(recipe)
-//                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                    .where(blockedMemberNotInForRecipe(member),
-                            combinedExpression,
-                            getFollowerRecipeCondition(member)
+                    .where(
+                            combinedExpression
+                                    .and(blockedMemberNotInForRecipe(member))
+                                    .and(getFollowerRecipeCondition(member))
                     )
                     .orderBy(recipe.createdAt.desc())
                     .offset(pageIndex * pageSize)
@@ -682,10 +689,10 @@ public class RecipeServiceImpl implements RecipeService {
 
             content.addAll(queryFactory
                     .selectFrom(recipe)
-//                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                    .where(blockedMemberNotInForRecipe(member),
-                            combinedExpression,
-                            getNotFollowerRecipeCondition(member)
+                    .where(
+                            combinedExpression
+                                    .and(blockedMemberNotInForRecipe(member))
+                                    .and(getNotFollowerRecipeCondition(member))
                     )
                     .orderBy(recipe.createdAt.desc())
                     .offset(0)
@@ -693,19 +700,25 @@ public class RecipeServiceImpl implements RecipeService {
                     .fetch());
 
         } else {
+            log.info("else로 넘어옴");
             //일반 레시피만. offset 잘 계산해야함
             content = queryFactory
                     .selectFrom(recipe)
-                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                    .where(blockedMemberNotInForRecipe(member),
-                            recipeCategoryMapping.category.id.eq(categoryId),
-                            getNotFollowerRecipeCondition(member)
+                    .where(
+                            combinedExpression
+                                    .and(blockedMemberNotInForRecipe(member))
+                                    .and(getNotFollowerRecipeCondition(member))
                     )
                     .orderBy(recipe.createdAt.desc())
-                    .offset(pageIndex * pageSize - followingCount)
+                    .offset(pageIndex == 0 ? 0 : pageIndex * pageSize - followingCount)
                     .limit(pageSize)
                     .fetch();
+
+            log.info(content.toString());
         }
+
+        log.info(content.toString());
+
         return content;
     }
 
