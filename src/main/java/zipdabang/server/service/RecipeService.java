@@ -24,7 +24,7 @@ public interface RecipeService {
 
     Boolean checkOwner(Recipe recipe, Member member);
 
-    Page<Recipe> searchRecipe(Long categoryId, String keyword, Integer pageIndex, Member member);
+    Page<Recipe> searchRecipe(Long categoryId, String keyword, String order, Integer pageIndex, Member member);
 
     List<Recipe> getWrittenByRecipePreview(String writtenby, Member member);
 
@@ -80,7 +80,7 @@ public interface RecipeService {
 
     Recipe update(Long recipeId, RecipeRequestDto.UpdateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException;
 
-    List<Recipe> getmyRecipePreview(Member member);
+    List<Recipe> getMyRecipePreview(Member member);
 
     Page<Recipe> getMyRecipeList(Integer pageIndex, Member member);
 }

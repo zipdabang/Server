@@ -16,4 +16,8 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     List<Recipe> findTop5ByIdInAndNameContainingOrderByCreatedAtDesc(List<Long> recipeIdList, String keyword);
 
     List<Recipe> findTop5ByIdInAndNameContainingAndMemberNotInOrderByCreatedAtDesc(List<Long> recipeIdList, String keyword, List<Member> blockedMember);
+
+    List<Recipe> findTop5ByMemberOrderByCreatedAtDesc(Member member);
+
+    Page<Recipe> findByMember(Member member, PageRequest pageRequest);
 }
