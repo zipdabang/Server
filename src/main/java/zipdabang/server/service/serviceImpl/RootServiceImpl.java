@@ -151,44 +151,45 @@ public class RootServiceImpl implements RootService {
         return pushAlarmRepository.findById(pushAlarmId);
     }
 
-    @Override
-    @Transactional
-    public void ParseExcelFile(MultipartFile inputFile) throws IOException{
-        InputStream file = inputFile.getInputStream();
-        Workbook workbook = WorkbookFactory.create(file);
-        Sheet sheet = workbook.getSheetAt(0);
+    // 엑셀 파일 파싱 및 비속어/예약어 db에 저장 메소드.
 
-        // 비속어 저장
-        for (int i=0;i<sheet.getPhysicalNumberOfRows();i++) {
-            Cell cell = sheet.getRow(i).getCell(0);
-            if (cell.getCellType().equals(CellType.BLANK)) {
-                file.close();
-                break;
-            } else if (cell.getCellType().equals(CellType.NUMERIC)) {
-                slangWordRepository.save(new SlangWord(Double.toString(cell.getNumericCellValue())));
-            } else{
-                slangWordRepository.save(new SlangWord(cell.getStringCellValue()));
-            }
-        }
-
-        // 예약어 저장
-        sheet = workbook.getSheetAt(1);
-
-        for (int i=0;i<sheet.getPhysicalNumberOfRows();i++) {
-            Cell cell = sheet.getRow(i).getCell(0);
-            if (cell.getCellType().equals(CellType.BLANK)) {
-                file.close();
-                break;
-            } else if (cell.getCellType().equals(CellType.NUMERIC)) {
-                reservedWordRepository.save(new ReservedWord(Double.toString(cell.getNumericCellValue())));
-            } else{
-                reservedWordRepository.save(new ReservedWord(cell.getStringCellValue()));
-            }
-        }
-
-        file.close();
-    }
-
+//    @Override
+//    @Transactional
+//    public void ParseExcelFile(MultipartFile inputFile) throws IOException{
+//        InputStream file = inputFile.getInputStream();
+//        Workbook workbook = WorkbookFactory.create(file);
+//        Sheet sheet = workbook.getSheetAt(0);
+//
+//        // 비속어 저장
+//        for (int i=0;i<sheet.getPhysicalNumberOfRows();i++) {
+//            Cell cell = sheet.getRow(i).getCell(0);
+//            if (cell.getCellType().equals(CellType.BLANK)) {
+//                file.close();
+//                break;
+//            } else if (cell.getCellType().equals(CellType.NUMERIC)) {
+//                slangWordRepository.save(new SlangWord(Double.toString(cell.getNumericCellValue())));
+//            } else{
+//                slangWordRepository.save(new SlangWord(cell.getStringCellValue()));
+//            }
+//        }
+//
+//        // 예약어 저장
+//        sheet = workbook.getSheetAt(1);
+//
+//        for (int i=0;i<sheet.getPhysicalNumberOfRows();i++) {
+//            Cell cell = sheet.getRow(i).getCell(0);
+//            if (cell.getCellType().equals(CellType.BLANK)) {
+//                file.close();
+//                break;
+//            } else if (cell.getCellType().equals(CellType.NUMERIC)) {
+//                reservedWordRepository.save(new ReservedWord(Double.toString(cell.getNumericCellValue())));
+//            } else{
+//                reservedWordRepository.save(new ReservedWord(cell.getStringCellValue()));
+//            }
+//        }
+//
+//        file.close();
+//    }
 
     @Override
     public boolean isNicknameContainsSlangWord(String nickname) {

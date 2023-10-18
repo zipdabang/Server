@@ -145,20 +145,13 @@ public class RootController {
     }
 
 
-    @Operation(summary = "닉네임 필터링용 엑셀 파싱 API ✔️🔑", description = "닉네임 필터링용 엑셀 파싱 API")
-    @PostMapping(value = "/excel", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-//    @Parameters({
-//            @Parameter(name = "member", hidden = true)
+//    @Operation(summary = "닉네임 필터링용 엑셀 파싱 API ✔️", description = "닉네임 필터링용 엑셀 파싱 API")
+//    @PostMapping(value = "/excel", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "2000", description = "OK 성공"),
 //    })
-    @ApiResponses({
-            @ApiResponse(responseCode = "2000", description = "OK 성공"),
-    })
-    public ResponseDto<RootResponseDto.ExcelParsingDto> parsingExcelFile(@ModelAttribute MultipartFile file) throws IOException{
-        // 멤버 id가 3이면 가능하도록 넣기
-        // resources에 엑셀 파일 넣고 해당 경로로 파일 찾기.
-        // 파싱해서 닉네임들 다 db 만들어서 저장하기.
-        // valid 어노테이션에서 필터링.
-        rootService.ParseExcelFile(file);
-        return null;
-    }
+//    public ResponseDto<RootResponseDto.ExcelParsingDto> parsingExcelFile(@ModelAttribute MultipartFile file) throws IOException{
+//        rootService.ParseExcelFile(file);
+//        return null;
+//    }
 }
