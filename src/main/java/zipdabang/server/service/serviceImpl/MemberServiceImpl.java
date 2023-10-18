@@ -100,7 +100,7 @@ public class MemberServiceImpl implements MemberService {
     public OAuthResult.OAuthResultDto SocialLogin(MemberRequestDto.OAuthRequestDto request,String type) {
         Member member = memberRepository.findByEmail(request.getEmail()).orElse(null);
 
-        request.toString();
+        log.info("the data from frontend : {}",request.toString());
         if(member != null) {
             String accessToken = null;
             Optional<FcmToken> fcmToken = fcmTokenRepository.findByTokenAndSerialNumber(request.getFcmToken(), request.getSerialNumber());
