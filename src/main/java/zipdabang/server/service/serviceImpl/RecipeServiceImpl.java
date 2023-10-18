@@ -390,8 +390,6 @@ public class RecipeServiceImpl implements RecipeService {
         if(recipeCategory.isEmpty())
             throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
 
-        order = updateMemberViewMethod(member, order);
-
         List<Recipe> content = new ArrayList<>();
 
         BooleanExpression categoryCondition = recipeRepositoryCustom.recipesInCategoryCondition(categoryId);
@@ -493,8 +491,6 @@ public class RecipeServiceImpl implements RecipeService {
         if(recipeCategory.isEmpty())
             throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
 
-        order = updateMemberViewMethod(member, order);
-
         List<Recipe> content = new ArrayList<>();
 
         BooleanExpression whereCondition = recipeRepositoryCustom.recipesInCategoryCondition(categoryId);
@@ -511,28 +507,6 @@ public class RecipeServiceImpl implements RecipeService {
         return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);
     }
 
-    private String updateMemberViewMethod(Member member, String order) {
-        Optional<MemberViewMethod> settedOrder = memberViewMethodRepository.findByMember(member);
-
-        if (settedOrder.isEmpty()){
-            if(order == null)
-                order = "latest";
-
-            MemberViewMethod savedOrder = MemberViewMethod.builder()
-                    .method(order)
-                    .build();
-            savedOrder.setMember(member);
-            memberViewMethodRepository.save(savedOrder);
-        }
-        else{
-            if(order == null)
-                order = settedOrder.get().getMethod();
-
-            if (settedOrder.get().getMethod() != order)
-                settedOrder.get().setMethod(order);
-        }
-        return order;
-    }
 
     @Override
     public boolean checkRecipeCategoryExist(Long categoryId) {
