@@ -136,6 +136,8 @@ spring:
         hbm2ddl:
           auto: update
         default_batch_fetch_size: 1000
+        show_sql: true
+        format_sql: true
 
   logging:
     level:

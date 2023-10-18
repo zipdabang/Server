@@ -147,4 +147,8 @@ public class Member extends BaseEntity {
 
     public void inactivateStatus(){
         this.status = StatusType.INACTIVE;}
+
+    public void deleteView(){
+        this.viewOrder = null;
+    }
 }

@@ -27,8 +27,9 @@ public class MemberViewMethod {
     private String method;
 
     public void setMember(Member member){
+        if(this.member != null) this.setMember(null);
         this.member = member;
-        member.setViewOrder(this);
+        if(member != null) member.setViewOrder(this);
     }
 
     public void setMethod(String method){

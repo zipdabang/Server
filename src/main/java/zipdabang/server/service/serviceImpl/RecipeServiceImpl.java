@@ -518,12 +518,11 @@ public class RecipeServiceImpl implements RecipeService {
             if(order == null)
                 order = "latest";
 
-            MemberViewMethod savedOrder = memberViewMethodRepository.save(MemberViewMethod.builder()
-                    .member(member)
+            MemberViewMethod savedOrder = MemberViewMethod.builder()
                     .method(order)
-                    .build()
-            );
+                    .build();
             savedOrder.setMember(member);
+            memberViewMethodRepository.save(savedOrder);
         }
         else{
             if(order == null)
