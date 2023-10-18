@@ -9,8 +9,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.apiPayload.reponse.ResponseDto;
 import zipdabang.server.auth.handler.annotation.AuthMember;
@@ -140,5 +142,23 @@ public class RootController {
     {
         rootService.readPushAlarm(alarmId);
         return ResponseDto.of(RootConverter.toReadPushAlarm());
+    }
+
+
+    @Operation(summary = "닉네임 필터링용 엑셀 파싱 API ✔️🔑", description = "닉네임 필터링용 엑셀 파싱 API")
+    @PostMapping(value = "/excel", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+//    @Parameters({
+//            @Parameter(name = "member", hidden = true)
+//    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+    })
+    public ResponseDto<RootResponseDto.ExcelParsingDto> parsingExcelFile(@ModelAttribute MultipartFile file) throws IOException{
+        // 멤버 id가 3이면 가능하도록 넣기
+        // resources에 엑셀 파일 넣고 해당 경로로 파일 찾기.
+        // 파싱해서 닉네임들 다 db 만들어서 저장하기.
+        // valid 어노테이션에서 필터링.
+        rootService.ParseExcelFile(file);
+        return null;
     }
 }

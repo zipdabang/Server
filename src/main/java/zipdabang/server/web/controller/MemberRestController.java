@@ -225,7 +225,7 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updateDetailInfo"));
     }
 
-    @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ✔️🔑", description = "닉네임 수정 API입니다.")
+    @Operation(summary = "[figma 더보기 - 회원 정보 수정 3] 닉네임 수정 API ✔️🔑", description = "닉네임 수정 API입니다. <br> CONTAINS_SLANG_WORD : 비속어를 포함한 경우 <br> RESERVED_WORD : 예약어를 입력한 경우. <br> (예약어 목록 : admin, master, test, 운영자, 관리자, 집다방 ")
     @Parameters({
             @Parameter(name = "member", hidden = true),
     })
@@ -233,7 +233,7 @@ public class MemberRestController {
             @ApiResponse(responseCode = "2000", description = "OK 성공 , 닉네임 수정 완료"),
     })
     @PatchMapping("/myInfo/nickname")
-    public ResponseDto<MemberResponseDto.MemberStatusDto> updateNickname(@AuthMember Member member, @RequestBody MemberRequestDto.changeNicknameDto request) {
+    public ResponseDto<MemberResponseDto.MemberStatusDto> updateNickname(@AuthMember Member member, @RequestBody @Valid MemberRequestDto.changeNicknameDto request) {
         memberService.updateMemberNickname(member, request.getNickname());
         return ResponseDto.of(MemberConverter.toMemberStatusDto(member.getMemberId(), "updateNickname"));
     }

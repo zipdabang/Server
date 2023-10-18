@@ -12,6 +12,7 @@ import java.util.List;
 import org.springframework.lang.Nullable;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.domain.enums.DeregisterType;
+import zipdabang.server.validation.annotation.CheckNickname;
 import zipdabang.server.validation.annotation.ExistNickname;
 
 public class MemberRequestDto {
@@ -83,7 +84,7 @@ public class MemberRequestDto {
         private String email;
         @NotBlank
         private String gender;
-        @NotBlank @ExistNickname @Size(min = 4, max = 10)
+        @NotBlank @ExistNickname @CheckNickname @Size(min = 2, max = 6)
         private String nickname;
         @NotBlank
         private String phoneNum;
@@ -159,6 +160,7 @@ public class MemberRequestDto {
     @Getter
     @Setter
     public static class changeNicknameDto {
+        @CheckNickname @ExistNickname
         String nickname;
     }
 

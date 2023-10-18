@@ -105,6 +105,9 @@ public enum CommonStatus implements BaseCode {
 
     NOT_MY_INQUERY(HttpStatus.BAD_REQUEST, 4068, "로그인 한 사용자의 문의가 아닙니다."),
 
+    CONTAINS_SLANG_WORD(HttpStatus.BAD_REQUEST, 4069, "닉네임에 비속어가 포함되어 있습니다."),
+    RESERVED_WORD(HttpStatus.BAD_REQUEST, 4070, "사용할 수 없는 닉네임입니다."),
+
 
     // recipe error
 

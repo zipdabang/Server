@@ -1,6 +1,7 @@
 package zipdabang.server.web.dto.responseDto;
 
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -96,5 +97,16 @@ public class RootResponseDto {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class ReadPushAlarm{
         LocalDateTime deletedAt;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class ExcelParsingDto {
+        Integer size;
+        @CreatedDate
+        LocalDateTime createdAt;
+
     }
 }
