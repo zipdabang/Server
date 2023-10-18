@@ -28,7 +28,7 @@ public interface RootService {
 
     Optional<PushAlarm> findPushAlarmById(Long pushAlarmId);
 
-    void ParseExcelFile(MultipartFile file) throws IOException;
+//    void ParseExcelFile(MultipartFile file) throws IOException;
     public boolean isNicknameContainsSlangWord(String nickname);
     public boolean isNicknameReservedWord(String nickname);
 }
