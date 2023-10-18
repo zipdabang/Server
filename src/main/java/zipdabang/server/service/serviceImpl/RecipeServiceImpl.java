@@ -501,7 +501,7 @@ public class RecipeServiceImpl implements RecipeService {
         else
             content = recipeRepositoryCustom.recipesOrderBy(pageIndex,pageSize, member, order, whereCondition);
 
-
+        log.info("서비스단의 상황 : {}", content.size());
         Long count = recipeRepositoryCustom.recipeTotalCount(member, whereCondition);
 
         return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);

@@ -394,7 +394,7 @@ RecipeRestController {
     })
     @GetMapping(value = "/members/recipes/categories/{categoryId}")
     public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "order", required = false) String order, @CheckPage @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
-
+        log.info("카테고리 조회 controller 호출 : {}", member.getMemberId());
         if (pageIndex == null)
             pageIndex = 1;
 
