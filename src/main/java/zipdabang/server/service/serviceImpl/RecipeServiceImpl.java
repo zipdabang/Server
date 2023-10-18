@@ -1,11 +1,7 @@
 package zipdabang.server.service.serviceImpl;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +29,9 @@ import zipdabang.server.repository.ReportRepository;
 import zipdabang.server.repository.memberRepositories.BlockedMemberRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
 import zipdabang.server.repository.recipeRepositories.*;
+import zipdabang.server.repository.recipeRepositories.recipeRepositoryCustom.CommentRepositoryCustom;
+import zipdabang.server.repository.recipeRepositories.recipeRepositoryCustom.RecipeRepositoryCustom;
+import zipdabang.server.repository.recipeRepositories.recipeRepositoryCustom.TempRecipeRepositoryCustom;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
@@ -57,7 +56,9 @@ import static zipdabang.server.domain.recipe.QTempRecipe.tempRecipe;
 public class RecipeServiceImpl implements RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final RecipeRepositoryCustom recipeRepositoryCustom;
     private final TempRecipeRepository tempRecipeRepository;
+    private final TempRecipeRepositoryCustom tempRecipeRepositoryCustom;
     private final RecipeCategoryMappingRepository recipeCategoryMappingRepository;
     private final RecipeCategoryRepository recipeCategoryRepository;
     private final RecipeBannerRepository recipeBannerRepository;
@@ -72,13 +73,13 @@ public class RecipeServiceImpl implements RecipeService {
     private final MemberRepository memberRepository;
     private final BlockedMemberRepository blockedMemberRepository;
     private final CommentRepository commentRepository;
+    private final CommentRepositoryCustom commentRepositoryCustom;
     private final ReportRepository reportRepository;
     private final ReportedCommentRepository reportedCommentRepository;
     private final ReportedRecipeRepository reportedRecipeRepository;
     private final WeeklyBestRecipeRepository weeklyBestRecipeRepository;
     private final MemberViewMethodRepository memberViewMethodRepository;
 
-    private final JPAQueryFactory queryFactory;
     private final PushAlarmRepository pushAlarmRepository;
     private final AlarmCategoryRepository alarmCategoryRepository;
     private final FirebaseService firebaseService;
@@ -339,25 +340,11 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Page<TempRecipe> getTempRecipeList(Integer pageIndex, Member member) {
 
-        QTempRecipe qTempRecipe = tempRecipe;
+        List<TempRecipe> content = tempRecipeRepositoryCustom.getTempRecipePageList(pageIndex, pageSize, member);
 
-        List<TempRecipe> content = queryFactory
-                .selectFrom(tempRecipe)
-                .where(
-                        tempRecipe.member.eq(member)
-                )
-                .orderBy(tempRecipe.updatedAt.desc())
-                .offset(pageIndex*pageSize)
-                .limit(pageSize)
-                .fetch();
+        Long count =tempRecipeRepositoryCustom.getTempRecipeTotalCount(member);
 
-        JPAQuery<Long> count = queryFactory
-                .select(tempRecipe.count())
-                .from(tempRecipe)
-                .where(tempRecipe.member.eq(member)
-                );
-
-        return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count.fetchOne());
+        return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);
     }
 
     @Transactional(readOnly = false)
@@ -396,107 +383,39 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public Page<Recipe> searchRecipe(Long categoryId, String keyword, Integer pageIndex, Member member) {
+    public Page<Recipe> searchRecipe(Long categoryId, String keyword, String order, Integer pageIndex, Member member) {
 
         List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
 
         if(recipeCategory.isEmpty())
             throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
 
-        QRecipe qRecipe = recipe;
-        QRecipeCategoryMapping qRecipeCategoryMapping = recipeCategoryMapping;
+        order = updateMemberViewMethod(member, order);
 
-        List<Recipe> content = queryFactory
-                .selectFrom(recipe)
-                .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                .where(blockedMemberNotInForRecipe(member),
-                        recipe.name.contains(keyword),
-                        recipeCategoryMapping.category.id.eq(categoryId)
-                )
-                .orderBy(recipe.createdAt.desc())
-                .offset(pageIndex*pageSize)
-                .limit(pageSize)
-                .fetch();
+        List<Recipe> content = new ArrayList<>();
 
-        JPAQuery<Long> count = queryFactory
-                .select(recipe.count())
-                .from(recipe)
-                .join(recipe.categoryMappingList, recipeCategoryMapping)
-                .where(blockedMemberNotInForRecipe(member),
-                        recipe.name.contains(keyword),
-                        recipeCategoryMapping.category.id.eq(categoryId)
-                );
+        BooleanExpression categoryCondition = recipeRepositoryCustom.recipesInCategoryCondition(categoryId);
+        BooleanExpression keywordCondition = recipeRepositoryCustom.recipesContainKeyword(keyword);
 
-        return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count.fetchOne());
+        if(order.equals("follow"))
+            content = recipeRepositoryCustom.recipesOrderByFollow(pageIndex, pageSize, member, categoryCondition, keywordCondition);
+        else
+            content = recipeRepositoryCustom.recipesOrderBy(pageIndex,pageSize, member, order, categoryCondition, keywordCondition);
+
+
+        Long count = recipeRepositoryCustom.recipeTotalCount(member, categoryCondition, keywordCondition);
+
+        return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);
     }
 
     @Override
     public List<Recipe> getWrittenByRecipePreview(String writtenby, Member member) {
 
-        QRecipe qRecipe = recipe;
-
-        List<Recipe> recipeList = queryFactory
-                .selectFrom(recipe)
-                .where(blockedMemberNotInForRecipe(member),
-                        checkWrittenBy(writtenby)
-                        )
-                .limit(previewSize)
-                .orderBy(recipe.createdAt.desc())
-                .fetch();
+        List<Recipe> recipeList = recipeRepositoryCustom.getWrittenByPreview(writtenby, member, pageSize);
 
         log.info(recipeList.toString());
 
         return recipeList;
-    }
-
-    private BooleanExpression checkWrittenBy(String writtenby) {
-        if (writtenby.equals("barista"))
-            return recipe.isBarista.eq(true);
-        else if (writtenby.equals("common"))
-            return recipe.isBarista.eq(false);
-        else if (writtenby.equals("official"))
-            return recipe.isOfficial.eq(true);
-        else
-            throw new RecipeException(CommonStatus.WRITTEN_BY_TYPE_ERROR);
-    }
-
-    private BooleanExpression blockedMemberNotInForRecipe(Member member) {
-        List<Member> blockedMember = getBlockedMember(member);
-
-            return blockedMember.isEmpty() ? null : recipe.member.notIn(blockedMember);
-    }
-
-    private BooleanExpression getFollowerRecipeCondition(Member member) {
-        List<Member> followee = queryFactory
-                .select(follow.followee)
-                .from(follow)
-                .where(follow.follower.eq(member))
-                .fetch();
-
-        return followee.isEmpty() ? null : recipe.member.in(followee).and(recipe.createdAt.after(LocalDateTime.now().minusWeeks(1)));
-    }
-    private BooleanExpression getNotFollowerRecipeCondition(Member member) {
-        Long count = queryFactory
-                .select(follow.count())
-                .from(follow)
-                .where(follow.follower.eq(member))
-                .fetchOne();
-
-        List<Recipe> blacklist = queryFactory
-                .selectFrom(recipe)
-                .where(getFollowerRecipeCondition(member))
-                .fetch();
-
-        log.info("blacklist count: ", blacklist);
-
-        return count == 0 ? null : recipe.notIn(blacklist);
-    }
-
-    private List<Member> getBlockedMember(Member member) {
-        List<Member> blockedMember = blockedMemberRepository.findByOwner(member).stream()
-                .map(blockedInfo -> blockedInfo.getBlocked())
-                .collect(Collectors.toList());
-        return blockedMember;
     }
 
 
@@ -556,22 +475,9 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public List<Recipe> getTop5RecipePerCategory(Long categoryId) {
 
-        QRecipe qRecipe = recipe;
-        QRecipeCategoryMapping qRecipeCategoryMapping = recipeCategoryMapping;
-
         List<Recipe> recipeList = new ArrayList<>();
 
-
-        recipeList = queryFactory
-                .selectFrom(recipe)
-                .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                .where(
-                        recipeCategoryMapping.category.id.eq(categoryId)
-                )
-                .limit(5)
-                .orderBy(recipe.totalLike.desc(), recipe.createdAt.desc())
-                .fetch();
-
+        recipeList = recipeRepositoryCustom.getTop5RecipePerCategory(categoryId);
 
         log.info(recipeList.toString());
 
@@ -589,137 +495,20 @@ public class RecipeServiceImpl implements RecipeService {
 
         order = updateMemberViewMethod(member, order);
 
-        QRecipe qRecipe = recipe;
-        QRecipeCategoryMapping qRecipeCategoryMapping = recipeCategoryMapping;
         List<Recipe> content = new ArrayList<>();
 
-        if(order.equals("follow")) {
-            BooleanExpression whereCondition = recipe.in(queryFactory
-                    .select(recipeCategoryMapping.recipe)
-                            .from(recipeCategoryMapping)
-                            .where(recipeCategoryMapping.category.id.eq(categoryId))
-                    .fetch());
-
-            content = recipesOrderByFollow(pageIndex, member, whereCondition);
-        }
-        else{
-            content = queryFactory
-                    .selectFrom(recipe)
-                    .join(recipe.categoryMappingList, recipeCategoryMapping).fetchJoin()
-                    .where(blockedMemberNotInForRecipe(member),
-                            recipeCategoryMapping.category.id.eq(categoryId)
-                    )
-                    .orderBy(order(order, member), recipe.createdAt.desc())
-                    .offset(pageIndex * pageSize)
-                    .limit(pageSize)
-                    .fetch();
-        }
+        BooleanExpression whereCondition = recipeRepositoryCustom.recipesInCategoryCondition(categoryId);
 
 
-        JPAQuery<Long> count = queryFactory
-                .select(recipe.count())
-                .from(recipe)
-                .join(recipe.categoryMappingList, recipeCategoryMapping)
-                .where(blockedMemberNotInForRecipe(member),
-                        recipeCategoryMapping.category.id.eq(categoryId)
-                );
-
-        return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count.fetchOne());
-    }
-
-    private List<Recipe> recipesOrderByFollow(Integer pageIndex, Member member, BooleanExpression... booleanExpressions) {
-
-        BooleanExpression combinedExpression = null;
-
-        for (BooleanExpression expression : booleanExpressions) {
-            if (combinedExpression == null) {
-                combinedExpression = expression;
-            } else {
-                combinedExpression = combinedExpression.and(expression);
-            }
-        }
-
-        List<Recipe> content = new ArrayList<>();
-
-        QFollow qFollow = follow;
-
-        //팔로잉 레시피 갯수 계산(일주일 전 것까지)
-        Long followingCount = queryFactory
-                .select(recipe.count())
-                .from(recipe)
-                .where(
-                        combinedExpression
-                                .and(blockedMemberNotInForRecipe(member))
-                                .and(getFollowerRecipeCondition(member))
-                )
-                .fetchOne();
+        if(order.equals("follow"))
+            content = recipeRepositoryCustom.recipesOrderByFollow(pageIndex, pageSize, member, whereCondition);
+        else
+            content = recipeRepositoryCustom.recipesOrderBy(pageIndex,pageSize, member, order, whereCondition);
 
 
-        if (followingCount >= (pageIndex+1) * pageSize) {
-            log.info("if로 넘어옴");
-            //index를 넘지 않으면 팔로잉 레시피 먼저
-            content = queryFactory
-                    .selectFrom(recipe)
-                    .where(
-                            combinedExpression
-                            .and(blockedMemberNotInForRecipe(member))
-                            .and(getFollowerRecipeCondition(member))
-                    )
-                    .orderBy(recipe.createdAt.desc())
-                    .offset(pageIndex * pageSize)
-                    .limit(pageSize)
-                    .fetch();
+        Long count = recipeRepositoryCustom.recipeTotalCount(member, whereCondition);
 
-        } else if (followingCount > pageIndex * pageSize) {
-            log.info("else if로 넘어옴");
-            //index에 끼어있으면 팔로잉,일반 레시피 둘 다. offset과 pagesize 잘 계산해야함
-
-            //팔로잉 추가
-            content.addAll(queryFactory
-                    .selectFrom(recipe)
-                    .where(
-                            combinedExpression
-                                    .and(blockedMemberNotInForRecipe(member))
-                                    .and(getFollowerRecipeCondition(member))
-                    )
-                    .orderBy(recipe.createdAt.desc())
-                    .offset(pageIndex * pageSize)
-                    .limit(pageSize)
-                    .fetch());
-
-            content.addAll(queryFactory
-                    .selectFrom(recipe)
-                    .where(
-                            combinedExpression
-                                    .and(blockedMemberNotInForRecipe(member))
-                                    .and(getNotFollowerRecipeCondition(member))
-                    )
-                    .orderBy(recipe.createdAt.desc())
-                    .offset(0)
-                    .limit(pageSize - content.size())
-                    .fetch());
-
-        } else {
-            log.info("else로 넘어옴");
-            //일반 레시피만. offset 잘 계산해야함
-            content = queryFactory
-                    .selectFrom(recipe)
-                    .where(
-                            combinedExpression
-                                    .and(blockedMemberNotInForRecipe(member))
-                                    .and(getNotFollowerRecipeCondition(member))
-                    )
-                    .orderBy(recipe.createdAt.desc())
-                    .offset(pageIndex == 0 ? 0 : pageIndex * pageSize - followingCount)
-                    .limit(pageSize)
-                    .fetch();
-
-            log.info(content.toString());
-        }
-
-        log.info(content.toString());
-
-        return content;
+        return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);
     }
 
     private String updateMemberViewMethod(Member member, String order) {
@@ -746,16 +535,6 @@ public class RecipeServiceImpl implements RecipeService {
         return order;
     }
 
-    private OrderSpecifier order(String order, Member member) {
-
-        if(order.equals("likes"))
-            return new OrderSpecifier<>(Order.DESC, recipe.totalLike);
-        else if(order.equals("latest") || order.equals("follow"))
-            return new OrderSpecifier(Order.DESC, recipe.createdAt);
-        else
-            throw new RecipeException(CommonStatus.ORDER_BY_TYPE_ERROR);
-    }
-
     @Override
     public boolean checkRecipeCategoryExist(Long categoryId) {
         return recipeCategoryRepository.existsById(categoryId);
@@ -765,7 +544,7 @@ public class RecipeServiceImpl implements RecipeService {
     public List<List<Recipe>> searchRecipePreview(String keyword, Member member) {
         Long recipeCategorySize = recipeCategoryRepository.count()-1;
 
-        List<Member> blockedMember = getBlockedMembers(member);
+        List<Member> blockedMember = getBlockedMember(member);
 
         List<List<Recipe>> recipeList = new ArrayList<>();
 
@@ -785,6 +564,13 @@ public class RecipeServiceImpl implements RecipeService {
         return recipeList;
     }
 
+    List<Member> getBlockedMember(Member member) {
+        List<Member> blockedMember = blockedMemberRepository.findByOwner(member).stream()
+                .map(blockedInfo -> blockedInfo.getBlocked())
+                .collect(Collectors.toList());
+        return blockedMember;
+    }
+
     @Override
     public List<WeeklyBestRecipe> WeekBestRecipe() {
         List<WeeklyBestRecipe> bestRecipes = weeklyBestRecipeRepository.findAll();
@@ -796,85 +582,38 @@ public class RecipeServiceImpl implements RecipeService {
     public List<Recipe> getRecipeByOwnerPreview(Long memberId) {
         Member findMember = memberRepository.findById(memberId).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
 
-        QRecipe qRecipe = recipe;
+        List<Recipe> recipeList = recipeRepository.findTop5ByMemberOrderByCreatedAtDesc(findMember);
 
-        List<Recipe> recipeList = queryFactory
-                .selectFrom(recipe)
-                .where(
-                        recipe.member.eq(findMember)
-                )
-                .limit(5)
-                .orderBy(recipe.createdAt.desc())
-                .fetch();
+        if(recipeList.size() == 0)
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
 
         return recipeList;
     }
 
     @Override
     public Page<Recipe> getRecipeByOwner(Integer pageIndex, Long memberId) {
-
         Member findMember = memberRepository.findById(memberId).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
 
-        QRecipe qRecipe = recipe;
+        Page<Recipe> recipeList = recipeRepository.findByMember(findMember, PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
 
-        List<Recipe> content = queryFactory
-                .selectFrom(recipe)
-                .where(recipe.member.eq(findMember))
-                .orderBy(recipe.createdAt.desc())
-                .offset(pageIndex*pageSize)
-                .limit(pageSize)
-                .fetch();
-
-
-        JPAQuery<Long> count = queryFactory
-                .select(recipe.count())
-                .from(recipe)
-                .where(recipe.member.eq(findMember));
-
-        return PageableExecutionUtils.getPage(content,PageRequest.of(pageIndex,pageSize), ()->count.fetchOne());
+        return recipeList;
     }
 
     @Override
-    public List<Recipe> getmyRecipePreview(Member member) {
-        QRecipe qRecipe = recipe;
+    public List<Recipe> getMyRecipePreview(Member member) {
+        List<Recipe> recipeList = recipeRepository.findTop5ByMemberOrderByCreatedAtDesc(member);
 
-        List<Recipe> recipeList = queryFactory
-                .selectFrom(recipe)
-                .where(
-                        recipe.member.eq(member)
-                )
-                .limit(5)
-                .orderBy(recipe.createdAt.desc())
-                .fetch();
+        if(recipeList.size() == 0)
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
 
         return recipeList;
     }
 
     @Override
     public Page<Recipe> getMyRecipeList(Integer pageIndex, Member member) {
-        QRecipe qRecipe = recipe;
+        Page<Recipe> recipeList = recipeRepository.findByMember(member, PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt")));
 
-        List<Recipe> content = queryFactory
-                .selectFrom(recipe)
-                .where(recipe.member.eq(member))
-                .orderBy(recipe.createdAt.desc())
-                .offset(pageIndex*pageSize)
-                .limit(pageSize)
-                .fetch();
-
-
-        JPAQuery<Long> count = queryFactory
-                .select(recipe.count())
-                .from(recipe)
-                .where(recipe.member.eq(member));
-
-        return PageableExecutionUtils.getPage(content,PageRequest.of(pageIndex,pageSize), ()->count.fetchOne());
-    }
-
-    private List<Member> getBlockedMembers(Member member) {
-        List<Member> blockedMember = getBlockedMember(member);
-
-        return blockedMember;
+        return recipeList;
     }
 
     public List<RecipeBanner> getRecipeBannerList() {
@@ -975,35 +714,15 @@ public class RecipeServiceImpl implements RecipeService {
     public Page<Comment> commentList(Integer pageIndex, Long recipeId, Member member) {
         Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(CommonStatus.NO_RECIPE_EXIST));
 
-        QComment qComment = comment;
-
-        List<Comment> content = queryFactory
-                .selectFrom(comment)
-                .where(blockedMemberNotInForComment(member),
-                        comment.recipe.eq(findRecipe))
-                .orderBy(comment.createdAt.desc())
-                .offset(pageIndex*pageSize)
-                .limit(pageSize)
-                .fetch();
+        List<Comment> content = commentRepositoryCustom.getCommentList(pageIndex, pageSize, member, findRecipe);
 
 
-        JPAQuery<Long> count = queryFactory
-                .select(comment.count())
-                .from(comment)
-                .where(blockedMemberNotInForComment(member),
-                        comment.recipe.eq(findRecipe)
-                );
+        Long count = commentRepositoryCustom.commentListTotalCount(member,findRecipe);
 
-        if (count.fetchOne() == 0)
+        if (count == 0)
             throw new RecipeException(CommonStatus.COMMENT_NOT_FOUND);
 
-        return PageableExecutionUtils.getPage(content,PageRequest.of(pageIndex,pageSize), ()->count.fetchOne());
-    }
-
-    private BooleanExpression blockedMemberNotInForComment(Member member) {
-        List<Member> blockedMember = getBlockedMember(member);
-
-        return blockedMember.isEmpty() ? null : comment.member.notIn(blockedMember);
+        return PageableExecutionUtils.getPage(content,PageRequest.of(pageIndex,pageSize), ()->count);
     }
 
     @Transactional(readOnly = false)

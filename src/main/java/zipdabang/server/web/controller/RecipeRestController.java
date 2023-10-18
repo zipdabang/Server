@@ -324,10 +324,11 @@ RecipeRestController {
     @Parameters({
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, 0 이런거 주면 에러 뱉음"),
-            @Parameter(name = "keyword", description = "query string 검색할 단어")
+            @Parameter(name = "keyword", description = "query string 검색할 단어"),
+            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 팔로우순: follow, 최신순: latest로 넘겨주세요, 기본값 latest")
     })
     @GetMapping(value = "/members/recipes/search/{categoryId}")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "keyword") String keyword, @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "keyword") String keyword, @RequestParam(name = "order", required = false) String order,  @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
 
         if (pageIndex == null)
             pageIndex = 1;
@@ -336,7 +337,7 @@ RecipeRestController {
 
         pageIndex -= 1;
 
-        Page<Recipe> recipes = recipeService.searchRecipe(categoryId, keyword, pageIndex, member);
+        Page<Recipe> recipes = recipeService.searchRecipe(categoryId, keyword, order,pageIndex, member);
 
         if (recipes.getTotalElements() == 0)
             throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
@@ -495,7 +496,7 @@ RecipeRestController {
     })
     @GetMapping(value = "/members/recipes/owner/preview/")
     public ResponseDto<RecipeResponseDto.RecipeListDto> myRecipePreview(@AuthMember Member member) {
-        List<Recipe> recipes = recipeService.getmyRecipePreview(member);
+        List<Recipe> recipes = recipeService.getMyRecipePreview(member);
 
         return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
     }
@@ -723,7 +724,7 @@ RecipeRestController {
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, 0 이런거 주면 에러 뱉음"),
     })
     @GetMapping(value = "/members/recipes/{recipeId}/comments")
-    public ResponseDto<RecipeResponseDto.CommentPageListDto> searchRecipe(@PathVariable Long recipeId, @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
+    public ResponseDto<RecipeResponseDto.CommentPageListDto> searchComment(@PathVariable Long recipeId, @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
 
         if (pageIndex == null)
             pageIndex = 1;
