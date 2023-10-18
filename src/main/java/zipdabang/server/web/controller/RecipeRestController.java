@@ -330,7 +330,8 @@ RecipeRestController {
     @GetMapping(value = "/members/recipes/search/{categoryId}")
     public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "keyword") String keyword, @RequestParam(name = "order", required = false) String order,  @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
 
-        if (pageIndex == null)
+        log.info("controller 호출 : {}", member.getMemberId());
+        if (pageIndex == null)g
             pageIndex = 1;
         else if (pageIndex < 1)
             throw new RecipeException(CommonStatus.UNDER_PAGE_INDEX_ERROR);
