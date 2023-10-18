@@ -120,7 +120,7 @@ public enum CommonStatus implements BaseCode {
     //BAD_REQUEST
     WRITTEN_BY_TYPE_ERROR(HttpStatus.BAD_REQUEST, 4103, "레시피 작성자 타입이 잘못되었습니다. official, barista, common중 하나로 보내주세요."),
     //BAD_REQUEST
-    ORDER_BY_TYPE_ERROR(HttpStatus.BAD_REQUEST, 4104, "조회 방식 타입이 잘못되었습니다. likes, views, latest중 하나로 보내주세요."),
+    ORDER_BY_TYPE_ERROR(HttpStatus.BAD_REQUEST, 4104, "조회 방식 타입이 잘못되었습니다. likes, follow, latest중 하나로 보내주세요."),
     //BAD_REQUEST
     NO_RECIPE_CATEGORY_EXIST(HttpStatus.BAD_REQUEST, 4105, "해당 id를 가진 레시피 카테고리가 없습니다. 잘못 보내줬어요"),
     //BAD_REQUEST

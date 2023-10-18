@@ -324,11 +324,13 @@ RecipeRestController {
     @Parameters({
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, 0 이런거 주면 에러 뱉음"),
-            @Parameter(name = "keyword", description = "query string 검색할 단어")
+            @Parameter(name = "keyword", description = "query string 검색할 단어"),
+            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 팔로우순: follow, 최신순: latest로 넘겨주세요, 기본값 latest")
     })
     @GetMapping(value = "/members/recipes/search/{categoryId}")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "keyword") String keyword, @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "keyword") String keyword, @RequestParam(name = "order", required = false) String order,  @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
 
+        log.info("controller 호출 : {}", member.getMemberId());
         if (pageIndex == null)
             pageIndex = 1;
         else if (pageIndex < 1)
@@ -336,7 +338,7 @@ RecipeRestController {
 
         pageIndex -= 1;
 
-        Page<Recipe> recipes = recipeService.searchRecipe(categoryId, keyword, pageIndex, member);
+        Page<Recipe> recipes = recipeService.searchRecipe(categoryId, keyword, order,pageIndex, member);
 
         if (recipes.getTotalElements() == 0)
             throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
@@ -381,7 +383,7 @@ RecipeRestController {
             @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4053", description = "BAD_REQUEST, 넘겨받은 categoryId와 일치하는 카테고리 없음. 1~6 사이로 보내세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4055", description = "BAD_REQUEST, 페이지 인덱스 범위 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4104", description = "BAD_REQUEST, 조회 방식 타입이 잘못되었습니다. likes, views, lastest중 하나로 보내주세요.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4104", description = "BAD_REQUEST, 조회 방식 타입이 잘못되었습니다. likes, follow, lastest중 하나로 보내주세요.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4105", description = "BAD_REQUEST, 해당 id를 가진 레시피 카테고리가 없습니다. 잘못 보내줬어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
@@ -495,7 +497,7 @@ RecipeRestController {
     })
     @GetMapping(value = "/members/recipes/owner/preview/")
     public ResponseDto<RecipeResponseDto.RecipeListDto> myRecipePreview(@AuthMember Member member) {
-        List<Recipe> recipes = recipeService.getmyRecipePreview(member);
+        List<Recipe> recipes = recipeService.getMyRecipePreview(member);
 
         return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
     }
@@ -723,7 +725,7 @@ RecipeRestController {
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, 0 이런거 주면 에러 뱉음"),
     })
     @GetMapping(value = "/members/recipes/{recipeId}/comments")
-    public ResponseDto<RecipeResponseDto.CommentPageListDto> searchRecipe(@PathVariable Long recipeId, @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
+    public ResponseDto<RecipeResponseDto.CommentPageListDto> searchComment(@PathVariable Long recipeId, @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
 
         if (pageIndex == null)
             pageIndex = 1;

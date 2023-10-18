@@ -58,6 +58,14 @@ public class MemberRequestDto {
     @Getter
     @Setter
     public static class OAuthRequestDto {
+        @Override
+        public String toString() {
+            return "OAuthRequestDto{" +
+                    "email='" + email + '\'' +
+                    ", fcmToken='" + fcmToken + '\'' +
+                    ", serialNumber='" + serialNumber + '\'' +
+                    '}';
+        }
         private String email;
         private String fcmToken;
         private String serialNumber;

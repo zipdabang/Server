@@ -8,13 +8,10 @@ import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.inform.Question;
-import zipdabang.server.domain.recipe.Recipe;
-import zipdabang.server.domain.recipe.Scrap;
+import zipdabang.server.domain.recipe.*;
 import zipdabang.server.domain.common.BaseEntity;
 import zipdabang.server.domain.enums.GenderType;
 import zipdabang.server.domain.enums.StatusType;
-import zipdabang.server.domain.recipe.Comment;
-import zipdabang.server.domain.recipe.Likes;
 import zipdabang.server.web.dto.responseDto.MemberResponseDto;
 
 
@@ -107,6 +104,10 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Inquery> inqueryList;
 
+    @Setter
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
+    private MemberViewMethod viewOrder;
+
 
     // 나를 따르는 놈들
     @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL)
@@ -146,4 +147,8 @@ public class Member extends BaseEntity {
 
     public void inactivateStatus(){
         this.status = StatusType.INACTIVE;}
+
+    public void deleteView(){
+        this.viewOrder = null;
+    }
 }

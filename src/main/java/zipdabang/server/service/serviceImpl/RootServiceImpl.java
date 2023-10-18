@@ -191,7 +191,6 @@ public class RootServiceImpl implements RootService {
 //        file.close();
 //    }
 
-
     @Override
     public boolean isNicknameContainsSlangWord(String nickname) {
         List<SlangWord> slangWords = slangWordRepository.qExistsByWordContains(nickname);
