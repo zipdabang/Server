@@ -1,5 +1,6 @@
 package zipdabang.server.service;
 
+import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.Report;
 import zipdabang.server.domain.inform.Notification;
@@ -26,4 +27,8 @@ public interface RootService {
     void readPushAlarm(Long PushAlarmId);
 
     Optional<PushAlarm> findPushAlarmById(Long pushAlarmId);
+
+    void ParseExcelFile(MultipartFile file) throws IOException;
+    public boolean isNicknameContainsSlangWord(String nickname);
+    public boolean isNicknameReservedWord(String nickname);
 }
