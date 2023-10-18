@@ -522,6 +522,7 @@ public class RecipeServiceImpl implements RecipeService {
                     .method(order)
                     .build();
             savedOrder.setMember(member);
+            memberViewMethodRepository.save(savedOrder);
         }
         else{
             if(order == null)
