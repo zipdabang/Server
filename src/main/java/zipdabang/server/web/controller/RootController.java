@@ -13,12 +13,16 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.apiPayload.reponse.ResponseDto;
+import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.Report;
 import zipdabang.server.domain.inform.Notification;
+import zipdabang.server.domain.member.Member;
 import zipdabang.server.service.RootService;
+import zipdabang.server.validation.annotation.CheckTempMember;
 import zipdabang.server.validation.annotation.ExistNotification;
+import zipdabang.server.validation.annotation.ExistPushAlarm;
 import zipdabang.server.web.dto.common.BaseDto;
 import zipdabang.server.web.dto.requestDto.RootRequestDto;
 import zipdabang.server.web.dto.responseDto.RootResponseDto;
@@ -115,5 +119,26 @@ public class RootController {
     {
         rootService.testFCMService(fcmToken.getFcmToken());
         return ResponseDto.of(null);
+    }
+
+
+    @Operation(summary = "푸쉬알림 읽음처리 API ✔️🔑", description = "푸쉬알림 읽음처리 API")
+    @DeleteMapping("/push-alarm/{alarmId}")
+    @Parameters({
+            @Parameter(name = "member", hidden = true)
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK 성공"),
+            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4011", description = "NOT_FOUND, 푸쉬알림이 없습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4012", description = "FORBIDDEN, 내 푸쉬알림이 아닙니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    public ResponseDto<RootResponseDto.ReadPushAlarm> readPushAlarm(@CheckTempMember @AuthMember Member member,@ExistPushAlarm @PathVariable(name = "alarmId") Long alarmId)
+    {
+        rootService.readPushAlarm(alarmId);
+        return ResponseDto.of(RootConverter.toReadPushAlarm());
     }
 }

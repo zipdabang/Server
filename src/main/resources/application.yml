@@ -13,186 +13,6 @@ springdoc:
 spring:
   config:
     activate:
-      on-profile: local
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${aws.db.username}
-    password: ${aws.db.password}
-    url: ${aws.db.url}
-  output:
-    ansi:
-      enabled: always
-  redis:
-    host: localhost
-  batch:
-    jdbc:
-      initialize-schema: always
-    job:
-      names: myJob
-
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        show_sql: true
-        format_sql: true
-        use_sql_comments: true
-        hbm2ddl:
-          auto: update
-        default_batch_fetch_size: 1000
-
-  logging:
-    level:
-      #      root: info
-      org.hibernate.SQL: DEBUG
-      org.hibernate.type: trace
-
-  servlet:
-    multipart:
-      maxFileSize: 20MB
-      maxRequestSize: 30MB
-      enabled: true
-
-oauth:
-  kakao:
-    baseUrl: ${KAKAO_BASE_URL}
-    clientId: ${KAKAO_CLIENT_ID}
-    secretKeyREST: ${KAKAO_SECRET_REST}
-    secretKeyAndroid : ${KAKAO_SECRET_ANDROID}
-  google:
-
-cloud:
-  aws:
-    s3:
-      bucket: zipdabang
-      folder:
-        zipdabang-recipe-thumbNail: recipe/thumbnail
-        zipdabang-recipe-steps : recipe/steps
-        zipdabang-proifile : user
-        zipdabang-inquery : inquery
-      #        zipdabang-facilities : facilities
-      user-default-image: ${USER_DEFAULT_IMAGE}
-    region:
-      static: ap-northeast-2
-    stack:
-      auto: false
-    credentials:
-      accessKey: ${AWS_ACCESS_KEY_ID}
-      secretKey: ${AWS_SECRET_ACCESS_KEY}
-
-jwt:
-  header: Authorization
-  secret: ${JWT_SECRET}
-  authorities-key: ${JWT_AUTHORITIES_KEY}
-  access-token-validity-in-seconds: 1800 # 30 m
-  refresh-token-validity-in-seconds: 1210000000 # 14 d
-
-paging:
-  size : 10
-
-naver-sms:
-  accessKey: ${NAVER_SMS_ACCESSKEY}
-  secretKey: ${NAVER_SMS_SECRET}
-  serviceId: ${NAVER_SMS_SERVICEID}
-  senderPhone: ${NAVER_SMS_PHONE}
-
-fcm:
-  url: ${FCM_URL}
-  project-num: ${FCM_PROJECT_NUMBER}
-
-#---
-#spring:
-#  config:
-#    activate:
-#      on-profile: dev
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    username: ${aws.db.username}
-#    password: ${aws.db.password}
-#    url: ${aws.db.url}
-#  output:
-#    ansi:
-#      enabled: always
-#  redis:
-#    host: briefing-dev-redis.bjyb5r.ng.0001.apne1.cache.amazonaws.com
-#  batch:
-#    jdbc:
-#      initialize-schema: always
-#    job:
-#      names: myJob
-#
-#  jpa:
-#    properties:
-#      hibernate:
-#        dialect: org.hibernate.dialect.MySQL8Dialect
-#        use_sql_comments: true
-#        hbm2ddl:
-#          auto: update
-#        default_batch_fetch_size: 1000
-#
-#  logging:
-#    level:
-#      #      root: info
-#      org.hibernate.SQL: DEBUG
-#      org.hibernate.type: trace
-#
-#  servlet:
-#    multipart:
-#      maxFileSize: 20MB
-#      maxRequestSize: 30MB
-#      enabled: true
-#
-#oauth:
-#  kakao:
-#    baseUrl: ${KAKAO_BASE_URL}
-#    clientId: ${KAKAO_CLIENT_ID}
-#    secretKeyREST: ${KAKAO_SECRET_REST}
-#    secretKeyAndroid : ${KAKAO_SECRET_ANDROID}
-#  google:
-#
-#cloud:
-#  aws:
-#    s3:
-#      bucket: zipdabang
-#      folder:
-#        zipdabang-recipe-thumbNail: recipe/thumbnail
-#        zipdabang-recipe-steps : recipe/steps
-#        zipdabang-proifile : user
-#        zipdabang-inquery : inquery
-#    #        zipdabang-facilities : facilities
-#      user-default-image: ${USER_DEFAULT_IMAGE}
-#    region:
-#      static: ap-northeast-2
-#    stack:
-#      auto: false
-#    credentials:
-#      accessKey: ${AWS_ACCESS_KEY_ID}
-#      secretKey: ${AWS_SECRET_ACCESS_KEY}
-#
-#jwt:
-#  header: Authorization
-#  secret: ${JWT_SECRET}
-#  authorities-key: ${JWT_AUTHORITIES_KEY}
-#  access-token-validity-in-seconds: 1800 # 30 m
-#  refresh-token-validity-in-seconds: 1210000000 # 14 d
-#
-#paging:
-#  size : 10
-#
-#naver-sms:
-#  accessKey: ${NAVER_SMS_ACCESSKEY}
-#  secretKey: ${NAVER_SMS_SECRET}
-#  serviceId: ${NAVER_SMS_SERVICEID}
-#  senderPhone: ${NAVER_SMS_PHONE}
-#
-#fcm:
-#  url: ${FCM_URL}
-#  project-num: ${FCM_PROJECT_NUMBER}
-
----
-spring:
-  config:
-    activate:
       on-profile: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -202,8 +22,14 @@ spring:
   output:
     ansi:
       enabled: always
+
+  ##  # local redis
+  #  redis:
+  #    host: localhost
+  #
   redis:
     host: zipdabang-dev-redis.fkcewd.ng.0001.apne1.cache.amazonaws.com
+
   batch:
     jdbc:
       initialize-schema: always
@@ -277,3 +103,96 @@ naver-sms:
 fcm:
   url: ${FCM_URL}
   project-num: ${FCM_PROJECT_NUMBER}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${aws.db.username}
+    password: ${aws.db.password}
+    url: ${aws.db.url}
+  output:
+    ansi:
+      enabled: always
+
+    ##  # local redis
+    redis:
+      host: localhost
+
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      names: myJob
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        use_sql_comments: true
+        hbm2ddl:
+          auto: update
+        default_batch_fetch_size: 1000
+
+  logging:
+    level:
+      #      root: info
+      org.hibernate.SQL: DEBUG
+      org.hibernate.type: trace
+
+  servlet:
+    multipart:
+      maxFileSize: 20MB
+      maxRequestSize: 30MB
+      enabled: true
+
+oauth:
+  kakao:
+    baseUrl: ${KAKAO_BASE_URL}
+    clientId: ${KAKAO_CLIENT_ID}
+    secretKeyREST: ${KAKAO_SECRET_REST}
+    secretKeyAndroid: ${KAKAO_SECRET_ANDROID}
+  google:
+
+cloud:
+  aws:
+    s3:
+      bucket: zipdabang
+      folder:
+        zipdabang-recipe-thumbNail: recipe/thumbnail
+        zipdabang-recipe-steps: recipe/steps
+        zipdabang-proifile: user
+        zipdabang-inquery: inquery
+      #        zipdabang-facilities : facilities
+      user-default-image: ${USER_DEFAULT_IMAGE}
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    credentials:
+      accessKey: ${AWS_ACCESS_KEY_ID}
+      secretKey: ${AWS_SECRET_ACCESS_KEY}
+
+jwt:
+  header: Authorization
+  secret: ${JWT_SECRET}
+  authorities-key: ${JWT_AUTHORITIES_KEY}
+  access-token-validity-in-seconds: 1800 # 30 m
+  refresh-token-validity-in-seconds: 1210000000 # 14 d
+
+paging:
+  size: 10
+
+naver-sms:
+  accessKey: ${NAVER_SMS_ACCESSKEY}
+  secretKey: ${NAVER_SMS_SECRET}
+  serviceId: ${NAVER_SMS_SERVICEID}
+  senderPhone: ${NAVER_SMS_PHONE}
+
+fcm:
+  url: ${FCM_URL}
+  project-num: ${FCM_PROJECT_NUMBER}
+

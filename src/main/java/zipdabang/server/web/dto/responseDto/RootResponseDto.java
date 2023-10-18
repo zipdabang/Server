@@ -2,6 +2,7 @@ package zipdabang.server.web.dto.responseDto;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class RootResponseDto {
@@ -87,5 +88,13 @@ public class RootResponseDto {
     public static class ReportListDto{
         List<ReportDto> reportList;
         Integer size;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class ReadPushAlarm{
+        LocalDateTime deletedAt;
     }
 }

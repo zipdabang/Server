@@ -9,6 +9,7 @@ import zipdabang.server.utils.converter.TimeConverter;
 import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,6 +84,12 @@ public class RootConverter {
         return RootResponseDto.ReportDto.builder()
                 .id(report.getId())
                 .reportName(report.getName())
+                .build();
+    }
+
+    public static RootResponseDto.ReadPushAlarm toReadPushAlarm(){
+        return RootResponseDto.ReadPushAlarm.builder()
+                .deletedAt(LocalDateTime.now())
                 .build();
     }
 }
