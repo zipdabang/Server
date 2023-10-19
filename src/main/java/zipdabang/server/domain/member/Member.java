@@ -104,10 +104,6 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Inquery> inqueryList;
 
-    @Setter
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
-    private MemberViewMethod viewOrder;
-
 
     // 나를 따르는 놈들
     @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL)
@@ -147,8 +143,4 @@ public class Member extends BaseEntity {
 
     public void inactivateStatus(){
         this.status = StatusType.INACTIVE;}
-
-    public void deleteView(){
-        this.viewOrder = null;
-    }
 }

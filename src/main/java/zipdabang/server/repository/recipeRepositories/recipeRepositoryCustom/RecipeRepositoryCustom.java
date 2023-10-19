@@ -21,4 +21,6 @@ public interface RecipeRepositoryCustom {
     BooleanExpression recipesInCategoryCondition(Long categoryId);
 
     BooleanExpression recipesContainKeyword(String keyword);
+    BooleanExpression checkWrittenBy(String writtenby);
+
 }

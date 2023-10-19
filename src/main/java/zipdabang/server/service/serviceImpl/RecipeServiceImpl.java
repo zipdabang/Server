@@ -43,12 +43,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static zipdabang.server.domain.member.QFollow.follow;
-import static zipdabang.server.domain.recipe.QComment.comment;
-import static zipdabang.server.domain.recipe.QRecipe.recipe;
-import static zipdabang.server.domain.recipe.QRecipeCategoryMapping.*;
-import static zipdabang.server.domain.recipe.QTempRecipe.tempRecipe;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -78,7 +72,6 @@ public class RecipeServiceImpl implements RecipeService {
     private final ReportedCommentRepository reportedCommentRepository;
     private final ReportedRecipeRepository reportedRecipeRepository;
     private final WeeklyBestRecipeRepository weeklyBestRecipeRepository;
-    private final MemberViewMethodRepository memberViewMethodRepository;
 
     private final PushAlarmRepository pushAlarmRepository;
     private final AlarmCategoryRepository alarmCategoryRepository;
@@ -416,6 +409,22 @@ public class RecipeServiceImpl implements RecipeService {
         return recipeList;
     }
 
+    @Override
+    public Page<Recipe> getWrittenByRecipe(Integer pageIndex, String writtenby, String order, Member member) {
+
+        List<Recipe> content = new ArrayList<>();
+
+        BooleanExpression writtenByCondition = recipeRepositoryCustom.checkWrittenBy(writtenby);
+
+        if(order.equals("follow"))
+            content = recipeRepositoryCustom.recipesOrderByFollow(pageIndex, pageSize, member, writtenByCondition);
+        else
+            content = recipeRepositoryCustom.recipesOrderBy(pageIndex,pageSize, member, order, writtenByCondition);
+
+        Long count = recipeRepositoryCustom.recipeTotalCount(member, writtenByCondition);
+
+        return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);
+    }
 
     @Override
     @Transactional(readOnly = false)

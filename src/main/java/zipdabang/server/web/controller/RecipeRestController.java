@@ -325,10 +325,10 @@ RecipeRestController {
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, 0 이런거 주면 에러 뱉음"),
             @Parameter(name = "keyword", description = "query string 검색할 단어"),
-            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 팔로우순: follow, 최신순: latest로 넘겨주세요, 기본값 latest")
+            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 팔로우순: follow, 최신순: latest로 넘겨주세요")
     })
     @GetMapping(value = "/members/recipes/search/{categoryId}")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "keyword") String keyword, @RequestParam(name = "order", required = false) String order,  @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> searchRecipe(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "keyword") String keyword, @RequestParam(name = "order") String order,  @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
 
         log.info("controller 호출 : {}", member.getMemberId());
         if (pageIndex == null)
@@ -390,10 +390,10 @@ RecipeRestController {
     @Parameters({
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, 0 이런거 주면 에러 뱉음"),
-            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 팔로우순: follow, 최신순: latest로 넘겨주세요, 기본값 latest")
+            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 팔로우순: follow, 최신순: latest로 넘겨주세요")
     })
     @GetMapping(value = "/members/recipes/categories/{categoryId}")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "order", required = false) String order, @CheckPage @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListByCategory(@ExistRecipeCategory @PathVariable Long categoryId, @RequestParam(name = "order") String order, @CheckPage @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
         log.info("카테고리 조회 controller 호출 : {}", member.getMemberId());
         if (pageIndex == null)
             pageIndex = 1;
@@ -413,7 +413,7 @@ RecipeRestController {
         return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
     }
 
-    @Operation(summary = "🍹figma 레시피1, 모든사람/인플루언서/우리들의 레시피 미리보기 API 🔑 ✔", description = "5개씩 미리보기로 가져오는 API입니다.")
+    @Operation(summary = "🍹figma 레시피1, 공식/바리스타/일반 레시피 미리보기 API 🔑 ✔", description = "5개씩 미리보기로 가져오는 API입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "2000", description = "OK, 목록이 있을 땐 이 응답임"),
             @ApiResponse(responseCode = "2100", description = "OK, 목록이 없을 경우, result = null", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -440,7 +440,7 @@ RecipeRestController {
         return ResponseDto.of(RecipeConverter.toPreviewRecipeDtoList(recipes, member));
     }
 
-    @Operation(summary = "🍹figma 레시피2, 모든사람/인플루언서/우리들의 레시피 목록 API 🔑", description = "레시피 목록 화면 API입니다. pageIndex로 페이징")
+    @Operation(summary = "🍹figma 레시피2, 공식/바리스타/일반 레시피 레시피 목록 API 🔑 ✔", description = "레시피 목록 화면 API입니다. pageIndex로 페이징")
     @ApiResponses({
             @ApiResponse(responseCode = "2000", description = "OK, 목록이 있을 땐 이 응답임"),
             @ApiResponse(responseCode = "2100", description = "OK, 목록이 없을 경우, result = null", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -456,11 +456,23 @@ RecipeRestController {
             @Parameter(name = "member", hidden = true),
             @Parameter(name = "writtenby", description = "query string 누가 쓴 레시피 종류인지. 공식: official, 바리스타: barista, 우리들: common으로 넘겨주세요"),
             @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, -1 이런거 주면 에러 뱉음"),
-            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 조회순: name, 최신순: latest로 넘겨주세요")
+            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 팔로우순: follow, 최신순: latest로 넘겨주세요")
     })
     @GetMapping(value = "/members/recipes/types")
     public ResponseDto<RecipeResponseDto.RecipePageListDto> recipeListWrittenBy(@RequestParam(name = "writtenby") String writtenby, @RequestParam(name = "order") String order, @CheckPage @RequestParam(name = "pageIndex") Integer pageIndex, @AuthMember Member member) {
-        return null;
+        if (pageIndex == null)
+            pageIndex = 1;
+
+        pageIndex -= 1;
+
+        Page<Recipe> recipes = recipeService.getWrittenByRecipe(pageIndex, writtenby, order, member);
+
+        log.info(recipes.toString());
+
+        if (recipes.getTotalElements() == 0)
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
+
+        return ResponseDto.of(RecipeConverter.toPagingRecipeDtoList(recipes, member));
     }
 
     @Operation(summary = "특정 유저의 레시피 미리보기 목록 API 🔑 ✔", description = "특정 유저의 레시피 미리기보기 목록")
