@@ -232,7 +232,8 @@ public class RecipeRepositoryImpl implements RecipeRepositoryCustom {
         return blockedMember;
     }
 
-    private BooleanExpression checkWrittenBy(String writtenby) {
+    @Override
+    public BooleanExpression checkWrittenBy(String writtenby) {
         if (writtenby.equals("barista"))
             return recipe.isBarista.eq(true);
         else if (writtenby.equals("common"))

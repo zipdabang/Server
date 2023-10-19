@@ -83,4 +83,6 @@ public interface RecipeService {
     List<Recipe> getMyRecipePreview(Member member);
 
     Page<Recipe> getMyRecipeList(Integer pageIndex, Member member);
+
+    Page<Recipe> getWrittenByRecipe(Integer pageIndex, String writtenby, String order, Member member);
 }
