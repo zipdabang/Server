@@ -85,4 +85,12 @@ public interface RecipeService {
     Page<Recipe> getMyRecipeList(Integer pageIndex, Member member);
 
     Page<Recipe> getWrittenByRecipe(Integer pageIndex, String writtenby, String order, Member member);
+
+    Boolean checkOwnerBlocked(Recipe recipe, Member member);
+
+    Boolean checkIsLiked(Recipe recipe, Member member);
+
+    Boolean checkIsScrapped(Recipe recipe, Member member);
+
+    RecipeCategory getRecipeCategory(Long categoryId);
 }
