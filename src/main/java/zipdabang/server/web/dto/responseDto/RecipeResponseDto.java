@@ -110,6 +110,8 @@ public class RecipeResponseDto {
         private Boolean isLiked;
         private Boolean isScrapped;
         private Integer rank;
+        private Boolean isBlocked;
+        private Long ownerId;
     }
 
     @Builder

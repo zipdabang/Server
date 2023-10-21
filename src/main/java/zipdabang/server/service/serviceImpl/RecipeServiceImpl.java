@@ -775,4 +775,8 @@ public class RecipeServiceImpl implements RecipeService {
         return RecipeConverter.toPagingRecipeDtoList(scrapRecipes, member);
     }
 
+    @Override
+    public Boolean checkOwnerBlocked(Recipe recipe, Member member) {
+        return blockedMemberRepository.existsByOwnerAndBlocked(member, recipe.getMember());
+    }
 }
