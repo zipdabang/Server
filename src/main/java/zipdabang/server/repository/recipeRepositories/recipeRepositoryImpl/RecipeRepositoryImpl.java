@@ -152,7 +152,9 @@ public class RecipeRepositoryImpl implements RecipeRepositoryCustom {
 
         log.info(content.toString());
 
+//        return content.stream().distinct().collect(Collectors.toList());
         return content;
+
     }
 
     @Override
