@@ -12,7 +12,6 @@ import zipdabang.server.domain.Report;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
-import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.utils.converter.TimeConverter;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
@@ -32,33 +31,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RecipeConverter {
 
-    private final RecipeRepository recipeRepository;
-    private final TempStepRepository tempStepRepository;
-    private final RecipeCategoryMappingRepository recipeCategoryMappingRepository;
-    private final LikesRepository likesRepository;
-    private final ScrapRepository scrapRepository;
-    private final RecipeCategoryRepository recipeCategoryRepository;
 
     private final AmazonS3Manager amazonS3Manager;
     private final TimeConverter timeConverter;
+    private final RecipeService recipeService;
 
-    private static LikesRepository staticLikesRepository;
-    private static ScrapRepository staticScrapRepository;
 
-    private static RecipeCategoryRepository staticRecipeCategoryRepository;
     private static AmazonS3Manager staticAmazonS3Manager;
     private static TimeConverter staticTimeConverter;
 
-    private final RecipeService recipeService;
     private static RecipeService staticRecipeService;
 
 
     @PostConstruct
     public void init() {
-        this.staticRecipeCategoryRepository = this.recipeCategoryRepository;
         this.staticAmazonS3Manager = this.amazonS3Manager;
-        this.staticLikesRepository = this.likesRepository;
-        this.staticScrapRepository = this.scrapRepository;
         this.staticTimeConverter = this.timeConverter;
         this.staticRecipeService = this.recipeService;
     }
@@ -84,8 +71,8 @@ public class RecipeConverter {
                 .nickname(recipe.getMember().getNickname())
                 .likes(recipe.getTotalLike())
                 .comments(recipe.getTotalComments())
-                .isLiked(staticLikesRepository.findByRecipeAndMember(recipe, member).isPresent())
-                .isScrapped(staticScrapRepository.findByRecipeAndMember(recipe,member).isPresent())
+                .isLiked(staticRecipeService.checkIsLiked(recipe, member))
+                .isScrapped(staticRecipeService.checkIsScrapped(recipe,member))
                 .rank(rank)
                 .build();
     }
@@ -189,8 +176,8 @@ public class RecipeConverter {
                 .likes(recipe.getTotalLike())
                 .comments(recipe.getTotalComments())
                 .scraps(recipe.getTotalScrap())
-                .isLiked(staticLikesRepository.findByRecipeAndMember(recipe, member).isPresent())
-                .isScrapped(staticScrapRepository.findByRecipeAndMember(recipe,member).isPresent())
+                .isLiked(staticRecipeService.checkIsLiked(recipe,member))
+                .isScrapped(staticRecipeService.checkIsScrapped(recipe,member))
                 .isBlocked(staticRecipeService.checkOwnerBlocked(recipe,member))
                 .ownerId(recipe.getMember().getMemberId())
                 .build();
@@ -237,8 +224,8 @@ public class RecipeConverter {
                 .comments(recipe.getTotalComments())
                 .likes(recipe.getTotalLike())
                 .scraps(recipe.getTotalScrap())
-                .isLiked(staticLikesRepository.findByRecipeAndMember(recipe, member).isPresent())
-                .isScrapped(staticScrapRepository.findByRecipeAndMember(recipe,member).isPresent())
+                .isLiked(staticRecipeService.checkIsLiked(recipe,member))
+                .isScrapped(staticRecipeService.checkIsScrapped(recipe,member))
                 .build();
     }
 
@@ -501,7 +488,7 @@ public class RecipeConverter {
 
     private static RecipeCategoryMapping toRecipeCategoryMappingDto(Long categoryId, Recipe recipe) {
         return RecipeCategoryMapping.builder()
-                .category(staticRecipeCategoryRepository.findById(categoryId).get())
+                .category(staticRecipeService.getRecipeCategory(categoryId))
                 .recipe(recipe)
                 .build();
     }

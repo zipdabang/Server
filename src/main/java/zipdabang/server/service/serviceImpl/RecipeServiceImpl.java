@@ -779,4 +779,19 @@ public class RecipeServiceImpl implements RecipeService {
     public Boolean checkOwnerBlocked(Recipe recipe, Member member) {
         return blockedMemberRepository.existsByOwnerAndBlocked(member, recipe.getMember());
     }
+
+    @Override
+    public Boolean checkIsLiked(Recipe recipe, Member member) {
+        return likesRepository.findByRecipeAndMember(recipe, member).isPresent();
+    }
+
+    @Override
+    public Boolean checkIsScrapped(Recipe recipe, Member member) {
+        return scrapRepository.findByRecipeAndMember(recipe,member).isPresent();
+    }
+
+    @Override
+    public RecipeCategory getRecipeCategory(Long categoryId) {
+        return recipeCategoryRepository.findById(categoryId).get();
+    }
 }
