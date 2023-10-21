@@ -73,6 +73,8 @@ public class RecipeConverter {
                 .comments(recipe.getTotalComments())
                 .isLiked(staticRecipeService.checkIsLiked(recipe, member))
                 .isScrapped(staticRecipeService.checkIsScrapped(recipe,member))
+                .isBlocked(staticRecipeService.checkOwnerBlocked(recipe,member))
+                .ownerId(recipe.getMember().getMemberId())
                 .rank(rank)
                 .build();
     }

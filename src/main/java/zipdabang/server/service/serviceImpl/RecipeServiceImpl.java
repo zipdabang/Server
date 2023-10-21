@@ -393,10 +393,28 @@ public class RecipeServiceImpl implements RecipeService {
         else
             content = recipeRepositoryCustom.recipesOrderBy(pageIndex,pageSize, member, order, categoryCondition, keywordCondition);
 
-
         Long count = recipeRepositoryCustom.recipeTotalCount(member, categoryCondition, keywordCondition);
 
+        if (content.size() > count - pageIndex*pageSize)
+            content = content.subList(0, count.intValue()-pageIndex*pageSize);
+
         return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);
+    }
+
+    @Override
+    public Long searchRecipeCounting(Long categoryId, String keyword, Member member) {
+
+        List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
+
+        if(recipeCategory.isEmpty())
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
+
+        BooleanExpression categoryCondition = recipeRepositoryCustom.recipesInCategoryCondition(categoryId);
+
+        BooleanExpression keywordCondition = recipeRepositoryCustom.recipesContainKeyword(keyword);
+        Long count = recipeRepositoryCustom.recipeTotalCount(member, categoryCondition, keywordCondition);
+
+        return count;
     }
 
     @Override
@@ -423,7 +441,19 @@ public class RecipeServiceImpl implements RecipeService {
 
         Long count = recipeRepositoryCustom.recipeTotalCount(member, writtenByCondition);
 
+        if (content.size() != 0 & content.size() > count - pageIndex*pageSize)
+            content = content.subList(0, count.intValue()-pageIndex*pageSize);
+
         return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);
+    }
+
+    @Override
+    public Long getWrittenByRecipeCounting(String writtenby, Member member) {
+        BooleanExpression writtenByCondition = recipeRepositoryCustom.checkWrittenBy(writtenby);
+
+        Long count = recipeRepositoryCustom.recipeTotalCount(member, writtenByCondition);
+
+        return count;
     }
 
     @Override
@@ -513,9 +543,25 @@ public class RecipeServiceImpl implements RecipeService {
         log.info("서비스단의 상황 : {}", content.size());
         Long count = recipeRepositoryCustom.recipeTotalCount(member, whereCondition);
 
+        if (content.size() > count - pageIndex*pageSize)
+            content = content.subList(0, count.intValue()-pageIndex*pageSize);
+
         return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);
     }
 
+    @Override
+    public Long getrecipeListByCategoryCounting(Long categoryId, Member member) {
+
+        List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
+
+        if(recipeCategory.isEmpty())
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
+
+        BooleanExpression whereCondition = recipeRepositoryCustom.recipesInCategoryCondition(categoryId);
+        Long count = recipeRepositoryCustom.recipeTotalCount(member, whereCondition);
+
+        return count;
+    }
 
     @Override
     public boolean checkRecipeCategoryExist(Long categoryId) {

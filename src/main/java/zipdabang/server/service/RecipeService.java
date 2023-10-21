@@ -93,4 +93,10 @@ public interface RecipeService {
     Boolean checkIsScrapped(Recipe recipe, Member member);
 
     RecipeCategory getRecipeCategory(Long categoryId);
+
+    Long searchRecipeCounting(Long categoryId, String keyword, Member member);
+
+    Long getrecipeListByCategoryCounting(Long categoryId, Member member);
+
+    Long getWrittenByRecipeCounting(String writtenby, Member member);
 }
