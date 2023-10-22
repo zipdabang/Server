@@ -99,4 +99,6 @@ public interface RecipeService {
     Long getrecipeListByCategoryCounting(Long categoryId, Member member);
 
     Long getWrittenByRecipeCounting(String writtenby, Member member);
+
+    Long getCommentCount(Recipe recipe, Member member);
 }
