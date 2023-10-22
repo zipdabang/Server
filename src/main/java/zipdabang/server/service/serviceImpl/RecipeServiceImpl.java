@@ -786,6 +786,11 @@ public class RecipeServiceImpl implements RecipeService {
         }
     }
 
+    @Override
+    public Long getCommentCount(Recipe recipe, Member member) {
+        return commentRepositoryCustom.commentListTotalCount(member, recipe);
+    }
+
     @Transactional(readOnly = false)
     @Override
     public Long reportComment(Long recipeId, Long commentId, Long reportId, Member member) {
