@@ -23,8 +23,7 @@ public class BatchScheduler {
     private final JobLauncher jobLauncher;
     private final WeeklyBestRecipeBatchConfig weeklyBestRecipeBatchConfig;
 
-//    @Scheduled(cron = "0 0 0 ? ? 1")
-    @Scheduled(cron = "0 0 0 * * 1")
+    @Scheduled(cron = "0 0 3 * * 1")
     public void runWeeklyBestRecipeJob() {
         Map<String, JobParameter> confMap = new HashMap<>();
         confMap.put("time", new JobParameter(System.currentTimeMillis()));

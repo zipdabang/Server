@@ -654,6 +654,10 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(CommonStatus.NO_RECIPE_EXIST));
 
         if (findRecipe.getMember().equals(member)) {
+
+            if (weeklyBestRecipeRepository.existsByRecipe(findRecipe))
+                    weeklyBestRecipeRepository.deleteByRecipe(findRecipe);
+
             amazonS3Manager.deleteFile(RecipeConverter.toKeyName(findRecipe.getThumbnailUrl()).substring(1));
             stepRepository.findAllByRecipeId(recipeId).stream()
                     .forEach(step -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(step.getImageUrl()).substring(1)));

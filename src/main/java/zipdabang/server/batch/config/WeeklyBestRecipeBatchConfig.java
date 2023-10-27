@@ -10,19 +10,15 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.data.RepositoryItemReader;
-import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.Sort;
 import zipdabang.server.domain.recipe.Recipe;
 import zipdabang.server.domain.recipe.WeeklyBestRecipe;
 import zipdabang.server.repository.recipeRepositories.RecipeRepository;
 import zipdabang.server.repository.recipeRepositories.WeeklyBestRecipeRepository;
 
-import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
