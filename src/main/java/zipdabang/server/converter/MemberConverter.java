@@ -315,10 +315,12 @@ public class MemberConverter {
 
     }
 
-    public static Deregister toDeregister(String phoneNum, MemberRequestDto.DeregisterDto request) {
+    public static Deregister toDeregister(String phoneNum, String email, SocialType socialType, String feedback) {
         return Deregister.builder()
                 .phoneNum(phoneNum)
-                .feedback(request.getFeedback())
+                .email(email)
+                .socialType(socialType)
+                .feedback(feedback)
                 .build();
     }
 

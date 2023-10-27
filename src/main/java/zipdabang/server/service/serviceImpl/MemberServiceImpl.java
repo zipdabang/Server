@@ -333,8 +333,6 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void memberDeregister(Member member, MemberRequestDto.DeregisterDto request) {
         inactivateMember(member);
-        Long deregisterId = saveDeregisterInfo(member.getPhoneNum(), request);
-        saveDeregisterReasons(deregisterId,request.getDeregisterTypes());
 
     }
 
@@ -346,8 +344,8 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public Long saveDeregisterInfo(String phoneNum, MemberRequestDto.DeregisterDto request) {
-        Deregister deregister = MemberConverter.toDeregister(phoneNum, request);
+    public Long saveDeregisterInfo(Member member, MemberRequestDto.DeregisterDto request) {
+        Deregister deregister = MemberConverter.toDeregister(member.getPhoneNum(),member.getEmail(),member.getSocialType(), request.getFeedback());
         deregisterRepository.save(deregister);
 
         for (DeregisterType deregisterType : request.getDeregisterTypes()) {
@@ -362,14 +360,6 @@ public class MemberServiceImpl implements MemberService {
         return deregister.getId();
     }
 
-    @Override
-    @Transactional
-    public void saveDeregisterReasons(Long deregisterId, List<DeregisterType> deregisterTypeList) {
-//        for (DeregisterType deregisterType : deregisterTypeList) {
-//            DeregisterReason.builder()
-//                    .
-//        }
-    }
 
     @Override
     @Transactional
