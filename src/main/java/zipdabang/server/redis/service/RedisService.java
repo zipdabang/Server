@@ -1,12 +1,13 @@
 package zipdabang.server.redis.service;
 
+import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 
 public interface RedisService {
 
     // 로그인시 accessToken과 같이 발급
-    RefreshToken generateRefreshToken(String email);
+    RefreshToken generateRefreshToken(String email, SocialType socialType);
 
     // accessToken 만료 시 발급 혹은 그대로 반환
     RefreshToken reGenerateRefreshToken(MemberRequestDto.IssueTokenDto request);

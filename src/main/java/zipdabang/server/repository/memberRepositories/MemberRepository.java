@@ -5,14 +5,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.enums.StatusType;
 import zipdabang.server.domain.member.Member;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    Optional<Member> findByEmail(String email);
+    Optional<Member> findByEmailAndSocialType(String email, SocialType socialType);
     Optional<Member> findByNickname(String nickname);
     Page<Member> findByNicknameContains(String nickname, PageRequest pageRequest);
 
@@ -22,4 +24,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Page<Member> qFindFollowingByNicknameContains(@Param("nickname")String nickname, @Param("owner")Member member, PageRequest pageRequest);
 
     boolean existsByPhoneNum(String phoneNum);
+
+    boolean existsByEmailAndSocialType(String email, SocialType socialType);
 }

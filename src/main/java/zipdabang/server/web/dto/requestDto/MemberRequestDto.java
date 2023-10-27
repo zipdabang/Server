@@ -6,6 +6,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -78,15 +79,15 @@ public class MemberRequestDto {
 
         @NotBlank
         private String name;
-        @NotBlank
+        @NotBlank @Pattern(regexp = "\\d{6}", message = "생년월일 형식과 맞지 않습니다.")
         private String birth;
-        @NotBlank
+        @NotBlank @Pattern(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$", message = "이메일 형식과 맞지 않습니다.")
         private String email;
         @NotBlank
         private String gender;
         @NotBlank @ExistNickname @CheckNickname @Size(min = 2, max = 6)
         private String nickname;
-        @NotBlank
+        @NotBlank @Size(min = 10, max = 11)
         private String phoneNum;
 
         @NotBlank

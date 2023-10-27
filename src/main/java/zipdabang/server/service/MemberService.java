@@ -1,8 +1,8 @@
 package zipdabang.server.service;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.Follow;
 import zipdabang.server.domain.member.Inquery;
@@ -27,7 +27,8 @@ public interface MemberService {
     Optional<Member> findMemberById(Long id);
 
     public void existByPhoneNumber(String phoneNum);
-    
+
+    public void joinDeregisterCheck(String email, String phoneNum, SocialType socialType);
     OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type);
     public List<Category> findMemberPreferCategories(Member member);
 

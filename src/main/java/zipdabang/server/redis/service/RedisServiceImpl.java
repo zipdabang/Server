@@ -9,6 +9,7 @@ import zipdabang.server.apiPayload.code.CommonStatus;
 import zipdabang.server.auth.provider.TokenProvider;
 import zipdabang.server.apiPayload.exception.handler.MemberException;
 import zipdabang.server.apiPayload.exception.handler.RefreshTokenExceptionHandler;
+import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.redis.domain.LoginStatus;
 import zipdabang.server.redis.domain.RefreshToken;
@@ -19,6 +20,7 @@ import zipdabang.server.web.dto.requestDto.MemberRequestDto;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,9 +41,8 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     @Transactional
-    public RefreshToken generateRefreshToken(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
-
+    public RefreshToken generateRefreshToken(String email, SocialType socialType) {
+        Member member = memberRepository.findByEmailAndSocialType(email,socialType).orElseThrow(() -> new MemberException(CommonStatus.MEMBER_NOT_FOUND));
         String token = UUID.randomUUID().toString();
         Long memberId = member.getMemberId();
 
@@ -83,7 +84,7 @@ public class RedisServiceImpl implements RedisService {
         else {
             logger.info("accessToken보다 먼저 만료될 예정인 리프레시 토큰 발견");
             deleteRefreshToken(request.getRefreshToken());
-            return generateRefreshToken(member.getEmail());
+            return generateRefreshToken(member.getEmail(),member.getSocialType());
         }
     }
 
