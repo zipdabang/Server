@@ -79,7 +79,8 @@ public class MemberRequestDto {
 
         @NotBlank
         private String name;
-        @NotBlank @Pattern(regexp = "\\d{6}", message = "생년월일 형식과 맞지 않습니다.")
+        @NotBlank @Pattern(regexp = "[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[1,2][0-9]|3[0,1])", message = "생년월일 형식과 맞지 않습니다.")
+
         private String birth;
         @NotBlank @Pattern(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$", message = "이메일 형식과 맞지 않습니다.")
         private String email;
@@ -87,7 +88,8 @@ public class MemberRequestDto {
         private String gender;
         @NotBlank @ExistNickname @CheckNickname @Size(min = 2, max = 6)
         private String nickname;
-        @NotBlank @Size(min = 10, max = 11)
+        @NotBlank @Pattern(regexp = "01[0-9]{8,9}", message = "전화번호 형식과 맞지 않습니다.")
+
         private String phoneNum;
 
         @NotBlank
