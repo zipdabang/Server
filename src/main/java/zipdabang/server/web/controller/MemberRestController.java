@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -27,6 +26,7 @@ import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.apiPayload.exception.handler.MemberException;
 import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
+import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.Follow;
 import zipdabang.server.domain.member.Inquery;
@@ -116,10 +116,15 @@ public class MemberRestController {
     @ApiResponses({
             @ApiResponse(responseCode = "2000", description = "OK 성공, access Token과 refresh 토큰을 반환함"),
             @ApiResponse(responseCode = "4053", description = "BAD_REQUEST, 선호하는 음료 카테고리 id가 이상할 경우", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4071", description = "탈퇴한 지 일주일이 지나지 않은 이메일과 SocialType입니다."),
+            @ApiResponse(responseCode = "4072", description = "탈퇴한 지 일주일이 지나지 않은 전화번호입니다."),
+            @ApiResponse(responseCode = "4073", description = "이미 존재하는 이메일과 소셜타입입니다."),
+            @ApiResponse(responseCode = "4074", description = "이미 존재하는 전화번호입니다."),
     })
     @PostMapping("/members/oauth/info")
     public ResponseDto<MemberResponseDto.SocialJoinDto> memberInfoForSignUp(@RequestBody @Valid MemberRequestDto.MemberInfoDto request, @RequestParam(name = "type", required = true) String type) {
         log.info("body로 넘겨온 사용자 정보: {}", request.toString());
+        memberService.joinDeregisterCheck(request.getEmail(), request.getPhoneNum(), SocialType.valueOf(type.toUpperCase()));
         OAuthJoin.OAuthJoinDto oAuthJoinDto = memberService.joinInfoComplete(request, type);
         return ResponseDto.of(MemberConverter.toSocialJoinDto(oAuthJoinDto));
     }

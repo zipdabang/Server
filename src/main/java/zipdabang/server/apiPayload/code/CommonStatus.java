@@ -107,6 +107,10 @@ public enum CommonStatus implements BaseCode {
 
     CONTAINS_SLANG_WORD(HttpStatus.BAD_REQUEST, 4069, "닉네임에 비속어가 포함되어 있습니다."),
     RESERVED_WORD(HttpStatus.BAD_REQUEST, 4070, "사용할 수 없는 닉네임입니다."),
+    NOT_PASSED_SEVEN_DAYS_EMAIL(HttpStatus.BAD_REQUEST, 4071, "탈퇴한 지 일주일이 지나지 않은 이메일과 SocialType입니다."),
+    NOT_PASSED_SEVEN_DAYS_PHONE_NUM(HttpStatus.BAD_REQUEST, 4072, "탈퇴한 지 일주일이 지나지 않은 전화번호입니다."),
+    EXIST_EMAIL_AND_SOCIAL_TYPE(HttpStatus.BAD_REQUEST, 4073, "이미 존재하는 이메일과 소셜타입입니다."),
+    EXIST_PHONE_NUMBER(HttpStatus.BAD_REQUEST, 4074, "이미 존재하는 전화번호입니다."),
 
 
     // recipe error

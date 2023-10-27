@@ -98,7 +98,8 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public OAuthResult.OAuthResultDto SocialLogin(MemberRequestDto.OAuthRequestDto request,String type) {
-        Member member = memberRepository.findByEmail(request.getEmail()).orElse(null);
+        SocialType socialType = SocialType.valueOf(type.toUpperCase());
+        Member member = memberRepository.findByEmailAndSocialType(request.getEmail(),socialType).orElse(null);
 
         log.info("the data from frontend : {}",request.toString());
         if(member != null) {
@@ -118,14 +119,14 @@ public class MemberServiceImpl implements MemberService {
                         .isLogin(true)
                         .memberId(member.getMemberId())
                         .accessToken(redisService.saveLoginStatus(member.getMemberId(),tokenProvider.createAccessToken(member.getMemberId(), SocialType.KAKAO.toString(), request.getEmail(), Arrays.asList(new SimpleGrantedAuthority("USER")))))
-                        .refreshToken(redisService.generateRefreshToken(request.getEmail()).getToken())
+                        .refreshToken(redisService.generateRefreshToken(request.getEmail(),socialType).getToken())
                         .build();
             else
                 return OAuthResult.OAuthResultDto.builder()
                         .isLogin(true)
                         .memberId(member.getMemberId())
                         .accessToken(redisService.saveLoginStatus(member.getMemberId(), tokenProvider.createAccessToken(member.getMemberId(), SocialType.GOOGLE.toString(), request.getEmail(),Arrays.asList(new SimpleGrantedAuthority("USER")))))
-                        .refreshToken(redisService.generateRefreshToken(request.getEmail()).getToken())
+                        .refreshToken(redisService.generateRefreshToken(request.getEmail(),socialType).getToken())
                         .build();
         }
         return OAuthResult.OAuthResultDto.builder()
@@ -257,10 +258,27 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public void joinDeregisterCheck(String email, String phoneNum, SocialType socialType) {
+        if (deregisterRepository.existsByEmailAndSocialTypeAndPassedSevenDays(email, socialType,false)) {
+            log.info("탈퇴한 지 1주일이 지나지 않은 이메일&소셜타입 : " + email + "," + socialType);
+            throw new MemberException(CommonStatus.NOT_PASSED_SEVEN_DAYS_EMAIL);
+        } else if (deregisterRepository.existsByPhoneNumAndPassedSevenDays(phoneNum,false)) {
+            log.info("탈퇴한 지 1주일이 지나지 않은 전화번호 : " + phoneNum);
+            throw new MemberException(CommonStatus.NOT_PASSED_SEVEN_DAYS_PHONE_NUM);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = false)
     public OAuthJoin.OAuthJoinDto joinInfoComplete(MemberRequestDto.MemberInfoDto request, String type){
+        if (memberRepository.existsByEmailAndSocialType(request.getEmail(), SocialType.valueOf(type.toUpperCase()))) {
+            throw new MemberException(CommonStatus.EXIST_EMAIL_AND_SOCIAL_TYPE);
+        } else if (memberRepository.existsByPhoneNum(request.getPhoneNum())) {
+            throw new MemberException(CommonStatus.EXIST_PHONE_NUMBER);
+        }
         List<Terms> termsList = termsRepository.findByIdIn(request.getAgreeTermsIdList());
         Member joinUser = MemberConverter.toSocialMember(request,type);
+        memberRepository.save(joinUser);
 
         request.getPreferBeverages().stream()
                 .map(prefer ->
@@ -295,8 +313,8 @@ public class MemberServiceImpl implements MemberService {
         fcmTokenRepository.save(fcmToken);
 
         return OAuthJoin.OAuthJoinDto.builder()
-                .refreshToken(redisService.generateRefreshToken(request.getEmail()).getToken())
-                .accessToken(redisService.saveLoginStatus(joinUser.getMemberId(), tokenProvider.createAccessToken(joinUser.getMemberId(), type.equals("kakao") ? SocialType.KAKAO.toString() : SocialType.GOOGLE.toString(),request.getEmail(),Arrays.asList(new SimpleGrantedAuthority("USER")))))
+                .refreshToken(redisService.generateRefreshToken(request.getEmail(), SocialType.valueOf(type.toUpperCase())).getToken())
+                .accessToken(redisService.saveLoginStatus(joinUser.getMemberId(), tokenProvider.createAccessToken(joinUser.getMemberId(), type.equals("kakao") ? SocialType.KAKAO.toString() : SocialType.GOOGLE.toString(), request.getEmail(), Arrays.asList(new SimpleGrantedAuthority("USER")))))
                 .build();
     }
 
@@ -315,8 +333,6 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void memberDeregister(Member member, MemberRequestDto.DeregisterDto request) {
         inactivateMember(member);
-        Long deregisterId = saveDeregisterInfo(member.getPhoneNum(), request);
-        saveDeregisterReasons(deregisterId,request.getDeregisterTypes());
 
     }
 
@@ -328,8 +344,8 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public Long saveDeregisterInfo(String phoneNum, MemberRequestDto.DeregisterDto request) {
-        Deregister deregister = MemberConverter.toDeregister(phoneNum, request);
+    public Long saveDeregisterInfo(Member member, MemberRequestDto.DeregisterDto request) {
+        Deregister deregister = MemberConverter.toDeregister(member.getPhoneNum(),member.getEmail(),member.getSocialType(), request.getFeedback());
         deregisterRepository.save(deregister);
 
         for (DeregisterType deregisterType : request.getDeregisterTypes()) {
@@ -344,14 +360,6 @@ public class MemberServiceImpl implements MemberService {
         return deregister.getId();
     }
 
-    @Override
-    @Transactional
-    public void saveDeregisterReasons(Long deregisterId, List<DeregisterType> deregisterTypeList) {
-//        for (DeregisterType deregisterType : deregisterTypeList) {
-//            DeregisterReason.builder()
-//                    .
-//        }
-    }
 
     @Override
     @Transactional

@@ -95,7 +95,6 @@ public class MemberConverter {
         int age = calculateAge(request.getBirth());
         GenderType gender = Integer.valueOf(request.getGender()) % 2 == 0 ? GenderType.WOMAN : GenderType.MAN;
 
-
         Member member = Member.builder()
                 .age(age)
                 .profileUrl(defaultProfileImage)
@@ -109,7 +108,8 @@ public class MemberConverter {
                 .termsAgree(new ArrayList<>())
                 .fcmTokenList(new ArrayList<>())
                 .build();
-        return staticMemberRepository.save(member);
+
+        return member;
     }
 
     public static MemberResponseDto.SocialJoinDto toSocialJoinDto(OAuthJoin.OAuthJoinDto result) {
@@ -315,10 +315,12 @@ public class MemberConverter {
 
     }
 
-    public static Deregister toDeregister(String phoneNum, MemberRequestDto.DeregisterDto request) {
+    public static Deregister toDeregister(String phoneNum, String email, SocialType socialType, String feedback) {
         return Deregister.builder()
                 .phoneNum(phoneNum)
-                .feedback(request.getFeedback())
+                .email(email)
+                .socialType(socialType)
+                .feedback(feedback)
                 .build();
     }
 
