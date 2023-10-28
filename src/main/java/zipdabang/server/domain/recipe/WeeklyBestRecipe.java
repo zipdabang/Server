@@ -25,5 +25,4 @@ public class WeeklyBestRecipe extends BaseEntity {
     private Recipe recipe;
 
     private Integer ranking;
-//    private Integer preRanking;
 }

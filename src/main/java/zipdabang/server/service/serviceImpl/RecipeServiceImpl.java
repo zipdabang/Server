@@ -658,10 +658,17 @@ public class RecipeServiceImpl implements RecipeService {
             if (weeklyBestRecipeRepository.existsByRecipe(findRecipe))
                     weeklyBestRecipeRepository.deleteByRecipe(findRecipe);
 
-            amazonS3Manager.deleteFile(RecipeConverter.toKeyName(findRecipe.getThumbnailUrl()).substring(1));
-            stepRepository.findAllByRecipeId(recipeId).stream()
-                    .forEach(step -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(step.getImageUrl()).substring(1)));
+            String thumbnailUrl = findRecipe.getThumbnailUrl();
+            List<String> stepUrlList = stepRepository.findAllByRecipeId(recipeId).stream()
+                    .filter(steps -> steps.getImageUrl() != null)
+                    .map(step -> step.getImageUrl())
+                    .collect(Collectors.toList());
+
             recipeRepository.deleteById(recipeId);
+
+            amazonS3Manager.deleteFile(RecipeConverter.toKeyName(thumbnailUrl).substring(1));
+            stepUrlList
+                    .forEach(stepUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(stepUrl).substring(1)));
         }
         else
             throw new RecipeException(CommonStatus.NOT_RECIPE_OWNER);

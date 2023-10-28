@@ -38,15 +38,25 @@ public class AmazonS3Manager {
     }
 
     public void deleteFile(String keyname) {
-        log.info("KEY NAME : " + keyname);
-        amazonS3.deleteObject(amazonConfig.getBucket(),keyname);
 
-        String[] keynameSplit = keyname.split("/");
-        String getUuid = keynameSplit[keynameSplit.length-1];
-        log.info(getUuid);
+        log.info("keyname: " + keyname);
 
-        uuidRepository.deleteByUuid(getUuid);
-        log.info("해당 uuid 삭제: "+ !uuidRepository.existsByUuid(getUuid));
+        if(amazonS3.doesObjectExist(amazonConfig.getBucket(), keyname)) {
+
+            log.info("KEY NAME : " + keyname);
+
+            amazonS3.deleteObject(amazonConfig.getBucket(), keyname);
+
+            String[] keynameSplit = keyname.split("/");
+            String getUuid = keynameSplit[keynameSplit.length-1];
+            log.info(getUuid);
+
+            uuidRepository.deleteByUuid(getUuid);
+            log.info("해당 uuid 삭제: "+ !uuidRepository.existsByUuid(getUuid));
+        } else{
+            log.info("KEY NAME : " + keyname + "에 해당하는 파일이 s3에 없음.");
+        }
+
     }
 
     public String generateMemberKeyName(Uuid uuid) {
