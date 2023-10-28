@@ -39,8 +39,6 @@ public class AmazonS3Manager {
 
     public void deleteFile(String keyname) {
 
-        log.info("keyname: " + keyname);
-
         if(amazonS3.doesObjectExist(amazonConfig.getBucket(), keyname)) {
 
             log.info("KEY NAME : " + keyname);

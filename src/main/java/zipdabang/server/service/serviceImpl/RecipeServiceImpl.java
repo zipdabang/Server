@@ -134,11 +134,12 @@ public class RecipeServiceImpl implements RecipeService {
                 .map(categoryMapping -> categoryMapping.setRecipe(recipe));
 
         //recipe
-        String thumbnailUrl = null;
+        String deleteThumbnailUrl = null;
+        String newThumbnailUrl = null;
         if (thumbnail != null) {
-            amazonS3Manager.deleteFile(RecipeConverter.toKeyName(recipe.getThumbnailUrl()).substring(1));
-            thumbnailUrl = RecipeConverter.uploadThumbnail(thumbnail);
-            recipe.setThumbnail(thumbnailUrl);
+            deleteThumbnailUrl = recipe.getThumbnailUrl();
+            newThumbnailUrl = RecipeConverter.uploadThumbnail(thumbnail);
+            recipe.setThumbnail(newThumbnailUrl);
         }
 
         recipe.updateInfo(request);
@@ -159,8 +160,6 @@ public class RecipeServiceImpl implements RecipeService {
                 .stream()
                 .map(step -> step.setRecipe(recipe));
 
-        if(!presentImageUrls.isEmpty())
-            presentImageUrls.forEach(imageUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(imageUrl).substring(1)));
 
         //ingredient
         ingredientRepository.deleteAllByRecipe(recipe);
@@ -170,6 +169,15 @@ public class RecipeServiceImpl implements RecipeService {
                 .collect(Collectors.toList())
                 .stream()
                 .map(ingredient -> ingredient.setRecipe(recipe));
+
+
+        //s3 삭제는 맨 마지막에
+        if (!deleteThumbnailUrl.isEmpty())
+            amazonS3Manager.deleteFile(RecipeConverter.toKeyName(deleteThumbnailUrl).substring(1));
+
+        if(!presentImageUrls.isEmpty())
+            presentImageUrls.forEach(imageUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(imageUrl).substring(1)));
+
 
         return recipe;
     }
@@ -213,20 +221,21 @@ public class RecipeServiceImpl implements RecipeService {
         TempRecipe tempRecipe = tempRecipeRepository.findById(tempId).orElseThrow(() -> new RecipeException(CommonStatus.NO_TEMP_RECIPE_EXIST));
 
         //recipe
-        String thumbnailUrl = null;
+        String deleteThumbnailUrl = null;
+        String newThumbnailUrl = null;
         if (thumbnail != null) {
             if (tempRecipe.getThumbnailUrl() != null)
-                amazonS3Manager.deleteFile(RecipeConverter.toKeyName(tempRecipe.getThumbnailUrl()).substring(1));
-            thumbnailUrl = RecipeConverter.uploadThumbnail(thumbnail);
+                deleteThumbnailUrl = tempRecipe.getThumbnailUrl();
+            newThumbnailUrl = RecipeConverter.uploadThumbnail(thumbnail);
         }
         else{
             if (request.getThumbnailUrl() == null && tempRecipe.getThumbnailUrl() != null)
-                amazonS3Manager.deleteFile(RecipeConverter.toKeyName(tempRecipe.getThumbnailUrl()).substring(1));
+                deleteThumbnailUrl = tempRecipe.getThumbnailUrl();
             else if (request.getThumbnailUrl() != null)
-                thumbnailUrl = request.getThumbnailUrl();
+                newThumbnailUrl = request.getThumbnailUrl();
         }
 
-        tempRecipe.setThumbnail(thumbnailUrl);
+        tempRecipe.setThumbnail(newThumbnailUrl);
         tempRecipe.updateInfo(request);
 
 
@@ -245,8 +254,6 @@ public class RecipeServiceImpl implements RecipeService {
                     .stream()
                     .map(step -> step.setTempRecipe(tempRecipe));
         }
-        if(!presentImageUrls.isEmpty())
-            presentImageUrls.forEach(imageUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(imageUrl).substring(1)));
 
         //ingredient
         if(request.getIngredientCount() >0) {
@@ -261,6 +268,12 @@ public class RecipeServiceImpl implements RecipeService {
         else{
             tempIngredientRepository.deleteAllByTempRecipe(tempRecipe);
         }
+
+        //s3 삭제는 맨 마지막에
+        if (!deleteThumbnailUrl.isEmpty())
+            amazonS3Manager.deleteFile(RecipeConverter.toKeyName(deleteThumbnailUrl).substring(1));
+        if(!presentImageUrls.isEmpty())
+            presentImageUrls.forEach(imageUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(imageUrl).substring(1)));
 
         return tempRecipe;
 
@@ -278,19 +291,27 @@ public class RecipeServiceImpl implements RecipeService {
         TempRecipe findTempRecipe = tempRecipeRepository.findById(tempId).orElseThrow(() -> new RecipeException(CommonStatus.NO_TEMP_RECIPE_EXIST));
 
         if (findTempRecipe.getMember().equals(member)) {
+            String thumbnailUrl = null;
+            List<String> stepUrls = new ArrayList<>();
+
             if(findTempRecipe.getThumbnailUrl() != null)
-                amazonS3Manager.deleteFile(RecipeConverter.toKeyName(findTempRecipe.getThumbnailUrl()).substring(1));
+                thumbnailUrl=findTempRecipe.getThumbnailUrl();
 
             List<TempStep> tempSteps = tempStepRepository.findAllByTempRecipe(findTempRecipe);
             if (!tempSteps.isEmpty()) {
                     tempSteps.stream()
                         .forEach(step -> {
                                     if (step.getImageUrl() != null)
-                                        amazonS3Manager.deleteFile(RecipeConverter.toKeyName(step.getImageUrl()).substring(1));
+                                        stepUrls.add(step.getImageUrl());
                                 }
                         );
             }
             tempRecipeRepository.deleteById(tempId);
+
+            if (!thumbnailUrl.isEmpty())
+                amazonS3Manager.deleteFile(RecipeConverter.toKeyName(thumbnailUrl).substring(1));
+            stepUrls.stream()
+                            .forEach(stepUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(stepUrl).substring(1)));
         }
         else
             throw new RecipeException(CommonStatus.NOT_RECIPE_OWNER);
