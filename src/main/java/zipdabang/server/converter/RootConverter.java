@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.Report;
+import zipdabang.server.domain.inform.HomeBanner;
 import zipdabang.server.domain.inform.Notification;
 import zipdabang.server.utils.converter.TimeConverter;
+import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 import zipdabang.server.web.dto.responseDto.RootResponseDto;
 
 import javax.annotation.PostConstruct;
@@ -20,6 +22,7 @@ public class RootConverter {
     private final TimeConverter timeConverter;
 
     private static TimeConverter staticTimeConverter;
+
 
     @PostConstruct
     public void init() {
@@ -92,4 +95,21 @@ public class RootConverter {
                 .deletedAt(LocalDateTime.now())
                 .build();
     }
+
+    public static RootResponseDto.BannerImageDto toRecipeBannerImageDto(List<HomeBanner> bannerList) {
+        return RootResponseDto.BannerImageDto.builder()
+                .bannerList(toHomeBannerDto(bannerList))
+                .size(bannerList.size())
+                .build();
+    }
+
+    private static List<RootResponseDto.BannerDto> toHomeBannerDto(List<HomeBanner> bannerList) {
+        return bannerList.stream()
+                .map(banner -> RootResponseDto.BannerDto.builder()
+                        .order(banner.getInOrder())
+                        .imageUrl(banner.getImageUrl())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
 }
