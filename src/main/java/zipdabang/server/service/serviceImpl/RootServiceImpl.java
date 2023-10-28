@@ -15,6 +15,7 @@ import zipdabang.server.domain.etc.BannedWord;
 import zipdabang.server.domain.etc.ReservedWord;
 import zipdabang.server.domain.etc.SlangWord;
 import zipdabang.server.domain.inform.AlarmCategory;
+import zipdabang.server.domain.inform.HomeBanner;
 import zipdabang.server.domain.inform.Notification;
 import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.Member;
@@ -24,6 +25,7 @@ import zipdabang.server.repository.*;
 import zipdabang.server.repository.AlarmRepository.AlarmCategoryRepository;
 import zipdabang.server.repository.AlarmRepository.PushAlarmRepository;
 import zipdabang.server.repository.memberRepositories.MemberRepository;
+import zipdabang.server.repository.recipeRepositories.HomeBannerRepository;
 import zipdabang.server.repository.recipeRepositories.RecipeRepository;
 import zipdabang.server.service.RootService;
 
@@ -60,6 +62,8 @@ public class RootServiceImpl implements RootService {
 
     private final SlangWordRepository slangWordRepository;
     private final ReservedWordRepository reservedWordRepository;
+    private final HomeBannerRepository homeBannerRepository;
+
     @Override
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
@@ -203,5 +207,10 @@ public class RootServiceImpl implements RootService {
         if (reservedWordRepository.existsByWord(nickname)) {
             return true;
         } else return false;
+    }
+
+    @Override
+    public List<HomeBanner> getBannerList() {
+        return homeBannerRepository.findAll();
     }
 }
