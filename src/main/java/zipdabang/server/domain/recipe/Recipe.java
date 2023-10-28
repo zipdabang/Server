@@ -92,8 +92,8 @@ public class Recipe extends BaseEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     private List<Ingredient> ingredientList;
 
-    @OneToOne(mappedBy = "recipe", cascade = CascadeType.ALL)
-    private WeeklyBestRecipe weeklyBestRecipe;
+//    @OneToOne(mappedBy = "recipe", cascade = CascadeType.ALL)
+//    private WeeklyBestRecipe weeklyBestRecipe;
 
 
     public Recipe setThumbnail(String imageUrl) {
@@ -108,12 +108,18 @@ public class Recipe extends BaseEntity {
 
     public Recipe updateLike(Integer i){
         this.weekLike += i;
+        if (weekLike < 0)
+            this.weekLike = 0L;
+
         this.totalLike += i;
         return this;
     }
 
     public Recipe updateScrap(Integer i){
         this.weekScrap += i;
+        if (weekScrap < 0)
+            this.weekScrap = 0L;
+
         this.totalScrap += i;
         return this;
     }

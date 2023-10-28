@@ -19,6 +19,7 @@ import zipdabang.server.auth.handler.annotation.AuthMember;
 import zipdabang.server.converter.RootConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.Report;
+import zipdabang.server.domain.inform.HomeBanner;
 import zipdabang.server.domain.inform.Notification;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.service.RootService;
@@ -66,7 +67,9 @@ public class RootController {
     @Operation(summary = "배너 이미지 API 🔑", description = "홈 화면의 배너 이미지를 가져옵니다. order는 배너 순서를 의미합니다.")
     @GetMapping("/banners")
     public ResponseDto<RootResponseDto.BannerImageDto> showBanners() {
-        return null;
+        List<HomeBanner> bannerList = rootService.getBannerList();
+
+        return ResponseDto.of(RootConverter.toRecipeBannerImageDto(bannerList));
     }
 
 

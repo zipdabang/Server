@@ -1,11 +1,15 @@
-package zipdabang.server.domain.recipe;
-
-import javax.persistence.*;
+package zipdabang.server.domain.inform;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -14,15 +18,13 @@ import zipdabang.server.domain.common.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 @DynamicUpdate
-public class WeeklyBestRecipe extends BaseEntity {
+public class HomeBanner extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipe_id", nullable = false)
-    private Recipe recipe;
-
-    private Integer ranking;
+    private Integer inOrder;
+    private String imageUrl;
+    private LocalDate expireDate;
 }
