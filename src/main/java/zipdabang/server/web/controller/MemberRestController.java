@@ -268,7 +268,7 @@ public class MemberRestController {
     })
     @GetMapping("/members/exist-nickname")
 
-    public ResponseDto<String> checkExistNickname(@RequestParam String nickname) {
+    public ResponseDto<String> checkExistNickname(@RequestParam @CheckNickname String nickname) {
 
         log.info("넘어온 nickname 정보: {}", nickname);
 
