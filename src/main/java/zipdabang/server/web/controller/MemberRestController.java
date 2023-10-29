@@ -116,10 +116,13 @@ public class MemberRestController {
     @ApiResponses({
             @ApiResponse(responseCode = "2000", description = "OK 성공, access Token과 refresh 토큰을 반환함"),
             @ApiResponse(responseCode = "4053", description = "BAD_REQUEST, 선호하는 음료 카테고리 id가 이상할 경우", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4069", description = "닉네임에 비속어가 포함되어 있습니다."),
+            @ApiResponse(responseCode = "4070", description = "사용할 수 없는 닉네임입니다."),
             @ApiResponse(responseCode = "4071", description = "탈퇴한 지 일주일이 지나지 않은 이메일과 SocialType입니다."),
             @ApiResponse(responseCode = "4072", description = "탈퇴한 지 일주일이 지나지 않은 전화번호입니다."),
             @ApiResponse(responseCode = "4073", description = "이미 존재하는 이메일과 소셜타입입니다."),
             @ApiResponse(responseCode = "4074", description = "이미 존재하는 전화번호입니다."),
+
     })
     @PostMapping("/members/oauth/info")
     public ResponseDto<MemberResponseDto.SocialJoinDto> memberInfoForSignUp(@RequestBody @Valid MemberRequestDto.MemberInfoDto request, @RequestParam(name = "type", required = true) String type) {
@@ -236,6 +239,8 @@ public class MemberRestController {
     })
     @ApiResponses({
             @ApiResponse(responseCode = "2000", description = "OK 성공 , 닉네임 수정 완료"),
+            @ApiResponse(responseCode = "4069", description = "닉네임에 비속어가 포함되어 있습니다."),
+            @ApiResponse(responseCode = "4070", description = "사용할 수 없는 닉네임입니다."),
     })
     @PatchMapping("/myInfo/nickname")
     public ResponseDto<MemberResponseDto.MemberStatusDto> updateNickname(@AuthMember Member member, @RequestBody @Valid MemberRequestDto.changeNicknameDto request) {
@@ -265,6 +270,8 @@ public class MemberRestController {
     @ApiResponses({
             @ApiResponse(responseCode = "2052", description = "OK 성공 , 닉네임 존재함 다시 시도하세요"),
             @ApiResponse(responseCode = "2053", description = "OK 성공 , 닉네임 사용 가능"),
+            @ApiResponse(responseCode = "4069", description = "닉네임에 비속어가 포함되어 있습니다."),
+            @ApiResponse(responseCode = "4070", description = "사용할 수 없는 닉네임입니다."),
     })
     @GetMapping("/members/exist-nickname")
 
