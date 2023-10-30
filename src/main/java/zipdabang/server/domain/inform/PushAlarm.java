@@ -53,4 +53,11 @@ public class PushAlarm extends BaseEntity {
         this.ownerMember = member;
         member.getPushAlarmList().add(this);
     }
+
+    public void setRecipe(Recipe recipe){
+        if (this.targetRecipe != null)
+            this.targetRecipe.getPushAlarmList().remove(this);
+        this.targetRecipe = recipe;
+        recipe.getPushAlarmList().add(this);
+    }
 }
