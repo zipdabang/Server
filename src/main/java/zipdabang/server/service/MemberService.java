@@ -4,11 +4,7 @@ import org.springframework.data.domain.Page;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.SocialType;
 import zipdabang.server.domain.inform.PushAlarm;
-import zipdabang.server.domain.member.Follow;
-import zipdabang.server.domain.member.Inquery;
-import zipdabang.server.domain.enums.DeregisterType;
-import zipdabang.server.domain.member.Member;
-import zipdabang.server.domain.member.Terms;
+import zipdabang.server.domain.member.*;
 import zipdabang.server.redis.domain.RefreshToken;
 import zipdabang.server.utils.dto.OAuthJoin;
 import zipdabang.server.utils.dto.OAuthResult;
@@ -83,4 +79,6 @@ public interface MemberService {
     Optional<Inquery> findInqueryById(Long inqueryId);
 
     Inquery findMyInqueryById(Member member,Long inqueryId);
+
+    MemberReport reportMember(Member member, Long targetId);
 }

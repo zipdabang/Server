@@ -324,4 +324,12 @@ public class MemberResponseDto {
         String body;
         List<String> imageList;
     }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class ReportDto{
+        LocalDateTime reportedAt;
+    }
 }

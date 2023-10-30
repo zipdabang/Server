@@ -672,7 +672,16 @@ public class MemberRestController {
         return ResponseDto.of(MemberConverter.toPagingMemberListDto(findFollowingByNickname));
     }
 
+    @Operation(summary = "사용자  신고 API ✔️🔑", description = "특정 유저를 신고하는 API 입니다.")
+    @Parameters({
+            @Parameter(name = "member", hidden = true),
+            @Parameter(name = "targetId", description = "신고를 하려는 대상(본인은 신고 불가능)")
+    })
+    @PostMapping("/members/report/{targetId}")
+    public ResponseDto<MemberResponseDto.ReportDto> reportMember(@CheckTempMember @AuthMember Member member, @CheckSelfTarget @PathVariable Long targetId){
 
-
+        memberService.reportMember(member, targetId);
+        return ResponseDto.of(MemberConverter.toReportDto());
+    }
 }
 

@@ -111,6 +111,7 @@ public enum CommonStatus implements BaseCode {
     NOT_PASSED_SEVEN_DAYS_PHONE_NUM(HttpStatus.BAD_REQUEST, 4072, "탈퇴한 지 일주일이 지나지 않은 전화번호입니다."),
     EXIST_EMAIL_AND_SOCIAL_TYPE(HttpStatus.BAD_REQUEST, 4073, "이미 존재하는 이메일과 소셜타입입니다."),
     EXIST_PHONE_NUMBER(HttpStatus.BAD_REQUEST, 4074, "이미 존재하는 전화번호입니다."),
+    SELF_BANNED(HttpStatus.FORBIDDEN, 4075, "다른 사용자를 대상으로 해주세요."),
 
 
     // recipe error
