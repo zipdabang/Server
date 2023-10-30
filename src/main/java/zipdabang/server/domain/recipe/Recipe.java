@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import zipdabang.server.domain.common.BaseEntity;
+import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 
@@ -92,8 +93,8 @@ public class Recipe extends BaseEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     private List<Ingredient> ingredientList;
 
-//    @OneToOne(mappedBy = "recipe", cascade = CascadeType.ALL)
-//    private WeeklyBestRecipe weeklyBestRecipe;
+    @OneToMany(mappedBy = "targetRecipe", cascade = CascadeType.ALL)
+    private List<PushAlarm> pushAlarmList;
 
 
     public Recipe setThumbnail(String imageUrl) {

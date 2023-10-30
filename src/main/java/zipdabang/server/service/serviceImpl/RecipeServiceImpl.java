@@ -719,49 +719,54 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe findRecipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(CommonStatus.NO_RECIPE_EXIST));
         findRecipe.updateComment(1);
 
-        List<PushAlarm> existAlarms = pushAlarmRepository.findByTitleAndOwnerMemberAndIsConfirmedFalse("나의 글에 댓글이 달렸어요. 확인해보세요!", findRecipe.getMember());
-        Boolean isMoreThan5Comments = !pushAlarmRepository.findByTitleAndOwnerMemberAndIsConfirmedFalse("확인하지 않은 댓글 알림이 5개 이상 있어요.", findRecipe.getMember()).isEmpty();
+        if (!member.equals(findRecipe.getMember())) {
 
-        String title = "나의 글에 댓글이 달렸어요. 확인해보세요!";
-        String body = content;
-        String targetView = AlarmType.RECIPE.toString();
-        String targetPK = findRecipe.getId().toString();
+            List<PushAlarm> existAlarms = pushAlarmRepository.findByTitleAndOwnerMemberAndIsConfirmedFalse("나의 글에 댓글이 달렸어요. 확인해보세요!", findRecipe.getMember());
+            Boolean isMoreThan5Comments = !pushAlarmRepository.findByTitleAndOwnerMemberAndIsConfirmedFalse("확인하지 않은 댓글 알림이 5개 이상 있어요.", findRecipe.getMember()).isEmpty();
 
-        PushAlarm pushAlarm = pushAlarmRepository.save(PushAlarm.builder()
-                .title(title)
-                .body(body)
-                .isConfirmed(false)
-                .targetRecipe(findRecipe)
-                .alarmCategory(alarmCategoryRepository.findByName(AlarmType.RECIPE).get())
-                .build());
+            String title = "나의 글에 댓글이 달렸어요. 확인해보세요!";
+            String body = content;
+            String targetView = AlarmType.RECIPE.toString();
+            String targetPK = findRecipe.getId().toString();
 
-        pushAlarm.setMember(findRecipe.getMember());
+            PushAlarm pushAlarm = pushAlarmRepository.save(PushAlarm.builder()
+                    .title(title)
+                    .body(body)
+                    .isConfirmed(false)
+                    .targetRecipe(findRecipe)
+                    .alarmCategory(alarmCategoryRepository.findByName(AlarmType.RECIPE).get())
+                    .build());
 
-        if (!isMoreThan5Comments) {
+            pushAlarm.setMember(findRecipe.getMember());
+            pushAlarm.setRecipe(findRecipe);
 
-            if(existAlarms.size() == 4) {
+            if (!isMoreThan5Comments) {
 
-                title = "확인하지 않은 댓글 알림이 5개 이상 있어요.";
-                body = "확인해보세요!";
-                targetView = AlarmType.ALARMPAGE.toString();
-                targetPK = findRecipe.getMember().getMemberId().toString();
+                if (existAlarms.size() == 4) {
+
+                    title = "확인하지 않은 댓글 알림이 5개 이상 있어요.";
+                    body = "확인해보세요!";
+                    targetView = AlarmType.ALARMPAGE.toString();
+                    targetPK = findRecipe.getMember().getMemberId().toString();
 
 
-                pushAlarm = pushAlarmRepository.save(PushAlarm.builder()
-                        .title(title)
-                        .body(body)
-                        .isConfirmed(false)
-                        .alarmCategory(alarmCategoryRepository.findByName(AlarmType.ALARMPAGE).get())
-                        .build());
+                    pushAlarm = pushAlarmRepository.save(PushAlarm.builder()
+                            .title(title)
+                            .body(body)
+                            .isConfirmed(false)
+                            .alarmCategory(alarmCategoryRepository.findByName(AlarmType.ALARMPAGE).get())
+                            .build());
 
-                pushAlarm.setMember(findRecipe.getMember());
-            }
+                    pushAlarm.setMember(findRecipe.getMember());
+                    pushAlarm.setRecipe(findRecipe);
+                }
 
-            for (FcmToken fcmToken : findRecipe.getMember().getFcmTokenList()) {
-                try {
-                    firebaseService.sendMessageTo(fcmToken.getToken(), title, body, targetView, targetPK, pushAlarm.getId().toString());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                for (FcmToken fcmToken : findRecipe.getMember().getFcmTokenList()) {
+                    try {
+                        firebaseService.sendMessageTo(fcmToken.getToken(), title, body, targetView, targetPK, pushAlarm.getId().toString());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }
