@@ -18,7 +18,6 @@ import zipdabang.server.converter.MemberConverter;
 import zipdabang.server.domain.Category;
 import zipdabang.server.domain.enums.DeregisterType;
 import zipdabang.server.domain.enums.SocialType;
-import zipdabang.server.domain.enums.StatusType;
 import zipdabang.server.domain.etc.Uuid;
 import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.Member;
@@ -81,6 +80,8 @@ public class MemberServiceImpl implements MemberService {
     private final FollowRepository followRepository;
 
     private final PushAlarmRepository pushAlarmRepository;
+
+    private final MemberReportRepository memberReportRepository;
 
     private static String defaultProfileImage;
 
@@ -590,5 +591,17 @@ public class MemberServiceImpl implements MemberService {
             throw new MemberException(CommonStatus.NOT_MY_INQUERY);
 
         return inquery;
+    }
+
+    @Override
+    @Transactional
+    public MemberReport reportMember(Member member, Long targetId) {
+
+        Member targetMember = memberRepository.findById(targetId).orElseThrow(()->new MemberException(CommonStatus.MEMBER_NOT_FOUND));
+
+        return memberReportRepository.save(MemberReport.builder()
+                .reporter(member)
+                .reported(targetMember)
+                .build());
     }
 }

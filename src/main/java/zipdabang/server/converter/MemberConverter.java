@@ -478,6 +478,12 @@ public class MemberConverter {
                 .imageList(imageList)
                 .build();
     }
+
+    public static MemberResponseDto.ReportDto toReportDto(){
+        return MemberResponseDto.ReportDto.builder()
+                .reportedAt(LocalDateTime.now())
+                .build();
+    }
 }
 
 
