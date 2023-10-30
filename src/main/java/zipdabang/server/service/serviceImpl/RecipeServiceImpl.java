@@ -172,7 +172,7 @@ public class RecipeServiceImpl implements RecipeService {
 
 
         //s3 삭제는 맨 마지막에
-        if (!deleteThumbnailUrl.isEmpty())
+        if (deleteThumbnailUrl != null)
             amazonS3Manager.deleteFile(RecipeConverter.toKeyName(deleteThumbnailUrl).substring(1));
 
         if(!presentImageUrls.isEmpty())
@@ -270,7 +270,7 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         //s3 삭제는 맨 마지막에
-        if (!deleteThumbnailUrl.isEmpty())
+        if (deleteThumbnailUrl != null)
             amazonS3Manager.deleteFile(RecipeConverter.toKeyName(deleteThumbnailUrl).substring(1));
         if(!presentImageUrls.isEmpty())
             presentImageUrls.forEach(imageUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(imageUrl).substring(1)));
