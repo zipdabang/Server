@@ -75,6 +75,8 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                                            @AuthenticationPrincipal User user, HttpServletRequest request) {
         getExceptionStackTrace(generalException, user, request);
         Reason errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
+        System.out.println(generalException.getMessage());
+        System.out.println(generalException.getCode());
         return handleExceptionInternal(generalException,errorReasonHttpStatus,null,request);
     }
 
@@ -157,6 +159,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
             pw.append("uid: " + user.getUsername() + "\n");
         }
         pw.append(e.getMessage());
+        System.out.println(e.getMessage());
         pw.append("\n=====================================================================");
         log.error(sw.toString());
     }
