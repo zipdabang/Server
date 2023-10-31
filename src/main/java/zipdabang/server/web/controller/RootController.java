@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +37,7 @@ import java.util.List;
 @RestController
 @Validated
 @RequiredArgsConstructor
+@Slf4j
 @ApiResponses({
         @ApiResponse(responseCode = "2000",description = "OK 성공"),
         @ApiResponse(responseCode = "4003",description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -80,6 +82,8 @@ public class RootController {
     })
     @GetMapping("/auto-login")
     public ResponseDto<BaseDto.BaseResponseDto> autoLogin(@RequestHeader(value = "Authorization", required = false) String authorizationHeader){
+
+        log.info("프론트가 보낸토큰 : {}", authorizationHeader);
         Boolean autoResult = rootService.autoLoginService(authorizationHeader);
         if(autoResult)
             return ResponseDto.of(CommonStatus.AUTO_LOGIN_MAIN,null);
