@@ -213,8 +213,8 @@ spring:
       enabled: always
 
     ##  # local redis
-    redis:
-      host: zipdabang-release.osattk.ng.0001.apn2.cache.amazonaws.com
+  redis:
+    host: zipdabang-release.osattk.ng.0001.apn2.cache.amazonaws.com
 
   batch:
     jdbc:
