@@ -102,6 +102,21 @@ public class MemberRequestDto {
 
         private List<Long> preferBeverages;
 
+        @Override
+        public String toString() {
+            return "MemberInfoDto{" +
+                    "name='" + name + '\'' +
+                    ", birth='" + birth + '\'' +
+                    ", email='" + email + '\'' +
+                    ", gender='" + gender + '\'' +
+                    ", nickname='" + nickname + '\'' +
+                    ", phoneNum='" + phoneNum + '\'' +
+                    ", fcmToken='" + fcmToken + '\'' +
+                    ", serialNumber='" + serialNumber + '\'' +
+                    ", agreeTermsIdList=" + agreeTermsIdList +
+                    ", preferBeverages=" + preferBeverages +
+                    '}';
+        }
     }
 
     @Getter
