@@ -73,11 +73,16 @@ public class RootServiceImpl implements RootService {
     public Boolean autoLoginService(String authorizationHeader) {
 
         Boolean result = null;
+
+        log.info("root service에서 bearer 제거한 토큰 : {}", authorizationHeader);
+
         if(authorizationHeader == null)
             result = false;
         else{
             String token = authorizationHeader.substring(7);
             Long memberId = tokenProvider.validateAndReturnSubject(token);
+
+            log.info("토큰 파싱 결과 : {}", memberId);
             if (memberId.equals(0L))
                 result = true;
             else if (memberId < 0L){
