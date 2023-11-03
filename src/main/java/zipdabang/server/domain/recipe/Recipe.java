@@ -30,7 +30,7 @@ public class Recipe extends BaseEntity {
     @Column(nullable = false)
     private Boolean isBarista;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "boolean default false", nullable = false)
     private Boolean isOfficial;
 
     @Column(nullable = false)
