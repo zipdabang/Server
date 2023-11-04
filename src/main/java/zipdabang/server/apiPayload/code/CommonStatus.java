@@ -149,11 +149,7 @@ public enum CommonStatus implements BaseCode {
     //INTERNAL_SERVER_ERROR
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "Internal server Error"),
     //INTERNAL_SERVER_ERROR
-    FEIGN_CLIENT_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "Inter server Error in feign client"),
-
-    RECIPE_NOT_DELETED(HttpStatus.INTERNAL_SERVER_ERROR, 5100, "레시피가 삭제되지 않았습니다."),
-    COMMENT_NOT_DELETED(HttpStatus.INTERNAL_SERVER_ERROR, 5101, "댓글이 삭제되지 않았습니다."),
-    TEMP_RECIPE_NOT_DELETED(HttpStatus.INTERNAL_SERVER_ERROR, 5102, "임시저장 레시피가 삭제되지 않았습니다.");
+    FEIGN_CLIENT_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR, 5001, "Inter server Error in feign client");
 
     private final HttpStatus httpStatus;
     private final Integer code;

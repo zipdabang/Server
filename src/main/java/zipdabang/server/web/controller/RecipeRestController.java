@@ -160,7 +160,6 @@ RecipeRestController {
             @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4111", description = "BAD_REQUEST, 해당 임시저장 Id가 존재하지 않습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5102", description = "SERVER ERROR, 임시저장 레시피가 삭제되지 않았습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
@@ -174,7 +173,7 @@ RecipeRestController {
         if (recipeDeleteBoolean)
             return ResponseDto.of(tempId + " 임시저장 레시피 삭제 완료");
         else
-            throw new RecipeException(CommonStatus.TEMP_RECIPE_NOT_DELETED);
+            throw new RecipeException(CommonStatus.INTERNAL_ERROR);
     }
 
     @Operation(summary = "레시피 임시저장 ➡ 최종 저장 API 🔑 ✔", description = "\"레시피 임시저장 ➡ 최종 저장 API입니다. ")
@@ -270,7 +269,6 @@ RecipeRestController {
             @ApiResponse(responseCode = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4106", description = "BAD_REQUEST, 본인이 작성한 레시피가 아닙니다. 삭제할 수 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5100", description = "SERVER ERROR, 레시피가 삭제되지 않았습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
@@ -282,7 +280,7 @@ RecipeRestController {
         if (recipeDeleteBoolean)
             return ResponseDto.of(recipeId + " 레시피 삭제 완료");
         else
-            throw new RecipeException(CommonStatus.RECIPE_NOT_DELETED);
+            throw new RecipeException(CommonStatus.INTERNAL_ERROR);
     }
 
     @Operation(summary = "🍹figma 레시피2, 레시피 검색 카테고리 별 preview 화면 API 🔑 ✔", description = "검색한 레시피 카테고리별 조회 화면 API입니다.")
@@ -839,8 +837,6 @@ RecipeRestController {
             @ApiResponse(responseCode = "4108", description = "BAD_REQUEST, 본인이 작성한 댓글이 아닙니다. 삭제할 수 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "4112", description = "BAD_REQUEST, 해당 댓글은 넘겨준 레시피 Id에 존재하지 않습니다. 레시피 Id를 올바르게 보내주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5101", description = "SERVER ERROR, 댓글이 삭제되지 않았습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-
     })
     @Parameters({
             @Parameter(name = "member", hidden = true),
@@ -852,7 +848,7 @@ RecipeRestController {
         if (commentDeleteBoolean)
             return ResponseDto.of(commentId + " 댓글 삭제 완료");
         else
-            throw new RecipeException(CommonStatus.COMMENT_NOT_DELETED);
+            throw new RecipeException(CommonStatus.INTERNAL_ERROR);
     }
 
     @Operation(summary = "댓글 수정 API 🔑 ✔", description = "댓글 수정 API입니다.")
