@@ -416,6 +416,8 @@ public class RecipeServiceImpl implements RecipeService {
 
         Long count = recipeRepositoryCustom.recipeTotalCount(member, categoryCondition, keywordCondition);
 
+        if (count < pageIndex*pageSize)
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
         if (content.size() > count - pageIndex*pageSize)
             content = content.subList(0, count.intValue()-pageIndex*pageSize);
 
@@ -462,6 +464,8 @@ public class RecipeServiceImpl implements RecipeService {
 
         Long count = recipeRepositoryCustom.recipeTotalCount(member, writtenByCondition);
 
+        if (count < pageIndex*pageSize)
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
         if (content.size() != 0 & content.size() > count - pageIndex*pageSize)
             content = content.subList(0, count.intValue()-pageIndex*pageSize);
 
@@ -564,6 +568,8 @@ public class RecipeServiceImpl implements RecipeService {
         log.info("서비스단의 상황 : {}", content.size());
         Long count = recipeRepositoryCustom.recipeTotalCount(member, whereCondition);
 
+        if (count < pageIndex*pageSize)
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
         if (content.size() > count - pageIndex*pageSize)
             content = content.subList(0, count.intValue()-pageIndex*pageSize);
 
