@@ -22,7 +22,7 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private Long id;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
