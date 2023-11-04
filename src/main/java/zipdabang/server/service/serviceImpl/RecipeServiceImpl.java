@@ -805,7 +805,7 @@ public class RecipeServiceImpl implements RecipeService {
             findRecipe.updateComment(-1);
         }
 
-        return commentRepository.existsById(recipeId) == false;
+        return commentRepository.existsById(commentId) == false;
     }
 
     @Transactional(readOnly = false)
