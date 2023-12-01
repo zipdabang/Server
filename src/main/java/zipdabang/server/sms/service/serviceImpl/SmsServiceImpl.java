@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import zipdabang.server.apiPayload.code.CommonStatus;
-import zipdabang.server.domain.etc.AuthNumber;
-import zipdabang.server.repository.AuthNumberRepository;
+import zipdabang.server.redis.domain.PhoneAuth;
+import zipdabang.server.redis.repository.PhoneAuthRepository;
 import zipdabang.server.sms.dto.MessageDto;
 import zipdabang.server.sms.dto.SmsRequestDto;
 import zipdabang.server.sms.dto.SmsResponseDto;
@@ -33,7 +33,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class SmsServiceImpl implements SmsService {
-    private final AuthNumberRepository authNumberRepository;
+    private final PhoneAuthRepository phoneAuthRepository;
     private final NaverSmsFeignClient naverSmsFeignClient;
 
     @Value("${naver-sms.accessKey}")
@@ -79,34 +79,27 @@ public class SmsServiceImpl implements SmsService {
     @Override
     @Transactional
     public SmsResponseDto.AuthNumResultDto authNumber(Integer authNum, String phoneNum) {
-        Optional<AuthNumber> authNumber = authNumberRepository.findByPhoneNum(phoneNum);//.orElseThrow(() ->
-        if(authNumber.isEmpty()){
+
+        Optional<PhoneAuth> phoneAuth = phoneAuthRepository.findById(phoneNum);
+        if (phoneAuth.isEmpty()) {
             return SmsResponseDto.AuthNumResultDto.builder()
                     .responseCommonStatus(CommonStatus.PHONE_AUTH_NOT_FOUND)
                     .build();
         }
-
-               // new AuthNumberException(CommonStatus.PHONE_AUTH_NOT_FOUND));
         CommonStatus commonStatus = CommonStatus.OK;
-        if (!authNumber.get().getAuthNum().equals(authNum))
+        if (!phoneAuth.get().getAuthNum().equals(authNum))
             commonStatus = CommonStatus.PHONE_AUTH_ERROR;
-//            return SmsResponseDto.AuthNumResultDto.builder()
-//                    .responseCommonStatus(CommonStatus.PHONE_AUTH_ERROR)
-//                    .build();
-            //throw new AuthNumberException(CommonStatus.PHONE_AUTH_ERROR);
+
         else{
             LocalDateTime nowTime = LocalDateTime.now();
 
-            long timeCheck = ChronoUnit.MINUTES.between(authNumber.get().getAuthNumTime(), nowTime);
+            long timeCheck = ChronoUnit.MINUTES.between(phoneAuth.get().getAuthNumTime(), nowTime);
             if (timeCheck >= 5)
                 commonStatus = CommonStatus.PHONE_AUTH_TIMEOUT;
-//                return SmsResponseDto.AuthNumResultDto.builder()
-//                        .responseCommonStatus(CommonStatus.PHONE_AUTH_TIMEOUT)
-//                        .build();
-                //throw new AuthNumberException(CommonStatus.PHONE_AUTH_TIMEOUT);
+
         }
         if(commonStatus.equals(CommonStatus.OK))
-            authNumberRepository.deleteByPhoneNum(authNumber.get().getPhoneNum());
+            phoneAuthRepository.deleteById(phoneAuth.get().getPhoneNum());
 
         return SmsResponseDto.AuthNumResultDto.builder()
                 .responseCommonStatus(commonStatus)
@@ -144,17 +137,15 @@ public class SmsServiceImpl implements SmsService {
                 .build();
 
 
-
         naverSmsFeignClient.sendSms(serviceId, headers,request);
 
-        AuthNumber authNumber = AuthNumber.builder()
+        PhoneAuth phoneAuth = PhoneAuth.builder()
                 .phoneNum(targetNumber)
                 .authNumTime(LocalDateTime.now())
                 .authNum(Integer.valueOf(randomNumber))
                 .build();
+        phoneAuthRepository.save(phoneAuth);
 
-        authNumberRepository.deleteByPhoneNum(targetNumber);
-        authNumberRepository.save(authNumber);
 
         return SmsResponseDto.AuthNumResultDto.builder()
                 .responseCommonStatus(CommonStatus.OK)
