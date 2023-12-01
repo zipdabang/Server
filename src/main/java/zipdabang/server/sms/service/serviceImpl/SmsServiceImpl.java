@@ -154,6 +154,8 @@ public class SmsServiceImpl implements SmsService {
 
     @Override
     public String getRandomNumber() {
-        return RandomStringUtils.randomNumeric(6);
+        Random random = new Random();
+        int rand= random.nextInt(900000) + 100000;
+        return String.valueOf(rand);
     }
 }
