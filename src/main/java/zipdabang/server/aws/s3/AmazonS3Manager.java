@@ -69,6 +69,14 @@ public class AmazonS3Manager {
         return amazonConfig.getRecipeStep() + '/' + uuid.getUuid();
     }
 
+    public String generateTestThumbnailKeyName(Uuid uuid) {
+        return amazonConfig.getTestThumbnail() + '/' + uuid.getUuid();
+    }
+
+    public String generateTestStepKeyName(Uuid uuid) {
+        return amazonConfig.getTestStep() + '/' + uuid.getUuid();
+    }
+
     public String generateInqueryKeyName(Uuid uuid) {return amazonConfig.getInquery() + '/' + uuid.getUuid();}
 
     // 중복된 UUID가 있다면 중복이 없을때까지 재귀적으로 동작

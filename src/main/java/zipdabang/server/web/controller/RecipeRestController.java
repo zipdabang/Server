@@ -22,6 +22,7 @@ import zipdabang.server.apiPayload.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
+import zipdabang.server.domain.test.TestRecipe;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.validation.annotation.CheckPage;
 import zipdabang.server.validation.annotation.CheckTempMember;
@@ -955,4 +956,72 @@ RecipeRestController {
         return ResponseDto.of(recipeService.getScrapRecipes(page, member));
     }
 
+    /**
+     * 부하 테스트용 컨트롤러
+     */
+    @Operation(summary = "레시피 등록 테스트 API 🔑 ✔")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000"),
+            @ApiResponse(responseCode = "4100", description = "레시피 작성시 누락된 내용이 있습니다. 미완료는 임시저장으로 가세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @PostMapping(value = "/test/members/recipes")
+    public ResponseDto<RecipeResponseDto.RecipeStatusDto> testCreateRecipe(
+            @RequestPart(value = "content") RecipeRequestDto.CreateRecipeDto request,
+            @RequestPart(value = "thumbnail") MultipartFile thumbnail,
+            @RequestPart(value = "stepImages") List<MultipartFile> stepImages) throws IOException {
+
+        log.info("사용자가 준 정보 : {}", request.toString());
+
+        TestRecipe recipe = recipeService.testCreate(request, thumbnail, stepImages);
+        return ResponseDto.of(RecipeConverter.toTestRecipeStatusDto(recipe));
+    }
+
+    @Operation(summary = "레시피 상세 정보 조회 테스트 API 🔑 ✔")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000"),
+            @ApiResponse(responseCode = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @GetMapping(value = "/test/members/recipes/{recipeId}")
+    public ResponseDto<RecipeResponseDto.RecipeInfoDto> testRecipeDetail(@PathVariable(name = "recipeId") Long recipeId) {
+
+        TestRecipe recipe = recipeService.getTestRecipe(recipeId);
+
+        return ResponseDto.of(RecipeConverter.toTestRecipeInfoDto(recipe));
+    }
+
+    @Operation(summary = "카테고리 별 레시피 목록 조회 테스트 API 🔑 ✔")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK, 목록이 있을 땐 이 응답임"),
+            @ApiResponse(responseCode = "2100", description = "OK, 목록이 없을 경우, result = null", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4053", description = "BAD_REQUEST, 넘겨받은 categoryId와 일치하는 카테고리 없음. 1~6 사이로 보내세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST, 페이지 인덱스 범위 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4104", description = "BAD_REQUEST, 조회 방식 타입이 잘못되었습니다. likes, follow, lastest중 하나로 보내주세요.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "4105", description = "BAD_REQUEST, 해당 id를 가진 레시피 카테고리가 없습니다. 잘못 보내줬어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @Parameters({
+            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, 0 이런거 주면 에러 뱉음"),
+            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 팔로우순: follow, 최신순: latest로 넘겨주세요")
+    })
+    @GetMapping(value = "/test/members/recipes/categories/{categoryId}")
+    public ResponseDto<RecipeResponseDto.RecipePageListDto> testRecipeListByCategory(@ExistRecipeCategory @PathVariable Long categoryId, @CheckPage @RequestParam(name = "pageIndex") Integer pageIndex) {
+        if (pageIndex == null)
+            pageIndex = 1;
+
+        pageIndex -= 1;
+
+        Page<TestRecipe> recipes = recipeService.testRecipeListByCategory(categoryId, pageIndex, "latest");
+
+
+        log.info(recipes.toString());
+
+        if (recipes.getTotalElements() == 0)
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
+        if (pageIndex >= recipes.getTotalPages())
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
+
+        return ResponseDto.of(RecipeConverter.toPagingTestRecipeDtoList(recipes));
+    }
 }

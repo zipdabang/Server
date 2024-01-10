@@ -1,7 +1,6 @@
 package zipdabang.server.service.serviceImpl;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +21,7 @@ import zipdabang.server.domain.enums.AlarmType;
 import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.*;
 import zipdabang.server.domain.recipe.*;
+import zipdabang.server.domain.test.TestRecipe;
 import zipdabang.server.firebase.fcm.service.FirebaseService;
 import zipdabang.server.repository.AlarmRepository.AlarmCategoryRepository;
 import zipdabang.server.repository.AlarmRepository.PushAlarmRepository;
@@ -32,12 +32,16 @@ import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.repository.recipeRepositories.recipeRepositoryCustom.CommentRepositoryCustom;
 import zipdabang.server.repository.recipeRepositories.recipeRepositoryCustom.RecipeRepositoryCustom;
 import zipdabang.server.repository.recipeRepositories.recipeRepositoryCustom.TempRecipeRepositoryCustom;
+import zipdabang.server.repository.testRepository.TestIngredientRepository;
+import zipdabang.server.repository.testRepository.TestRecipeCategoryMappingRepository;
+import zipdabang.server.repository.testRepository.TestRecipeRepository;
+import zipdabang.server.repository.testRepository.TestStepRepository;
+import zipdabang.server.repository.testRepository.testRecipeRepositoryCustom.TestRecipeRepositoryCustom;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -887,5 +891,77 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public RecipeCategory getRecipeCategory(Long categoryId) {
         return recipeCategoryRepository.findById(categoryId).get();
+    }
+
+    /**
+     * 부하테스트용 서비스
+     */
+    private final TestRecipeRepository testRecipeRepository;
+    private final TestRecipeCategoryMappingRepository testRecipeCategoryMappingRepository;
+    private final TestStepRepository testStepRepository;
+    private final TestIngredientRepository testIngredientRepository;
+    private final TestRecipeRepositoryCustom testRecipeRepositoryCustom;
+
+    @Override
+    @Transactional(readOnly = false)
+    public TestRecipe testCreate(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages) throws IOException {
+        TestRecipe buildRecipe = RecipeConverter.toTestRecipe(request, thumbnail);
+        TestRecipe recipe = testRecipeRepository.save(buildRecipe);
+
+        RecipeConverter.toTestRecipeCategory(request.getCategoryId(),recipe).stream()
+                .map(categoryMapping -> testRecipeCategoryMappingRepository.save(categoryMapping))
+                .collect(Collectors.toList())
+                .stream()
+                .map(categoryMapping -> categoryMapping.setRecipe(recipe));
+
+
+        RecipeConverter.toTestStep(request, recipe, stepImages).stream()
+                .map(step -> testStepRepository.save(step))
+                .collect(Collectors.toList())
+                .stream()
+                .map(step -> step.setRecipe(recipe));
+
+        RecipeConverter.toTestIngredient(request, recipe).stream()
+                .map(ingredient -> testIngredientRepository.save(ingredient))
+                .collect(Collectors.toList())
+                .stream()
+                .map(ingredient -> ingredient.setRecipe(recipe));
+
+        return recipe;
+    }
+
+    @Override
+    public TestRecipe getTestRecipe(Long recipeId) {
+        TestRecipe findRecipe = testRecipeRepository.findById(recipeId).orElseThrow(()->new RecipeException(CommonStatus.NO_RECIPE_EXIST));
+
+        findRecipe.updateView();
+        return findRecipe;
+    }
+
+    @Transactional(readOnly = false)
+    @Override
+    public Page<TestRecipe> testRecipeListByCategory(Long categoryId, Integer pageIndex, String order) {
+
+        List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
+
+        if(recipeCategory.isEmpty())
+            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
+
+        List<TestRecipe> content = new ArrayList<>();
+
+        BooleanExpression whereCondition = recipeRepositoryCustom.recipesInCategoryCondition(categoryId);
+
+
+        content = testRecipeRepositoryCustom.testRecipesOrderBy(pageIndex,pageSize, order, whereCondition);
+
+        log.info("서비스단의 상황 : {}", content.size());
+        Long count = testRecipeRepositoryCustom.testRecipeTotalCount(whereCondition);
+
+        if (count < pageIndex*pageSize)
+            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
+        if (content.size() > count - pageIndex*pageSize)
+            content = content.subList(0, count.intValue()-pageIndex*pageSize);
+
+        return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);
     }
 }
