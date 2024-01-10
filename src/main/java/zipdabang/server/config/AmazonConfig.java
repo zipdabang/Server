@@ -35,6 +35,12 @@ public class AmazonConfig {
     @Value("${cloud.aws.s3.folder.zipdabang-recipe-steps}")
     private String recipeStep;
 
+    @Value("${cloud.aws.s3.folder.zipdabang-test-thumbnail}")
+    private String testThumbnail;
+
+    @Value("${cloud.aws.s3.folder.zipdabang-test-steps}")
+    private String testStep;
+
     @Value("${cloud.aws.s3.folder.zipdabang-proifile}")
     private String userProfile;
 

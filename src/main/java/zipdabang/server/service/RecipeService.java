@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
+import zipdabang.server.domain.test.TestRecipe;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
@@ -101,4 +102,10 @@ public interface RecipeService {
     Long getWrittenByRecipeCounting(String writtenby, Member member);
 
     Long getCommentCount(Recipe recipe, Member member);
+
+    TestRecipe testCreate(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages) throws IOException;
+
+    TestRecipe getTestRecipe(Long recipeId);
+
+    Page<TestRecipe> testRecipeListByCategory(Long categoryId, Integer pageIndex, String order);
 }

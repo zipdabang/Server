@@ -72,6 +72,8 @@ cloud:
       folder:
         zipdabang-recipe-thumbNail: recipe/thumbnail
         zipdabang-recipe-steps : recipe/steps
+        zipdabang-test-thumbnail: test/thumbnail
+        zipdabang-test-steps: test/steps
         zipdabang-proifile : user
         zipdabang-inquery : inquery
       #        zipdabang-facilities : facilities
@@ -83,6 +85,7 @@ cloud:
     credentials:
       accessKey: ${AWS_ACCESS_KEY_ID}
       secretKey: ${AWS_SECRET_ACCESS_KEY}
+
 
 jwt:
   header: Authorization
@@ -166,6 +169,8 @@ cloud:
       folder:
         zipdabang-recipe-thumbNail: recipe/thumbnail
         zipdabang-recipe-steps: recipe/steps
+        zipdabang-test-thumbnail: test/thumbnail
+        zipdabang-test-steps: test/steps
         zipdabang-proifile: user
         zipdabang-inquery: inquery
       #        zipdabang-facilities : facilities
