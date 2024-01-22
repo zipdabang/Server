@@ -1024,4 +1024,21 @@ RecipeRestController {
 
         return ResponseDto.of(RecipeConverter.toPagingTestRecipeDtoList(recipes));
     }
+
+    @Operation(summary = "테스트 레시피 삭제 API 🔑 ✔")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000", description = "OK, 삭제처리 되었습니다."),
+            @ApiResponse(responseCode = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5100", description = "SERVER ERROR, 레시피가 삭제되지 않았습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+
+    @DeleteMapping("/test/members/recipes/{recipeId}")
+    public ResponseDto<String> deleteTestRecipe(@PathVariable(name = "recipeId") Long recipeId) {
+        Boolean recipeDeleteBoolean = recipeService.deleteTestRecipe(recipeId);
+
+        if (recipeDeleteBoolean)
+            return ResponseDto.of(recipeId + " 레시피 삭제 완료");
+        else
+            throw new RecipeException(CommonStatus.RECIPE_NOT_DELETED);
+    }
 }

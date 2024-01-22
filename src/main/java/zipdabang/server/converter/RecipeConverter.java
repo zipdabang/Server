@@ -723,7 +723,7 @@ public class RecipeConverter {
         Uuid uuid = staticAmazonS3Manager.createUUID();
         String keyName = staticAmazonS3Manager.generateTestStepKeyName(uuid);
         String fileUrl = staticAmazonS3Manager.uploadFile(keyName, thumbnail);
-        log.info("S3에 업로드 한 test thumbnail 파일의 url : {}", fileUrl);
+        log.info("S3에 업로드 한 test step 파일의 url : {}", fileUrl);
         return fileUrl;
     }
 

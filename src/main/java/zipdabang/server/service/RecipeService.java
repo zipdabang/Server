@@ -108,4 +108,6 @@ public interface RecipeService {
     TestRecipe getTestRecipe(Long recipeId);
 
     Page<TestRecipe> testRecipeListByCategory(Long categoryId, Integer pageIndex, String order);
+
+    Boolean deleteTestRecipe(Long recipeId);
 }

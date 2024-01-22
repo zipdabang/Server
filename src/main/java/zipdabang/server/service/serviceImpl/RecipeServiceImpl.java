@@ -964,4 +964,25 @@ public class RecipeServiceImpl implements RecipeService {
 
         return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);
     }
+
+    @Transactional(readOnly = false)
+    @Override
+    public Boolean deleteTestRecipe(Long recipeId) {
+        TestRecipe findRecipe = testRecipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(CommonStatus.NO_RECIPE_EXIST));
+
+        String thumbnailUrl = findRecipe.getThumbnailUrl();
+        List<String> stepUrlList = testStepRepository.findAllByRecipeId(recipeId).stream()
+                .filter(steps -> steps.getImageUrl() != null)
+                .map(step -> step.getImageUrl())
+                .collect(Collectors.toList());
+
+        testRecipeRepository.deleteById(recipeId);
+
+        amazonS3Manager.deleteFile(RecipeConverter.toKeyName(thumbnailUrl).substring(1));
+        stepUrlList
+                .forEach(stepUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(stepUrl).substring(1)));
+
+        return testRecipeRepository.existsById(recipeId) == false;
+
+    }
 }
