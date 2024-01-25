@@ -964,4 +964,25 @@ public class RecipeServiceImpl implements RecipeService {
 
         return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);
     }
+
+    @Transactional(readOnly = false)
+    @Override
+    public Boolean deleteTestRecipe() {
+        List<TestRecipe> findRecipes = testRecipeRepository.findAll();
+
+        List<String> thumbnailUrls = findRecipes.stream().map(recipe -> recipe.getThumbnailUrl()).collect(Collectors.toList());
+        List<String> stepUrlList = testStepRepository.findAll().stream()
+                .filter(steps -> steps.getImageUrl() != null)
+                .map(step -> step.getImageUrl())
+                .collect(Collectors.toList());
+
+        testRecipeRepository.deleteAll();
+
+        thumbnailUrls.forEach(thumbnailUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(thumbnailUrl).substring(1)));
+        stepUrlList
+                .forEach(stepUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(stepUrl).substring(1)));
+
+        return testRecipeRepository.count() == 0;
+
+    }
 }
