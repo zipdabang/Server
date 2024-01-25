@@ -107,9 +107,6 @@ fcm:
   url: ${FCM_URL}
   project-num: ${FCM_PROJECT_NUMBER}
 
-server:
-  tomcat:
-    max-http-form-post-size: 30MB
 ---
 spring:
   config:
@@ -206,9 +203,6 @@ fcm:
   url: ${FCM_URL}
   project-num: ${FCM_PROJECT_NUMBER}
 
-server:
-  tomcat:
-    max-http-form-post-size: 30MB
 ---
 spring:
   config:
@@ -302,7 +296,3 @@ naver-sms:
 fcm:
   url: ${FCM_URL}
   project-num: ${FCM_PROJECT_NUMBER}
-
-server:
-  tomcat:
-    max-http-form-post-size: 30MB
