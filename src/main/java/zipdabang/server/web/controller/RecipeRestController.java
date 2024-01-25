@@ -1032,12 +1032,12 @@ RecipeRestController {
             @ApiResponse(responseCode = "5100", description = "SERVER ERROR, 레시피가 삭제되지 않았습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
 
-    @DeleteMapping("/test/members/recipes/{recipeId}")
-    public ResponseDto<String> deleteTestRecipe(@PathVariable(name = "recipeId") Long recipeId) {
-        Boolean recipeDeleteBoolean = recipeService.deleteTestRecipe(recipeId);
+    @DeleteMapping("/test/members/recipes")
+    public ResponseDto<String> deleteTestRecipe() {
+        Boolean recipeDeleteBoolean = recipeService.deleteTestRecipe();
 
         if (recipeDeleteBoolean)
-            return ResponseDto.of(recipeId + " 레시피 삭제 완료");
+            return ResponseDto.of(" 레시피 삭제 완료");
         else
             throw new RecipeException(CommonStatus.RECIPE_NOT_DELETED);
     }

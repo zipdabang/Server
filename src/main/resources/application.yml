@@ -53,7 +53,7 @@ spring:
 
   servlet:
     multipart:
-      maxFileSize: 20MB
+      maxFileSize: 30MB
       maxRequestSize: 30MB
       enabled: true
 
@@ -107,6 +107,9 @@ fcm:
   url: ${FCM_URL}
   project-num: ${FCM_PROJECT_NUMBER}
 
+server:
+  tomcat:
+    max-http-form-post-size: 30MB
 ---
 spring:
   config:
@@ -150,7 +153,7 @@ spring:
 
   servlet:
     multipart:
-      maxFileSize: 20MB
+      maxFileSize: 30MB
       maxRequestSize: 30MB
       enabled: true
 
@@ -203,6 +206,9 @@ fcm:
   url: ${FCM_URL}
   project-num: ${FCM_PROJECT_NUMBER}
 
+server:
+  tomcat:
+    max-http-form-post-size: 30MB
 ---
 spring:
   config:
@@ -296,3 +302,7 @@ naver-sms:
 fcm:
   url: ${FCM_URL}
   project-num: ${FCM_PROJECT_NUMBER}
+
+server:
+  tomcat:
+    max-http-form-post-size: 30MB

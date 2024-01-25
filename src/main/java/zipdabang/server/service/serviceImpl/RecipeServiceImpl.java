@@ -967,22 +967,22 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Transactional(readOnly = false)
     @Override
-    public Boolean deleteTestRecipe(Long recipeId) {
-        TestRecipe findRecipe = testRecipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(CommonStatus.NO_RECIPE_EXIST));
+    public Boolean deleteTestRecipe() {
+        List<TestRecipe> findRecipes = testRecipeRepository.findAll();
 
-        String thumbnailUrl = findRecipe.getThumbnailUrl();
-        List<String> stepUrlList = testStepRepository.findAllByRecipeId(recipeId).stream()
+        List<String> thumbnailUrls = findRecipes.stream().map(recipe -> recipe.getThumbnailUrl()).collect(Collectors.toList());
+        List<String> stepUrlList = testStepRepository.findAll().stream()
                 .filter(steps -> steps.getImageUrl() != null)
                 .map(step -> step.getImageUrl())
                 .collect(Collectors.toList());
 
-        testRecipeRepository.deleteById(recipeId);
+        testRecipeRepository.deleteAll();
 
-        amazonS3Manager.deleteFile(RecipeConverter.toKeyName(thumbnailUrl).substring(1));
+        thumbnailUrls.forEach(thumbnailUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(thumbnailUrl).substring(1)));
         stepUrlList
                 .forEach(stepUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(stepUrl).substring(1)));
 
-        return testRecipeRepository.existsById(recipeId) == false;
+        return testRecipeRepository.count() == 0;
 
     }
 }
