@@ -949,7 +949,7 @@ public class RecipeServiceImpl implements RecipeService {
 
         List<TestRecipe> content = new ArrayList<>();
 
-        BooleanExpression whereCondition = recipeRepositoryCustom.recipesInCategoryCondition(categoryId);
+        BooleanExpression whereCondition = testRecipeRepositoryCustom.recipesInCategoryCondition(categoryId);
 
 
         content = testRecipeRepositoryCustom.testRecipesOrderBy(pageIndex,pageSize, order, whereCondition);

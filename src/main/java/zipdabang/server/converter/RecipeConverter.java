@@ -44,7 +44,6 @@ public class RecipeConverter {
 
     private static AmazonS3Manager staticAmazonS3Manager;
     private static TimeConverter staticTimeConverter;
-
     private static RecipeService staticRecipeService;
 
 

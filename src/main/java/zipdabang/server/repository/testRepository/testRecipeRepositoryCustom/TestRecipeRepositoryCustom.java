@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface TestRecipeRepositoryCustom {
 
+    BooleanExpression recipesInCategoryCondition(Long categoryId);
     List<TestRecipe> testRecipesOrderBy(Integer pageIndex, Integer pageSize, String order, BooleanExpression... booleanExpressions);
 
     Long testRecipeTotalCount(BooleanExpression... booleanExpressions);
