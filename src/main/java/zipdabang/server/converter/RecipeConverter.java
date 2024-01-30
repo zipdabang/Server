@@ -747,7 +747,7 @@ public class RecipeConverter {
     }
 
     public static List<TestRecipeCategoryMapping> toTestRecipeCategory(List<Long> categoryIds, TestRecipe recipe) {
-        return categoryIds.stream()
+        return categoryIds.stream().parallel()
                 .map(recipeCategoryId -> toTestRecipeCategoryMappingDto(recipeCategoryId, recipe))
                 .collect(Collectors.toList());
     }
@@ -760,7 +760,7 @@ public class RecipeConverter {
     }
 
     public static List<TestStep> toTestStep(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe, List<MultipartFile> stepImages) {
-        return request.getSteps().stream()
+        return request.getSteps().stream().parallel()
                 .map(step-> {
                     if (step.getDescription() == null)
                         throw new RecipeException(CommonStatus.NULL_RECIPE_ERROR);
@@ -801,7 +801,7 @@ public class RecipeConverter {
     }
 
     public static List<TestIngredient> toTestIngredient(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe) {
-        return request.getIngredients().stream()
+        return request.getIngredients().stream().parallel()
                 .map(ingredient -> toTestIngredientDto(ingredient, recipe))
                 .collect(Collectors.toList());
     }
