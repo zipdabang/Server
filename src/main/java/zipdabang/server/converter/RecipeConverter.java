@@ -747,7 +747,7 @@ public class RecipeConverter {
     }
 
     public static List<TestRecipeCategoryMapping> toTestRecipeCategory(List<Long> categoryIds, TestRecipe recipe) {
-        return categoryIds.stream().parallel()
+        return categoryIds.stream()
                 .map(recipeCategoryId -> toTestRecipeCategoryMappingDto(recipeCategoryId, recipe))
                 .collect(Collectors.toList());
     }
@@ -801,7 +801,7 @@ public class RecipeConverter {
     }
 
     public static List<TestIngredient> toTestIngredient(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe) {
-        return request.getIngredients().stream().parallel()
+        return request.getIngredients().stream()
                 .map(ingredient -> toTestIngredientDto(ingredient, recipe))
                 .collect(Collectors.toList());
     }
