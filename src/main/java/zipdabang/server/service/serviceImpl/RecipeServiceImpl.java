@@ -938,7 +938,7 @@ public class RecipeServiceImpl implements RecipeService {
         return findRecipe;
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     @Override
     public Page<TestRecipe> testRecipeListByCategory(Long categoryId, Integer pageIndex, String order) {
 
@@ -970,16 +970,17 @@ public class RecipeServiceImpl implements RecipeService {
     public Boolean deleteTestRecipe() {
         List<TestRecipe> findRecipes = testRecipeRepository.findAll();
 
-        List<String> thumbnailUrls = findRecipes.stream().map(recipe -> recipe.getThumbnailUrl()).collect(Collectors.toList());
-        List<String> stepUrlList = testStepRepository.findAll().stream()
+        List<String> thumbnailUrls = findRecipes.stream().parallel()
+            .map(recipe -> recipe.getThumbnailUrl()).collect(Collectors.toList());
+        List<String> stepUrlList = testStepRepository.findAll().stream().parallel()
                 .filter(steps -> steps.getImageUrl() != null)
                 .map(step -> step.getImageUrl())
                 .collect(Collectors.toList());
 
         testRecipeRepository.deleteAll();
 
-        thumbnailUrls.forEach(thumbnailUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(thumbnailUrl).substring(1)));
-        stepUrlList
+        thumbnailUrls.parallelStream().forEach(thumbnailUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(thumbnailUrl).substring(1)));
+        stepUrlList.parallelStream()
                 .forEach(stepUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(stepUrl).substring(1)));
 
         return testRecipeRepository.count() == 0;
