@@ -25,6 +25,7 @@ import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
@@ -746,10 +747,10 @@ public class RecipeConverter {
         return recipe;
     }
 
-    public static List<TestRecipeCategoryMapping> toTestRecipeCategory(List<Long> categoryIds, TestRecipe recipe) {
-        return categoryIds.stream().parallel()
+    public static CompletableFuture<List<TestRecipeCategoryMapping>> toTestRecipeCategory(List<Long> categoryIds, TestRecipe recipe) {
+        return CompletableFuture.completedFuture(categoryIds.stream()
                 .map(recipeCategoryId -> toTestRecipeCategoryMappingDto(recipeCategoryId, recipe))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     private static TestRecipeCategoryMapping toTestRecipeCategoryMappingDto(Long categoryId, TestRecipe recipe) {
@@ -760,8 +761,8 @@ public class RecipeConverter {
                 .build();
     }
 
-    public static List<TestStep> toTestStep(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe, List<MultipartFile> stepImages) {
-        return request.getSteps().stream().parallel()
+    public static CompletableFuture<List<TestStep>> toTestStep(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe, List<MultipartFile> stepImages) {
+        return CompletableFuture.completedFuture(request.getSteps().stream()
                 .map(step-> {
                     if (step.getDescription() == null)
                         throw new RecipeException(CommonStatus.NULL_RECIPE_ERROR);
@@ -771,7 +772,8 @@ public class RecipeConverter {
                         throw new RuntimeException(e);
                     }
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())
+        );
     }
 
     private static TestStep toTestStepDto(RecipeRequestDto.StepDto step, TestRecipe recipe, List<MultipartFile> stepImages) throws IOException {
@@ -803,10 +805,10 @@ public class RecipeConverter {
         return createdStep;
     }
 
-    public static List<TestIngredient> toTestIngredient(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe) {
-        return request.getIngredients().stream().parallel()
+    public static CompletableFuture<List<TestIngredient>> toTestIngredient(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe) {
+        return CompletableFuture.completedFuture(request.getIngredients().stream()
                 .map(ingredient -> toTestIngredientDto(ingredient, recipe))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     private static TestIngredient toTestIngredientDto(RecipeRequestDto.NewIngredientDto ingredient, TestRecipe recipe) {
