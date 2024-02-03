@@ -21,6 +21,7 @@ import zipdabang.server.domain.enums.AlarmType;
 import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.*;
 import zipdabang.server.domain.recipe.*;
+import zipdabang.server.domain.test.QTestRecipe;
 import zipdabang.server.domain.test.TestRecipe;
 import zipdabang.server.firebase.fcm.service.FirebaseService;
 import zipdabang.server.repository.AlarmRepository.AlarmCategoryRepository;
@@ -45,6 +46,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -905,29 +907,40 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     @Transactional(readOnly = false)
     public TestRecipe testCreate(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages) throws IOException {
-        TestRecipe buildRecipe = RecipeConverter.toTestRecipe(request, thumbnail);
-        TestRecipe recipe = testRecipeRepository.save(buildRecipe);
 
-        RecipeConverter.toTestRecipeCategory(request.getCategoryId(),recipe).stream()
-                .map(categoryMapping -> testRecipeCategoryMappingRepository.save(categoryMapping))
-                .collect(Collectors.toList())
-                .stream()
-                .map(categoryMapping -> categoryMapping.setRecipe(recipe));
+        CompletableFuture<TestRecipe> savedRecipeFuture = CompletableFuture.supplyAsync(() ->{
+            TestRecipe buildRecipe = null;
+            try {
+                buildRecipe = RecipeConverter.toTestRecipe(request, thumbnail);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return testRecipeRepository.save(buildRecipe);
+                });
+
+        savedRecipeFuture.thenAccept(recipe -> {
+            RecipeConverter.toTestRecipeCategory(request.getCategoryId(),recipe).join().stream()
+                    .map(categoryMapping -> testRecipeCategoryMappingRepository.save(categoryMapping))
+                    .peek(categoryMapping -> categoryMapping.setRecipe(recipe));
+//                    .collect(Collectors.toList())
+//                    .stream()
+//                    .map(categoryMapping -> categoryMapping.setRecipe(recipe));
+        });
 
 
-        RecipeConverter.toTestStep(request, recipe, stepImages).stream()
-                .map(step -> testStepRepository.save(step))
-                .collect(Collectors.toList())
-                .stream()
-                .map(step -> step.setRecipe(recipe));
+        savedRecipeFuture.thenAccept(recipe -> {
+            RecipeConverter.toTestStep(request, recipe, stepImages).join().stream()
+                    .map(step -> testStepRepository.save(step))
+                    .peek(step -> step.setRecipe(recipe));
+        });
 
-        RecipeConverter.toTestIngredient(request, recipe).stream()
-                .map(ingredient -> testIngredientRepository.save(ingredient))
-                .collect(Collectors.toList())
-                .stream()
-                .map(ingredient -> ingredient.setRecipe(recipe));
+        savedRecipeFuture.thenAccept(recipe -> {
+            RecipeConverter.toTestIngredient(request, recipe).join().stream()
+                    .map(ingredient -> testIngredientRepository.save(ingredient))
+                    .peek(ingredient -> ingredient.setRecipe(recipe));
+        });
 
-        return recipe;
+        return savedRecipeFuture.join();
     }
 
     @Override
