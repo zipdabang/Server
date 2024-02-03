@@ -753,6 +753,7 @@ public class RecipeConverter {
     }
 
     private static TestRecipeCategoryMapping toTestRecipeCategoryMappingDto(Long categoryId, TestRecipe recipe) {
+        log.info("categoryMappingDto Thread: " + categoryId);
         return TestRecipeCategoryMapping.builder()
                 .category(staticRecipeService.getRecipeCategory(categoryId))
                 .recipe(recipe)
@@ -774,6 +775,8 @@ public class RecipeConverter {
     }
 
     private static TestStep toTestStepDto(RecipeRequestDto.StepDto step, TestRecipe recipe, List<MultipartFile> stepImages) throws IOException {
+        log.info("stepDto Thread: " + step.getStepNum()+"(stepNum)");
+
         TestStep createdStep = TestStep.builder()
                 .stepNum(step.getStepNum())
                 .description(step.getDescription())
@@ -807,6 +810,8 @@ public class RecipeConverter {
     }
 
     private static TestIngredient toTestIngredientDto(RecipeRequestDto.NewIngredientDto ingredient, TestRecipe recipe) {
+        log.info("ingredientDto Thread: " + ingredient.getIngredientName());
+
         return TestIngredient.builder()
                 .name(ingredient.getIngredientName())
                 .quantity(ingredient.getQuantity())
