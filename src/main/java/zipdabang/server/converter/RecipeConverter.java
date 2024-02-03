@@ -748,7 +748,7 @@ public class RecipeConverter {
     }
 
     public static CompletableFuture<List<TestRecipeCategoryMapping>> toTestRecipeCategory(List<Long> categoryIds, TestRecipe recipe) {
-        return CompletableFuture.completedFuture(categoryIds.stream()
+        return CompletableFuture.completedFuture(categoryIds.stream().parallel()
                 .map(recipeCategoryId -> toTestRecipeCategoryMappingDto(recipeCategoryId, recipe))
                 .collect(Collectors.toList()));
     }
@@ -762,7 +762,7 @@ public class RecipeConverter {
     }
 
     public static CompletableFuture<List<TestStep>> toTestStep(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe, List<MultipartFile> stepImages) {
-        return CompletableFuture.completedFuture(request.getSteps().stream()
+        return CompletableFuture.completedFuture(request.getSteps().stream().parallel()
                 .map(step-> {
                     if (step.getDescription() == null)
                         throw new RecipeException(CommonStatus.NULL_RECIPE_ERROR);
@@ -806,7 +806,7 @@ public class RecipeConverter {
     }
 
     public static CompletableFuture<List<TestIngredient>> toTestIngredient(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe) {
-        return CompletableFuture.completedFuture(request.getIngredients().stream()
+        return CompletableFuture.completedFuture(request.getIngredients().stream().parallel()
                 .map(ingredient -> toTestIngredientDto(ingredient, recipe))
                 .collect(Collectors.toList()));
     }
