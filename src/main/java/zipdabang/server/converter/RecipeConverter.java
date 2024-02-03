@@ -761,7 +761,7 @@ public class RecipeConverter {
     }
 
     public static List<TestStep> toTestStep(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe, List<MultipartFile> stepImages) {
-        return request.getSteps().stream().parallel()
+        return request.getSteps().stream()
                 .map(step-> {
                     if (step.getDescription() == null)
                         throw new RecipeException(CommonStatus.NULL_RECIPE_ERROR);
