@@ -910,22 +910,16 @@ public class RecipeServiceImpl implements RecipeService {
 
         RecipeConverter.toTestRecipeCategory(request.getCategoryId(),recipe).stream()
                 .map(categoryMapping -> testRecipeCategoryMappingRepository.save(categoryMapping))
-                .collect(Collectors.toList())
-                .stream()
-                .map(categoryMapping -> categoryMapping.setRecipe(recipe));
+                .peek(categoryMapping -> categoryMapping.setRecipe(recipe));
 
 
         RecipeConverter.toTestStep(request, recipe, stepImages).stream()
                 .map(step -> testStepRepository.save(step))
-                .collect(Collectors.toList())
-                .stream()
-                .map(step -> step.setRecipe(recipe));
+                .peek(step -> step.setRecipe(recipe));
 
         RecipeConverter.toTestIngredient(request, recipe).stream()
                 .map(ingredient -> testIngredientRepository.save(ingredient))
-                .collect(Collectors.toList())
-                .stream()
-                .map(ingredient -> ingredient.setRecipe(recipe));
+                .peek(ingredient -> ingredient.setRecipe(recipe));
 
         return recipe;
     }
