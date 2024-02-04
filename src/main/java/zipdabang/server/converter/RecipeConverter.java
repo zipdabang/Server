@@ -747,6 +747,7 @@ public class RecipeConverter {
         return recipe;
     }
 
+
     public static CompletableFuture<List<TestRecipeCategoryMapping>> toTestRecipeCategory(List<Long> categoryIds, TestRecipe recipe) {
         return CompletableFuture.completedFuture(categoryIds.stream()
                 .map(recipeCategoryId -> toTestRecipeCategoryMappingDto(recipeCategoryId, recipe))

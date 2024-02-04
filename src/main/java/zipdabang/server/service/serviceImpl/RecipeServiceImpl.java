@@ -916,7 +916,7 @@ public class RecipeServiceImpl implements RecipeService {
                 throw new RuntimeException(e);
             }
             return testRecipeRepository.save(buildRecipe);
-                });
+        });
 
         savedRecipeFuture.thenAccept(recipe -> {
             RecipeConverter.toTestRecipeCategory(request.getCategoryId(),recipe).join().stream()
