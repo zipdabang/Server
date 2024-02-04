@@ -25,6 +25,7 @@ import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
@@ -747,13 +748,12 @@ public class RecipeConverter {
     }
 
     public static List<TestRecipeCategoryMapping> toTestRecipeCategory(List<Long> categoryIds, TestRecipe recipe) {
-        return categoryIds.stream().parallel()
+        return categoryIds.stream()
                 .map(recipeCategoryId -> toTestRecipeCategoryMappingDto(recipeCategoryId, recipe))
                 .collect(Collectors.toList());
     }
 
     private static TestRecipeCategoryMapping toTestRecipeCategoryMappingDto(Long categoryId, TestRecipe recipe) {
-        log.info("categoryMappingDto Thread: " + categoryId);
         return TestRecipeCategoryMapping.builder()
                 .category(staticRecipeService.getRecipeCategory(categoryId))
                 .recipe(recipe)
@@ -761,7 +761,7 @@ public class RecipeConverter {
     }
 
     public static List<TestStep> toTestStep(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe, List<MultipartFile> stepImages) {
-        return request.getSteps().stream().parallel()
+        return request.getSteps().stream()
                 .map(step-> {
                     if (step.getDescription() == null)
                         throw new RecipeException(CommonStatus.NULL_RECIPE_ERROR);
@@ -775,7 +775,6 @@ public class RecipeConverter {
     }
 
     private static TestStep toTestStepDto(RecipeRequestDto.StepDto step, TestRecipe recipe, List<MultipartFile> stepImages) throws IOException {
-        log.info("stepDto Thread: " + step.getStepNum()+"(stepNum)");
 
         TestStep createdStep = TestStep.builder()
                 .stepNum(step.getStepNum())
@@ -804,13 +803,12 @@ public class RecipeConverter {
     }
 
     public static List<TestIngredient> toTestIngredient(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe) {
-        return request.getIngredients().stream().parallel()
+        return request.getIngredients().stream()
                 .map(ingredient -> toTestIngredientDto(ingredient, recipe))
                 .collect(Collectors.toList());
     }
 
     private static TestIngredient toTestIngredientDto(RecipeRequestDto.NewIngredientDto ingredient, TestRecipe recipe) {
-        log.info("ingredientDto Thread: " + ingredient.getIngredientName());
 
         return TestIngredient.builder()
                 .name(ingredient.getIngredientName())

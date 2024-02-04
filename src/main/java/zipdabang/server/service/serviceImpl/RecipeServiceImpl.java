@@ -21,6 +21,7 @@ import zipdabang.server.domain.enums.AlarmType;
 import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.*;
 import zipdabang.server.domain.recipe.*;
+import zipdabang.server.domain.test.QTestRecipe;
 import zipdabang.server.domain.test.TestRecipe;
 import zipdabang.server.firebase.fcm.service.FirebaseService;
 import zipdabang.server.repository.AlarmRepository.AlarmCategoryRepository;
@@ -45,6 +46,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -905,6 +907,7 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     @Transactional(readOnly = false)
     public TestRecipe testCreate(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages) throws IOException {
+
         TestRecipe buildRecipe = RecipeConverter.toTestRecipe(request, thumbnail);
         TestRecipe recipe = testRecipeRepository.save(buildRecipe);
 
