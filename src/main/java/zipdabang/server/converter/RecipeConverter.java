@@ -748,13 +748,12 @@ public class RecipeConverter {
     }
 
     public static CompletableFuture<List<TestRecipeCategoryMapping>> toTestRecipeCategory(List<Long> categoryIds, TestRecipe recipe) {
-        return CompletableFuture.completedFuture(categoryIds.stream().parallel()
+        return CompletableFuture.completedFuture(categoryIds.stream()
                 .map(recipeCategoryId -> toTestRecipeCategoryMappingDto(recipeCategoryId, recipe))
                 .collect(Collectors.toList()));
     }
 
     private static TestRecipeCategoryMapping toTestRecipeCategoryMappingDto(Long categoryId, TestRecipe recipe) {
-        log.info("categoryMappingDto Thread: " + categoryId);
         return TestRecipeCategoryMapping.builder()
                 .category(staticRecipeService.getRecipeCategory(categoryId))
                 .recipe(recipe)
@@ -762,7 +761,7 @@ public class RecipeConverter {
     }
 
     public static CompletableFuture<List<TestStep>> toTestStep(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe, List<MultipartFile> stepImages) {
-        return CompletableFuture.completedFuture(request.getSteps().stream().parallel()
+        return CompletableFuture.completedFuture(request.getSteps().stream()
                 .map(step-> {
                     if (step.getDescription() == null)
                         throw new RecipeException(CommonStatus.NULL_RECIPE_ERROR);
@@ -777,7 +776,6 @@ public class RecipeConverter {
     }
 
     private static TestStep toTestStepDto(RecipeRequestDto.StepDto step, TestRecipe recipe, List<MultipartFile> stepImages) throws IOException {
-        log.info("stepDto Thread: " + step.getStepNum()+"(stepNum)");
 
         TestStep createdStep = TestStep.builder()
                 .stepNum(step.getStepNum())
@@ -806,13 +804,12 @@ public class RecipeConverter {
     }
 
     public static CompletableFuture<List<TestIngredient>> toTestIngredient(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe) {
-        return CompletableFuture.completedFuture(request.getIngredients().stream().parallel()
+        return CompletableFuture.completedFuture(request.getIngredients().stream()
                 .map(ingredient -> toTestIngredientDto(ingredient, recipe))
                 .collect(Collectors.toList()));
     }
 
     private static TestIngredient toTestIngredientDto(RecipeRequestDto.NewIngredientDto ingredient, TestRecipe recipe) {
-        log.info("ingredientDto Thread: " + ingredient.getIngredientName());
 
         return TestIngredient.builder()
                 .name(ingredient.getIngredientName())

@@ -921,23 +921,26 @@ public class RecipeServiceImpl implements RecipeService {
         savedRecipeFuture.thenAccept(recipe -> {
             RecipeConverter.toTestRecipeCategory(request.getCategoryId(),recipe).join().stream()
                     .map(categoryMapping -> testRecipeCategoryMappingRepository.save(categoryMapping))
-                    .peek(categoryMapping -> categoryMapping.setRecipe(recipe));
-//                    .collect(Collectors.toList())
-//                    .stream()
-//                    .map(categoryMapping -> categoryMapping.setRecipe(recipe));
+                    .collect(Collectors.toList())
+                    .stream()
+                    .map(categoryMapping -> categoryMapping.setRecipe(recipe));
         });
 
 
         savedRecipeFuture.thenAccept(recipe -> {
             RecipeConverter.toTestStep(request, recipe, stepImages).join().stream()
                     .map(step -> testStepRepository.save(step))
-                    .peek(step -> step.setRecipe(recipe));
+                    .collect(Collectors.toList())
+                    .stream()
+                    .map(step -> step.setRecipe(recipe));
         });
 
         savedRecipeFuture.thenAccept(recipe -> {
             RecipeConverter.toTestIngredient(request, recipe).join().stream()
                     .map(ingredient -> testIngredientRepository.save(ingredient))
-                    .peek(ingredient -> ingredient.setRecipe(recipe));
+                    .collect(Collectors.toList())
+                    .stream()
+                    .map(ingredient -> ingredient.setRecipe(recipe));
         });
 
         return savedRecipeFuture.join();
