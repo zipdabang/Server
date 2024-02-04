@@ -908,39 +908,23 @@ public class RecipeServiceImpl implements RecipeService {
     @Transactional(readOnly = false)
     public TestRecipe testCreate(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages) throws IOException {
 
-        CompletableFuture<TestRecipe> savedRecipeFuture = CompletableFuture.supplyAsync(() ->{
-            TestRecipe buildRecipe = null;
-            try {
-                buildRecipe = RecipeConverter.toTestRecipe(request, thumbnail);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            return testRecipeRepository.save(buildRecipe);
-                });
+        TestRecipe buildRecipe = RecipeConverter.toTestRecipe(request, thumbnail);
+        TestRecipe recipe = testRecipeRepository.save(buildRecipe);
 
-        savedRecipeFuture.thenAccept(recipe -> {
-            RecipeConverter.toTestRecipeCategory(request.getCategoryId(),recipe).join().stream()
-                    .map(categoryMapping -> testRecipeCategoryMappingRepository.save(categoryMapping))
-                    .peek(categoryMapping -> categoryMapping.setRecipe(recipe));
-//                    .collect(Collectors.toList())
-//                    .stream()
-//                    .map(categoryMapping -> categoryMapping.setRecipe(recipe));
-        });
+        RecipeConverter.toTestRecipeCategory(request.getCategoryId(),recipe).stream()
+                .map(categoryMapping -> testRecipeCategoryMappingRepository.save(categoryMapping))
+                .peek(categoryMapping -> categoryMapping.setRecipe(recipe));
 
 
-        savedRecipeFuture.thenAccept(recipe -> {
-            RecipeConverter.toTestStep(request, recipe, stepImages).join().stream()
-                    .map(step -> testStepRepository.save(step))
-                    .peek(step -> step.setRecipe(recipe));
-        });
+        RecipeConverter.toTestStep(request, recipe, stepImages).stream()
+                .map(step -> testStepRepository.save(step))
+                .peek(step -> step.setRecipe(recipe));
 
-        savedRecipeFuture.thenAccept(recipe -> {
-            RecipeConverter.toTestIngredient(request, recipe).join().stream()
-                    .map(ingredient -> testIngredientRepository.save(ingredient))
-                    .peek(ingredient -> ingredient.setRecipe(recipe));
-        });
+        RecipeConverter.toTestIngredient(request, recipe).stream()
+                .map(ingredient -> testIngredientRepository.save(ingredient))
+                .peek(ingredient -> ingredient.setRecipe(recipe));
 
-        return savedRecipeFuture.join();
+        return recipe;
     }
 
     @Override
