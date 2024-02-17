@@ -85,7 +85,8 @@ cloud:
     credentials:
       accessKey: ${AWS_ACCESS_KEY_ID}
       secretKey: ${AWS_SECRET_ACCESS_KEY}
-
+    cloudfront:
+      uri: ${AWS_CLOUDFRONT}
 
 jwt:
   header: Authorization
@@ -182,6 +183,8 @@ cloud:
     credentials:
       accessKey: ${AWS_ACCESS_KEY_ID}
       secretKey: ${AWS_SECRET_ACCESS_KEY}
+    cloudfront:
+      uri: ${AWS_CLOUDFRONT}
 
 jwt:
   header: Authorization
@@ -276,6 +279,8 @@ cloud:
     credentials:
       accessKey: ${AWS_ACCESS_KEY_ID}
       secretKey: ${AWS_SECRET_ACCESS_KEY}
+    cloudfront:
+      uri: ${CLOUDFRONT}
 
 jwt:
   header: Authorization
