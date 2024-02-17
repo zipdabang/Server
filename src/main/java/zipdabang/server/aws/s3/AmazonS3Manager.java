@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.config.AmazonConfig;
@@ -24,13 +25,19 @@ public class AmazonS3Manager {
     private final AmazonConfig amazonConfig;
     private final UuidRepository uuidRepository;
 
+    @Value("${cloud.aws.cloudfront.uri}")
+    private String cloudfrontUri;
+
+
     public String uploadFile(String KeyName, MultipartFile file) throws IOException {
         System.out.println(KeyName);
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());
         amazonS3.putObject(new PutObjectRequest(amazonConfig.getBucket(), KeyName,file.getInputStream(), metadata));
 
-        return amazonS3.getUrl(amazonConfig.getBucket(), KeyName).toString();
+        return cloudfrontUri+amazonS3.getUrl(amazonConfig.getBucket(), KeyName).getPath();
+
+        //return amazonS3.getUrl(amazonConfig.getBucket(), KeyName).toString();
     }
 
     public String getPattern(){
