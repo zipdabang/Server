@@ -848,7 +848,7 @@ public class RecipeConverter {
                 .recipeName(recipe.getName())
                 .ownerImage("")
                 .nickname("test")
-                .thumbnailUrl(recipe.getThumbnailUrl())
+                .thumbnailUrl(recipe.getThumbnailUrl()+"?size=thumbnail")
                 .time(recipe.getTime())
                 .intro(recipe.getIntro())
                 .recipeTip(recipe.getRecipeTip())
@@ -874,7 +874,7 @@ public class RecipeConverter {
                 .map(step-> RecipeResponseDto.StepDto.builder()
                         .stepNum(step.getStepNum())
                         .description(step.getDescription())
-                        .image(step.getImageUrl())
+                        .image(step.getImageUrl()+"?size=step")
                         .build())
                 .collect(Collectors.toList());
     }
@@ -907,7 +907,7 @@ public class RecipeConverter {
                 .categoryId(getTestCategoryIds(recipe))
                 .recipeName(recipe.getName())
                 .nickname("test")
-                .thumbnailUrl(recipe.getThumbnailUrl())
+                .thumbnailUrl(recipe.getThumbnailUrl()+"?size=preview")
                 .createdAt(staticTimeConverter.ConvertTime(recipe.getCreatedAt()))
                 .updatedAt(staticTimeConverter.ConvertTime(recipe.getUpdatedAt()))
                 .comments(0L)
