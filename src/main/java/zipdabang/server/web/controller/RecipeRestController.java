@@ -965,7 +965,7 @@ RecipeRestController {
             @ApiResponse(responseCode = "4100", description = "레시피 작성시 누락된 내용이 있습니다. 미완료는 임시저장으로 가세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
-    @PostMapping(value = "/test/members/recipes")
+//    @PostMapping(value = "/test/members/recipes")
     public ResponseDto<RecipeResponseDto.RecipeStatusDto> testCreateRecipe(
             @RequestPart(value = "content") RecipeRequestDto.CreateRecipeDto request,
             @RequestPart(value = "thumbnail") MultipartFile thumbnail,
@@ -974,6 +974,22 @@ RecipeRestController {
         log.info("사용자가 준 정보 : {}", request.toString());
 
         TestRecipe recipe = recipeService.testCreate(request, thumbnail, stepImages);
+        return ResponseDto.of(RecipeConverter.toTestRecipeStatusDto(recipe));
+    }
+
+    @Operation(summary = "레시피 등록 테스트-image url만 넘겨받기 API 🔑 ✔")
+    @ApiResponses({
+            @ApiResponse(responseCode = "2000"),
+            @ApiResponse(responseCode = "4100", description = "레시피 작성시 누락된 내용이 있습니다. 미완료는 임시저장으로 가세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @PostMapping(value = "/test/members/recipes")
+    public ResponseDto<RecipeResponseDto.RecipeStatusDto> testCreateRecipeWithImageURL(
+            @RequestBody RecipeRequestDto.CreateRecipeWithImageUrlDto request) throws IOException {
+
+        log.info("사용자가 준 정보 : {}", request.toString());
+
+        TestRecipe recipe = recipeService.testCreateWithImageUrl(request);
         return ResponseDto.of(RecipeConverter.toTestRecipeStatusDto(recipe));
     }
 

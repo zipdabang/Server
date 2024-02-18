@@ -947,6 +947,45 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
+    @Transactional(readOnly = false)
+    public TestRecipe testCreateWithImageUrl(RecipeRequestDto.CreateRecipeWithImageUrlDto request){
+
+        CompletableFuture<TestRecipe> savedRecipeFuture = CompletableFuture.supplyAsync(() ->{
+            TestRecipe buildRecipe = null;
+                buildRecipe = RecipeConverter.toTestRecipeWithImageUrl(request);
+
+            return testRecipeRepository.save(buildRecipe);
+        });
+
+        savedRecipeFuture.thenAccept(recipe -> {
+            RecipeConverter.toTestRecipeCategory(request.getCategoryId(),recipe).join().stream()
+                    .map(categoryMapping -> testRecipeCategoryMappingRepository.save(categoryMapping))
+                    .collect(Collectors.toList())
+                    .stream()
+                    .map(categoryMapping -> categoryMapping.setRecipe(recipe));
+        });
+
+
+        savedRecipeFuture.thenAccept(recipe -> {
+            RecipeConverter.toTestStepWithImageUrl(request, recipe).join().stream()
+                    .map(step -> testStepRepository.save(step))
+                    .collect(Collectors.toList())
+                    .stream()
+                    .map(step -> step.setRecipe(recipe));
+        });
+
+        savedRecipeFuture.thenAccept(recipe -> {
+            RecipeConverter.toTestIngredientWithImageUrl(request, recipe).join().stream()
+                    .map(ingredient -> testIngredientRepository.save(ingredient))
+                    .collect(Collectors.toList())
+                    .stream()
+                    .map(ingredient -> ingredient.setRecipe(recipe));
+        });
+
+        return savedRecipeFuture.join();
+    }
+
+    @Override
     public TestRecipe getTestRecipe(Long recipeId) {
         TestRecipe findRecipe = testRecipeRepository.findById(recipeId).orElseThrow(()->new RecipeException(CommonStatus.NO_RECIPE_EXIST));
 

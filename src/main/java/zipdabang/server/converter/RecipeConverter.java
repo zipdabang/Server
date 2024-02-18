@@ -738,16 +738,16 @@ public class RecipeConverter {
         CompletableFuture<TestRecipe> buildRecipe = new CompletableFuture<>();
         CompletableFuture<String> setThumbnail = new CompletableFuture<>();
 
-        ioExecutor.submit(() -> buildRecipe.complete(TestRecipe.builder()
+        buildRecipe.complete(TestRecipe.builder()
                 .isBarista(false)
                 .name(request.getName())
                 .intro(request.getIntro())
                 .recipeTip(request.getRecipeTip())
                 .time(request.getTime())
-                .build()));
+                .build());
 
         if(thumbnail != null)
-            ioExecutor.submit(()-> setThumbnail.complete(uploadTestThumbnail(thumbnail)));
+            setThumbnail.complete(uploadTestThumbnail(thumbnail));
         else
             throw new RecipeException(CommonStatus.NULL_RECIPE_ERROR);
 
@@ -755,6 +755,18 @@ public class RecipeConverter {
             recipe.setThumbnail(imageUrl);
             return recipe;
         }).join();
+    }
+
+    public static TestRecipe toTestRecipeWithImageUrl(RecipeRequestDto.CreateRecipeWithImageUrlDto request){
+
+            return TestRecipe.builder()
+                .isBarista(false)
+                .name(request.getName())
+                .intro(request.getIntro())
+                .thumbnailUrl(request.getThumbnailUrl())
+                .recipeTip(request.getRecipeTip())
+                .time(request.getTime())
+                .build();
     }
 
 
@@ -786,22 +798,37 @@ public class RecipeConverter {
         );
     }
 
+    public static CompletableFuture<List<TestStep>> toTestStepWithImageUrl(RecipeRequestDto.CreateRecipeWithImageUrlDto request, TestRecipe recipe) {
+        return CompletableFuture.supplyAsync(() -> request.getSteps().stream().parallel()
+                .map(step-> {
+                    if (step.getDescription() == null)
+                        throw new RecipeException(CommonStatus.NULL_RECIPE_ERROR);
+                    try {
+                        return toTestStepWithImageUrlDto(step, recipe);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList()), ioExecutor
+        );
+    }
+
     private static TestStep toTestStepDto(RecipeRequestDto.StepDto step, TestRecipe recipe, List<MultipartFile> stepImages) throws IOException {
 
         CompletableFuture<TestStep> buildStep = new CompletableFuture<>();
         CompletableFuture<String> setStep = new CompletableFuture<>();
 
-        ioExecutor.submit(() -> buildStep.complete(TestStep.builder()
+        buildStep.complete(TestStep.builder()
                 .stepNum(step.getStepNum())
                 .description(step.getDescription())
                 .recipe(recipe)
-                .build()));
+                .build());
 
         for (int i = 0; i <= stepImages.size(); i++) {
             Integer imageNum = Integer.parseInt(stepImages.get(i).getOriginalFilename().substring(0,1)) + 1;
             if (imageNum == step.getStepNum()){
                 MultipartFile stepImage = stepImages.get(i);
-                ioExecutor.submit(()-> setStep.complete(uploadTestStep(stepImage)));
+                setStep.complete(uploadTestStep(stepImage));
                 break;
             }
             else if(i == stepImages.size())
@@ -815,7 +842,23 @@ public class RecipeConverter {
 
     }
 
+    private static TestStep toTestStepWithImageUrlDto(RecipeRequestDto.StepWithImageUrlDto step, TestRecipe recipe) throws IOException {
+
+        return TestStep.builder()
+                .stepNum(step.getStepNum())
+                .description(step.getDescription())
+                .imageUrl(step.getStepUrl())
+                .recipe(recipe)
+                .build();
+    }
+
     public static CompletableFuture<List<TestIngredient>> toTestIngredient(RecipeRequestDto.CreateRecipeDto request, TestRecipe recipe) {
+        return CompletableFuture.completedFuture(request.getIngredients().stream().parallel()
+                .map(ingredient -> toTestIngredientDto(ingredient, recipe))
+                .collect(Collectors.toList()));
+    }
+
+    public static CompletableFuture<List<TestIngredient>> toTestIngredientWithImageUrl(RecipeRequestDto.CreateRecipeWithImageUrlDto request, TestRecipe recipe) {
         return CompletableFuture.completedFuture(request.getIngredients().stream().parallel()
                 .map(ingredient -> toTestIngredientDto(ingredient, recipe))
                 .collect(Collectors.toList()));
