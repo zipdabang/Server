@@ -19,6 +19,8 @@ spring:
     username: ${aws.db.username}
     password: ${aws.db.password}
     url: ${aws.db.url}
+  #  hikari:
+  #    leak-detection-threshold: 3000
   output:
     ansi:
       enabled: always
@@ -118,6 +120,9 @@ spring:
     username: ${aws.db.username}
     password: ${aws.db.password}
     url: ${aws.db.url}
+    hikari:
+      #leak-detection-threshold: 2000
+      #maximum-pool-size: 1
   output:
     ansi:
       enabled: always
@@ -205,6 +210,11 @@ naver-sms:
 fcm:
   url: ${FCM_URL}
   project-num: ${FCM_PROJECT_NUMBER}
+
+logging:
+  level:
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari: TRACE
 
 ---
 spring:

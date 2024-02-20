@@ -949,40 +949,28 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     @Transactional(readOnly = false)
     public TestRecipe testCreateWithImageUrl(RecipeRequestDto.CreateRecipeWithImageUrlDto request){
+        TestRecipe buildRecipe = RecipeConverter.toTestRecipeWithImageUrl(request);
+        testRecipeRepository.save(buildRecipe);
 
-        CompletableFuture<TestRecipe> savedRecipeFuture = CompletableFuture.supplyAsync(() ->{
-            TestRecipe buildRecipe = null;
-                buildRecipe = RecipeConverter.toTestRecipeWithImageUrl(request);
+        RecipeConverter.toTestRecipeCategory(request.getCategoryId(),buildRecipe).join().stream()
+                .map(categoryMapping -> testRecipeCategoryMappingRepository.save(categoryMapping))
+                .collect(Collectors.toList())
+                .stream()
+                .map(categoryMapping -> categoryMapping.setRecipe(buildRecipe));
 
-            return testRecipeRepository.save(buildRecipe);
-        });
+        RecipeConverter.toTestStepWithImageUrl(request, buildRecipe).join().stream()
+                .map(step -> testStepRepository.save(step))
+                .collect(Collectors.toList())
+                .stream()
+                .map(step -> step.setRecipe(buildRecipe));
 
-        savedRecipeFuture.thenAccept(recipe -> {
-            RecipeConverter.toTestRecipeCategory(request.getCategoryId(),recipe).join().stream()
-                    .map(categoryMapping -> testRecipeCategoryMappingRepository.save(categoryMapping))
-                    .collect(Collectors.toList())
-                    .stream()
-                    .map(categoryMapping -> categoryMapping.setRecipe(recipe));
-        });
+        RecipeConverter.toTestIngredientWithImageUrl(request, buildRecipe).join().stream()
+                .map(ingredient -> testIngredientRepository.save(ingredient))
+                .collect(Collectors.toList())
+                .stream()
+                .map(ingredient -> ingredient.setRecipe(buildRecipe));
 
-
-        savedRecipeFuture.thenAccept(recipe -> {
-            RecipeConverter.toTestStepWithImageUrl(request, recipe).join().stream()
-                    .map(step -> testStepRepository.save(step))
-                    .collect(Collectors.toList())
-                    .stream()
-                    .map(step -> step.setRecipe(recipe));
-        });
-
-        savedRecipeFuture.thenAccept(recipe -> {
-            RecipeConverter.toTestIngredientWithImageUrl(request, recipe).join().stream()
-                    .map(ingredient -> testIngredientRepository.save(ingredient))
-                    .collect(Collectors.toList())
-                    .stream()
-                    .map(ingredient -> ingredient.setRecipe(recipe));
-        });
-
-        return savedRecipeFuture.join();
+        return buildRecipe;
     }
 
     @Override
