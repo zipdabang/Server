@@ -55,17 +55,12 @@ public class TempRecipe extends BaseEntity {
     private List<TempIngredient> ingredientList;
 
 
-    public TempRecipe setThumbnail(String imageUrl) {
-        log.info("setThumbnail 호출됨");
-        this.thumbnailUrl = imageUrl;
-        return this;
-    }
-
-    public TempRecipe updateInfo(RecipeRequestDto.TempRecipeDto request) {
+    public TempRecipe updateInfo(RecipeRequestDto.SetRecipeWithImageUrlDto request) {
         this.name = request.getName();
         this.intro = request.getIntro();
         this.recipeTip = request.getRecipeTip();
         this.time = request.getTime();
+        this.thumbnailUrl =request.getThumbnailUrl();
 
         return this;
     }

@@ -21,8 +21,6 @@ import zipdabang.server.domain.enums.AlarmType;
 import zipdabang.server.domain.inform.PushAlarm;
 import zipdabang.server.domain.member.*;
 import zipdabang.server.domain.recipe.*;
-import zipdabang.server.domain.test.QTestRecipe;
-import zipdabang.server.domain.test.TestRecipe;
 import zipdabang.server.firebase.fcm.service.FirebaseService;
 import zipdabang.server.repository.AlarmRepository.AlarmCategoryRepository;
 import zipdabang.server.repository.AlarmRepository.PushAlarmRepository;
@@ -33,11 +31,6 @@ import zipdabang.server.repository.recipeRepositories.*;
 import zipdabang.server.repository.recipeRepositories.recipeRepositoryCustom.CommentRepositoryCustom;
 import zipdabang.server.repository.recipeRepositories.recipeRepositoryCustom.RecipeRepositoryCustom;
 import zipdabang.server.repository.recipeRepositories.recipeRepositoryCustom.TempRecipeRepositoryCustom;
-import zipdabang.server.repository.testRepository.TestIngredientRepository;
-import zipdabang.server.repository.testRepository.TestRecipeCategoryMappingRepository;
-import zipdabang.server.repository.testRepository.TestRecipeRepository;
-import zipdabang.server.repository.testRepository.TestStepRepository;
-import zipdabang.server.repository.testRepository.testRecipeRepositoryCustom.TestRecipeRepositoryCustom;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
@@ -46,7 +39,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -99,7 +91,7 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe buildRecipe = RecipeConverter.toRecipe(request, thumbnail, member);
         Recipe recipe = recipeRepository.save(buildRecipe);
 
-        RecipeConverter.toRecipeCategory(request.getCategoryId(),recipe).stream()
+        RecipeConverter.toRecipeCategory(request.getCategoryId(),recipe).join().stream()
                 .map(categoryMapping -> recipeCategoryMappingRepository.save(categoryMapping))
                 .collect(Collectors.toList())
                 .stream()
@@ -123,7 +115,34 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     @Transactional(readOnly = false)
-    public Recipe update(Long recipeId, RecipeRequestDto.UpdateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException {
+    public Recipe createWithImageUrl(RecipeRequestDto.SetRecipeWithImageUrlDto request, Member member){
+        Recipe buildRecipe = RecipeConverter.toRecipeWithImageUrl(request, member);
+        recipeRepository.save(buildRecipe);
+
+        RecipeConverter.toRecipeCategory(request.getCategoryId(),buildRecipe).join().stream()
+                .map(categoryMapping -> recipeCategoryMappingRepository.save(categoryMapping))
+                .collect(Collectors.toList())
+                .stream()
+                .map(categoryMapping -> categoryMapping.setRecipe(buildRecipe));
+
+        RecipeConverter.toStepWithImageUrl(request, buildRecipe).join().stream()
+                .map(step -> stepRepository.save(step))
+                .collect(Collectors.toList())
+                .stream()
+                .map(step -> step.setRecipe(buildRecipe));
+
+        RecipeConverter.toIngredientWithImageUrl(request, buildRecipe).join().stream()
+                .map(ingredient -> ingredientRepository.save(ingredient))
+                .collect(Collectors.toList())
+                .stream()
+                .map(ingredient -> ingredient.setRecipe(buildRecipe));
+
+        return buildRecipe;
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public Recipe update(Long recipeId, RecipeRequestDto.SetRecipeWithImageUrlDto request, Member member) {
         log.info("service: ", request.toString());
 
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeException(CommonStatus.NO_RECIPE_EXIST));
@@ -133,34 +152,21 @@ public class RecipeServiceImpl implements RecipeService {
 
         recipeCategoryMappingRepository.deleteAllByRecipe(recipe);
 
-        RecipeConverter.toRecipeCategory(request.getCategoryId(),recipe).stream()
+        RecipeConverter.toRecipeCategory(request.getCategoryId(),recipe).join().stream()
                 .map(categoryMapping -> recipeCategoryMappingRepository.save(categoryMapping))
                 .collect(Collectors.toList())
                 .stream()
                 .map(categoryMapping -> categoryMapping.setRecipe(recipe));
 
         //recipe
-        String deleteThumbnailUrl = null;
-        String newThumbnailUrl = null;
-        if (thumbnail != null) {
-            deleteThumbnailUrl = recipe.getThumbnailUrl();
-            newThumbnailUrl = RecipeConverter.uploadThumbnail(thumbnail);
-            recipe.setThumbnail(newThumbnailUrl);
-        }
-
         recipe.updateInfo(request);
 
 
         //step
-        List<String> presentImageUrls = stepRepository.findAllByRecipeId(recipeId).stream()
-                .filter(steps -> steps.getImageUrl() != null)
-                .map(tempStep -> tempStep.getImageUrl())
-                .collect(Collectors.toList());
-
         stepRepository.deleteAllByRecipe(recipe);
 
 
-        RecipeConverter.toUpdateStep(request, recipe, stepImages, presentImageUrls).stream()
+        RecipeConverter.toUpdateStep(request, recipe).stream()
                 .map(step -> stepRepository.save(step))
                 .collect(Collectors.toList())
                 .stream()
@@ -177,30 +183,19 @@ public class RecipeServiceImpl implements RecipeService {
                 .map(ingredient -> ingredient.setRecipe(recipe));
 
 
-        //s3 삭제는 맨 마지막에
-        if (deleteThumbnailUrl != null)
-            amazonS3Manager.deleteFile(RecipeConverter.toKeyName(deleteThumbnailUrl).substring(1));
-
-        if(!presentImageUrls.isEmpty())
-            presentImageUrls.forEach(imageUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(imageUrl).substring(1)));
-
-
         return recipe;
     }
 
     @Override
     @Transactional(readOnly = false)
-    public TempRecipe tempCreate(RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException {
-
+    public TempRecipe tempCreate(RecipeRequestDto.SetRecipeWithImageUrlDto request, Member member){
         log.info("service: ", request.toString());
 
-        TempRecipe buildTempRecipe = RecipeConverter.toTempRecipe(request, thumbnail, member);
+        TempRecipe buildTempRecipe = RecipeConverter.toTempRecipe(request, member);
         TempRecipe tempRecipe = tempRecipeRepository.save(buildTempRecipe);
-        List<String> presentImageUrls = new ArrayList<>();
-
 
         if (request.getStepCount() > 0) {
-            RecipeConverter.toTempStep(request, tempRecipe, stepImages, presentImageUrls).stream()
+            RecipeConverter.toTempStep(request, tempRecipe).stream()
                     .map(step -> tempStepRepository.save(step))
                     .collect(Collectors.toList())
                     .stream()
@@ -220,41 +215,20 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     @Transactional(readOnly = false)
-    public TempRecipe tempUpdate(Long tempId, RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException {
+    public TempRecipe tempUpdate(Long tempId, RecipeRequestDto.SetRecipeWithImageUrlDto request) {
 
         log.info("service: ", request.toString());
 
         TempRecipe tempRecipe = tempRecipeRepository.findById(tempId).orElseThrow(() -> new RecipeException(CommonStatus.NO_TEMP_RECIPE_EXIST));
 
         //recipe
-        String deleteThumbnailUrl = null;
-        String newThumbnailUrl = null;
-        if (thumbnail != null) {
-            if (tempRecipe.getThumbnailUrl() != null)
-                deleteThumbnailUrl = tempRecipe.getThumbnailUrl();
-            newThumbnailUrl = RecipeConverter.uploadThumbnail(thumbnail);
-        }
-        else{
-            if (request.getThumbnailUrl() == null && tempRecipe.getThumbnailUrl() != null)
-                deleteThumbnailUrl = tempRecipe.getThumbnailUrl();
-            else if (request.getThumbnailUrl() != null)
-                newThumbnailUrl = request.getThumbnailUrl();
-        }
-
-        tempRecipe.setThumbnail(newThumbnailUrl);
         tempRecipe.updateInfo(request);
 
-
         //step
-        List<String> presentImageUrls = tempStepRepository.findAllByTempRecipe(tempRecipe).stream()
-                .filter(steps -> steps.getImageUrl() != null)
-                .map(tempStep -> tempStep.getImageUrl())
-                .collect(Collectors.toList());
-
         tempStepRepository.deleteAllByTempRecipe(tempRecipe);
 
         if(request.getStepCount() > 0) {
-            RecipeConverter.toTempStep(request, tempRecipe, stepImages, presentImageUrls).stream()
+            RecipeConverter.toTempStep(request, tempRecipe).stream()
                     .map(step -> tempStepRepository.save(step))
                     .collect(Collectors.toList())
                     .stream()
@@ -274,12 +248,6 @@ public class RecipeServiceImpl implements RecipeService {
         else{
             tempIngredientRepository.deleteAllByTempRecipe(tempRecipe);
         }
-
-        //s3 삭제는 맨 마지막에
-        if (deleteThumbnailUrl != null)
-            amazonS3Manager.deleteFile(RecipeConverter.toKeyName(deleteThumbnailUrl).substring(1));
-        if(!presentImageUrls.isEmpty())
-            presentImageUrls.forEach(imageUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(imageUrl).substring(1)));
 
         return tempRecipe;
 
@@ -334,7 +302,7 @@ public class RecipeServiceImpl implements RecipeService {
 
         Recipe recipe = recipeRepository.save(RecipeConverter.toRecipeFromTemp(tempRecipe, tempSteps, tempIngredients, member));
 
-        RecipeConverter.toRecipeCategory(categoryList.getCategoryId(),recipe).stream()
+        RecipeConverter.toRecipeCategory(categoryList.getCategoryId(),recipe).join().stream()
                 .map(categoryMapping -> recipeCategoryMappingRepository.save(categoryMapping))
                 .collect(Collectors.toList())
                 .stream()
@@ -583,7 +551,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public Long getrecipeListByCategoryCounting(Long categoryId, Member member) {
+    public Long getRecipeListByCategoryCounting(Long categoryId, Member member) {
 
         List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
 
@@ -594,11 +562,6 @@ public class RecipeServiceImpl implements RecipeService {
         Long count = recipeRepositoryCustom.recipeTotalCount(member, whereCondition);
 
         return count;
-    }
-
-    @Override
-    public boolean checkRecipeCategoryExist(Long categoryId) {
-        return recipeCategoryRepository.existsById(categoryId);
     }
 
     @Override
@@ -895,138 +858,4 @@ public class RecipeServiceImpl implements RecipeService {
         return recipeCategoryRepository.findById(categoryId).get();
     }
 
-    /**
-     * 부하테스트용 서비스
-     */
-    private final TestRecipeRepository testRecipeRepository;
-    private final TestRecipeCategoryMappingRepository testRecipeCategoryMappingRepository;
-    private final TestStepRepository testStepRepository;
-    private final TestIngredientRepository testIngredientRepository;
-    private final TestRecipeRepositoryCustom testRecipeRepositoryCustom;
-
-    @Override
-    @Transactional(readOnly = false)
-    public TestRecipe testCreate(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages) throws IOException {
-
-        CompletableFuture<TestRecipe> savedRecipeFuture = CompletableFuture.supplyAsync(() ->{
-            TestRecipe buildRecipe = null;
-            try {
-                buildRecipe = RecipeConverter.toTestRecipe(request, thumbnail);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            return testRecipeRepository.save(buildRecipe);
-        });
-
-        savedRecipeFuture.thenAccept(recipe -> {
-            RecipeConverter.toTestRecipeCategory(request.getCategoryId(),recipe).join().stream()
-                    .map(categoryMapping -> testRecipeCategoryMappingRepository.save(categoryMapping))
-                    .collect(Collectors.toList())
-                    .stream()
-                    .map(categoryMapping -> categoryMapping.setRecipe(recipe));
-        });
-
-
-        savedRecipeFuture.thenAccept(recipe -> {
-            RecipeConverter.toTestStep(request, recipe, stepImages).join().stream()
-                    .map(step -> testStepRepository.save(step))
-                    .collect(Collectors.toList())
-                    .stream()
-                    .map(step -> step.setRecipe(recipe));
-        });
-
-        savedRecipeFuture.thenAccept(recipe -> {
-            RecipeConverter.toTestIngredient(request, recipe).join().stream()
-                    .map(ingredient -> testIngredientRepository.save(ingredient))
-                    .collect(Collectors.toList())
-                    .stream()
-                    .map(ingredient -> ingredient.setRecipe(recipe));
-        });
-
-        return savedRecipeFuture.join();
-    }
-
-    @Override
-    @Transactional(readOnly = false)
-    public TestRecipe testCreateWithImageUrl(RecipeRequestDto.CreateRecipeWithImageUrlDto request){
-        TestRecipe buildRecipe = RecipeConverter.toTestRecipeWithImageUrl(request);
-        testRecipeRepository.save(buildRecipe);
-
-        RecipeConverter.toTestRecipeCategory(request.getCategoryId(),buildRecipe).join().stream()
-                .map(categoryMapping -> testRecipeCategoryMappingRepository.save(categoryMapping))
-                .collect(Collectors.toList())
-                .stream()
-                .map(categoryMapping -> categoryMapping.setRecipe(buildRecipe));
-
-        RecipeConverter.toTestStepWithImageUrl(request, buildRecipe).join().stream()
-                .map(step -> testStepRepository.save(step))
-                .collect(Collectors.toList())
-                .stream()
-                .map(step -> step.setRecipe(buildRecipe));
-
-        RecipeConverter.toTestIngredientWithImageUrl(request, buildRecipe).join().stream()
-                .map(ingredient -> testIngredientRepository.save(ingredient))
-                .collect(Collectors.toList())
-                .stream()
-                .map(ingredient -> ingredient.setRecipe(buildRecipe));
-
-        return buildRecipe;
-    }
-
-    @Override
-    public TestRecipe getTestRecipe(Long recipeId) {
-        TestRecipe findRecipe = testRecipeRepository.findById(recipeId).orElseThrow(()->new RecipeException(CommonStatus.NO_RECIPE_EXIST));
-
-        findRecipe.updateView();
-        return findRecipe;
-    }
-
-    @Transactional
-    @Override
-    public Page<TestRecipe> testRecipeListByCategory(Long categoryId, Integer pageIndex, String order) {
-
-        List<RecipeCategory> recipeCategory = recipeCategoryRepository.findAllById(categoryId);
-
-        if(recipeCategory.isEmpty())
-            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
-
-        List<TestRecipe> content = new ArrayList<>();
-
-        BooleanExpression whereCondition = testRecipeRepositoryCustom.recipesInCategoryCondition(categoryId);
-
-
-        content = testRecipeRepositoryCustom.testRecipesOrderBy(pageIndex,pageSize, order, whereCondition);
-
-        log.info("서비스단의 상황 : {}", content.size());
-        Long count = testRecipeRepositoryCustom.testRecipeTotalCount(whereCondition);
-
-        if (count < pageIndex*pageSize)
-            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
-        if (content.size() > count - pageIndex*pageSize)
-            content = content.subList(0, count.intValue()-pageIndex*pageSize);
-
-        return new PageImpl<>(content,PageRequest.of(pageIndex,pageSize), count);
-    }
-
-    @Transactional(readOnly = false)
-    @Override
-    public Boolean deleteTestRecipe() {
-        List<TestRecipe> findRecipes = testRecipeRepository.findAll();
-
-        List<String> thumbnailUrls = findRecipes.stream().parallel()
-            .map(recipe -> recipe.getThumbnailUrl()).collect(Collectors.toList());
-        List<String> stepUrlList = testStepRepository.findAll().stream().parallel()
-                .filter(steps -> steps.getImageUrl() != null)
-                .map(step -> step.getImageUrl())
-                .collect(Collectors.toList());
-
-        testRecipeRepository.deleteAll();
-
-        thumbnailUrls.parallelStream().forEach(thumbnailUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(thumbnailUrl).substring(1)));
-        stepUrlList.parallelStream()
-                .forEach(stepUrl -> amazonS3Manager.deleteFile(RecipeConverter.toKeyName(stepUrl).substring(1)));
-
-        return testRecipeRepository.count() == 0;
-
-    }
 }

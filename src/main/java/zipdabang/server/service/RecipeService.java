@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
-import zipdabang.server.domain.test.TestRecipe;
 import zipdabang.server.web.dto.requestDto.RecipeRequestDto;
 import zipdabang.server.web.dto.responseDto.RecipeResponseDto;
 
@@ -39,9 +38,6 @@ public interface RecipeService {
 
     List<List<Recipe>> searchRecipePreview(String keyword, Member member);
 
-
-    boolean checkRecipeCategoryExist(Long categoryId);
-
     Boolean deleteRecipe(Long recipeId, Member member);
 
     Comment createComment(String content, Long recipeId, Member member);
@@ -56,9 +52,9 @@ public interface RecipeService {
 
     Long reportRecipe(Long recipeId, Long reportId, Member member);
 
-    TempRecipe tempCreate(RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException;
+    TempRecipe tempCreate(RecipeRequestDto.SetRecipeWithImageUrlDto request, Member member);
 
-    TempRecipe tempUpdate(Long tempId, RecipeRequestDto.TempRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException;
+    TempRecipe tempUpdate(Long tempId, RecipeRequestDto.SetRecipeWithImageUrlDto request);
 
     List<Recipe> getTop5RecipePerCategory(Long categoryId);
 
@@ -79,8 +75,6 @@ public interface RecipeService {
 
     Page<TempRecipe> getTempRecipeList(Integer pageIndex, Member member);
 
-    Recipe update(Long recipeId, RecipeRequestDto.UpdateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages, Member member) throws IOException;
-
     List<Recipe> getMyRecipePreview(Member member);
 
     Page<Recipe> getMyRecipeList(Integer pageIndex, Member member);
@@ -97,19 +91,13 @@ public interface RecipeService {
 
     Long searchRecipeCounting(Long categoryId, String keyword, Member member);
 
-    Long getrecipeListByCategoryCounting(Long categoryId, Member member);
+    Long getRecipeListByCategoryCounting(Long categoryId, Member member);
 
     Long getWrittenByRecipeCounting(String writtenby, Member member);
 
     Long getCommentCount(Recipe recipe, Member member);
 
-    TestRecipe testCreate(RecipeRequestDto.CreateRecipeDto request, MultipartFile thumbnail, List<MultipartFile> stepImages) throws IOException;
+    Recipe createWithImageUrl(RecipeRequestDto.SetRecipeWithImageUrlDto request, Member member);
 
-    TestRecipe getTestRecipe(Long recipeId);
-
-    Page<TestRecipe> testRecipeListByCategory(Long categoryId, Integer pageIndex, String order);
-
-    Boolean deleteTestRecipe();
-
-    TestRecipe testCreateWithImageUrl(RecipeRequestDto.CreateRecipeWithImageUrlDto request);
+    Recipe update(Long recipeId, RecipeRequestDto.SetRecipeWithImageUrlDto request, Member member);
 }

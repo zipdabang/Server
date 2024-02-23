@@ -4,7 +4,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.test.QTestRecipe;
 import zipdabang.server.domain.test.QTestRecipeCategoryMapping;
 import zipdabang.server.domain.test.TestRecipe;
@@ -12,8 +11,6 @@ import zipdabang.server.repository.testRepository.testRecipeRepositoryCustom.Tes
 
 import java.util.List;
 
-import static zipdabang.server.domain.recipe.QRecipe.recipe;
-import static zipdabang.server.domain.recipe.QRecipeCategoryMapping.recipeCategoryMapping;
 import static zipdabang.server.domain.test.QTestRecipe.testRecipe;
 import static zipdabang.server.domain.test.QTestRecipeCategoryMapping.testRecipeCategoryMapping;
 
