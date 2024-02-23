@@ -7,12 +7,8 @@ import java.util.List;
 
 public class RecipeRequestDto {
 
-    @Getter @Setter
-    public static class RecipeCategoryList{
-        List<Long> categoryId;
-    }
-
-    @Getter @Setter
+    @Getter
+    @Setter
     public static class CreateRecipeDto{
         List<Long> categoryId;
         String name;
@@ -25,8 +21,20 @@ public class RecipeRequestDto {
         List<NewIngredientDto> ingredients;
     }
 
+    @Getter
+    public static class StepDto{
+        private Integer stepNum;
+        private String description;
+    }
+
+    @Getter
+    public static class NewIngredientDto{
+        private String ingredientName;
+        private String quantity;
+    }
+
     @Getter @Setter
-    public static class SetRecipeWithImageUrlDto {
+    public static class CreateRecipeWithImageUrlDto{
         List<Long> categoryId;
         String name;
         String time;
@@ -40,39 +48,9 @@ public class RecipeRequestDto {
     }
 
     @Getter
-    public static class NewIngredientDto{
-        private String ingredientName;
-        private String quantity;
-    }
-
-    @Getter
-    public static class StepDto{
-        private Integer stepNum;
-        private String description;
-    }
-
-    @Getter
     public static class StepWithImageUrlDto{
         private Integer stepNum;
         private String stepUrl;
         private String description;
-    }
-
-    @Getter
-    public static class UpdateStepDto{
-        private String stepUrl;
-        private Integer stepNum;
-        private String description;
-    }
-
-
-    @Getter
-    public static class createCommentDto {
-        private String comment;
-    }
-
-    @Getter
-    public static class updateCommentDto {
-        private String comment;
     }
 }

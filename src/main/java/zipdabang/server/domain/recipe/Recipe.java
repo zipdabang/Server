@@ -132,11 +132,12 @@ public class Recipe extends BaseEntity {
         return this;
     }
 
-    public Recipe updateInfo(RecipeRequestDto.UpdateRecipeDto request) {
+    public Recipe updateInfo(RecipeRequestDto.SetRecipeWithImageUrlDto request) {
         this.name = request.getName();
         this.intro = request.getIntro();
         this.recipeTip = request.getRecipeTip();
         this.time = request.getTime();
+        this.thumbnailUrl = request.getThumbnailUrl();
 
         return this;
     }

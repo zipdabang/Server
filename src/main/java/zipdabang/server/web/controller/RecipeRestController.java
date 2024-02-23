@@ -22,7 +22,6 @@ import zipdabang.server.apiPayload.exception.handler.RecipeException;
 import zipdabang.server.converter.RecipeConverter;
 import zipdabang.server.domain.member.Member;
 import zipdabang.server.domain.recipe.*;
-import zipdabang.server.domain.test.TestRecipe;
 import zipdabang.server.service.RecipeService;
 import zipdabang.server.validation.annotation.CheckPage;
 import zipdabang.server.validation.annotation.CheckTempMember;
@@ -43,6 +42,32 @@ RecipeRestController {
 
     private final RecipeService recipeService;
 
+//    @Operation(summary = "🍹figma 레시피 작성하기1, 레시피 등록 API 🔑 ✔", description = "레시피 (작성)등록 화면 API입니다. 임시저장 api는 별도로 있음. step이랑 ingredient 몇개 들어오는지 각Count에 적어주세요")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "2000"),
+//            @ApiResponse(responseCode = "4003", description = "UNAUTHORIZED, 토큰 모양이 이상함, 토큰 제대로 주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCode = "4005", description = "UNAUTHORIZED, 엑세스 토큰 만료, 리프레시 토큰 사용", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCode = "4008", description = "UNAUTHORIZED, 토큰 없음, 토큰 줘요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCode = "4052", description = "BAD_REQUEST, 사용자가 없습니다. 이 api에서 이거 생기면 백앤드 개발자 호출", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCode = "4100", description = "레시피 작성시 누락된 내용이 있습니다. 미완료는 임시저장으로 가세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+//    })
+//    @Parameters({
+//            @Parameter(name = "member", hidden = true),
+//    })
+//    @PostMapping(value = "/members/recipes")
+//    public ResponseDto<RecipeResponseDto.RecipeStatusDto> createRecipe(
+//            @RequestPart(value = "content") RecipeRequestDto.CreateRecipeDto request,
+//            @RequestPart(value = "thumbnail") MultipartFile thumbnail,
+//            @RequestPart(value = "stepImages") List<MultipartFile> stepImages,
+//            @CheckTempMember @AuthMember Member member) throws IOException {
+//
+//        log.info("사용자가 준 정보 : {}", request.toString());
+//
+//        Recipe recipe = recipeService.create(request, thumbnail, stepImages, member);
+//        return ResponseDto.of(RecipeConverter.toRecipeStatusDto(recipe));
+//    }
+
     @Operation(summary = "🍹figma 레시피 작성하기1, 레시피 등록 API 🔑 ✔", description = "레시피 (작성)등록 화면 API입니다. 임시저장 api는 별도로 있음. step이랑 ingredient 몇개 들어오는지 각Count에 적어주세요")
     @ApiResponses({
             @ApiResponse(responseCode = "2000"),
@@ -58,14 +83,12 @@ RecipeRestController {
     })
     @PostMapping(value = "/members/recipes")
     public ResponseDto<RecipeResponseDto.RecipeStatusDto> createRecipe(
-            @RequestPart(value = "content") RecipeRequestDto.CreateRecipeDto request,
-            @RequestPart(value = "thumbnail") MultipartFile thumbnail,
-            @RequestPart(value = "stepImages") List<MultipartFile> stepImages,
+            @RequestBody RecipeRequestDto.SetRecipeWithImageUrlDto request,
             @CheckTempMember @AuthMember Member member) throws IOException {
 
         log.info("사용자가 준 정보 : {}", request.toString());
 
-        Recipe recipe = recipeService.create(request, thumbnail, stepImages, member);
+        Recipe recipe = recipeService.createWithImageUrl(request, member);
         return ResponseDto.of(RecipeConverter.toRecipeStatusDto(recipe));
     }
 
@@ -86,14 +109,12 @@ RecipeRestController {
     @PatchMapping(value = "/members/recipes/{recipeId}")
     public ResponseDto<RecipeResponseDto.RecipeStatusDto> updateRecipe(
             @PathVariable(name = "recipeId") Long recipeId,
-            @RequestPart(value = "content") RecipeRequestDto.UpdateRecipeDto request,
-            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
-            @RequestPart(value = "stepImages", required = false) List<MultipartFile> stepImages,
+            @RequestBody RecipeRequestDto.SetRecipeWithImageUrlDto request,
             @CheckTempMember @AuthMember Member member) throws IOException {
 
         log.info("사용자가 준 정보 : {}", request.toString());
 
-        Recipe recipe = recipeService.update(recipeId, request, thumbnail, stepImages, member);
+        Recipe recipe = recipeService.update(recipeId, request, member);
         return ResponseDto.of(RecipeConverter.toRecipeStatusDto(recipe));
     }
 
@@ -113,9 +134,7 @@ RecipeRestController {
     @PostMapping(value = {"/members/recipes/temp/{tempId}", "/members/recipes/temp"})
     public ResponseDto<RecipeResponseDto.TempRecipeStatusDto> createTempRecipe(
             @PathVariable(required = false) Long tempId,
-            @RequestPart(value = "content") RecipeRequestDto.TempRecipeDto request,
-            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
-            @RequestPart(value = "stepImages", required = false) List<MultipartFile> stepImages,
+            @RequestBody RecipeRequestDto.SetRecipeWithImageUrlDto request,
             @CheckTempMember @AuthMember Member member) throws IOException {
 
         log.info("사용자가 준 정보 : {}", request.toString());
@@ -123,9 +142,9 @@ RecipeRestController {
         TempRecipe tempRecipe;
 
         if (tempId==null)
-            tempRecipe = recipeService.tempCreate(request, thumbnail, stepImages, member);
+            tempRecipe = recipeService.tempCreate(request, member);
         else
-            tempRecipe = recipeService.tempUpdate(tempId, request, thumbnail, stepImages, member);
+            tempRecipe = recipeService.tempUpdate(tempId, request);
 
         return ResponseDto.of(RecipeConverter.toTempRecipeStatusDto(tempRecipe));
     }
@@ -455,7 +474,7 @@ RecipeRestController {
     })
     @GetMapping(value = "/members/recipes/categories/{categoryId}/count")
     public ResponseDto<Long> recipeListByCategoryCounting(@ExistRecipeCategory @PathVariable Long categoryId, @AuthMember Member member){
-        Long totalCount = recipeService.getrecipeListByCategoryCounting(categoryId, member);
+        Long totalCount = recipeService.getRecipeListByCategoryCounting(categoryId, member);
 
          return ResponseDto.of(totalCount);
     }
@@ -956,105 +975,4 @@ RecipeRestController {
         return ResponseDto.of(recipeService.getScrapRecipes(page, member));
     }
 
-    /**
-     * 부하 테스트용 컨트롤러
-     */
-    @Operation(summary = "레시피 등록 테스트 API 🔑 ✔")
-    @ApiResponses({
-            @ApiResponse(responseCode = "2000"),
-            @ApiResponse(responseCode = "4100", description = "레시피 작성시 누락된 내용이 있습니다. 미완료는 임시저장으로 가세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-    })
-//    @PostMapping(value = "/test/members/recipes")
-    public ResponseDto<RecipeResponseDto.RecipeStatusDto> testCreateRecipe(
-            @RequestPart(value = "content") RecipeRequestDto.CreateRecipeDto request,
-            @RequestPart(value = "thumbnail") MultipartFile thumbnail,
-            @RequestPart(value = "stepImages") List<MultipartFile> stepImages) throws IOException {
-
-        log.info("사용자가 준 정보 : {}", request.toString());
-
-        TestRecipe recipe = recipeService.testCreate(request, thumbnail, stepImages);
-        return ResponseDto.of(RecipeConverter.toTestRecipeStatusDto(recipe));
-    }
-
-    @Operation(summary = "레시피 등록 테스트-image url만 넘겨받기 API 🔑 ✔")
-    @ApiResponses({
-            @ApiResponse(responseCode = "2000"),
-            @ApiResponse(responseCode = "4100", description = "레시피 작성시 누락된 내용이 있습니다. 미완료는 임시저장으로 가세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-    })
-    @PostMapping(value = "/test/members/recipes")
-    public ResponseDto<RecipeResponseDto.RecipeStatusDto> testCreateRecipeWithImageURL(
-            @RequestBody RecipeRequestDto.CreateRecipeWithImageUrlDto request) throws IOException {
-
-        log.info("사용자가 준 정보 : {}", request.toString());
-
-        TestRecipe recipe = recipeService.testCreateWithImageUrl(request);
-        return ResponseDto.of(RecipeConverter.toTestRecipeStatusDto(recipe));
-    }
-
-    @Operation(summary = "레시피 상세 정보 조회 테스트 API 🔑 ✔")
-    @ApiResponses({
-            @ApiResponse(responseCode = "2000"),
-            @ApiResponse(responseCode = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-    })
-    @GetMapping(value = "/test/members/recipes/{recipeId}")
-    public ResponseDto<RecipeResponseDto.RecipeInfoDto> testRecipeDetail(@PathVariable(name = "recipeId") Long recipeId) {
-
-        TestRecipe recipe = recipeService.getTestRecipe(recipeId);
-
-        return ResponseDto.of(RecipeConverter.toTestRecipeInfoDto(recipe));
-    }
-
-    @Operation(summary = "카테고리 별 레시피 목록 조회 테스트 API 🔑 ✔")
-    @ApiResponses({
-            @ApiResponse(responseCode = "2000", description = "OK, 목록이 있을 땐 이 응답임"),
-            @ApiResponse(responseCode = "2100", description = "OK, 목록이 없을 경우, result = null", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4053", description = "BAD_REQUEST, 넘겨받은 categoryId와 일치하는 카테고리 없음. 1~6 사이로 보내세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4055", description = "BAD_REQUEST, 페이지 인덱스 범위 초과함", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4104", description = "BAD_REQUEST, 조회 방식 타입이 잘못되었습니다. likes, follow, lastest중 하나로 보내주세요.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "4105", description = "BAD_REQUEST, 해당 id를 가진 레시피 카테고리가 없습니다. 잘못 보내줬어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5000", description = "SERVER ERROR, 백앤드 개발자에게 알려주세요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-    })
-    @Parameters({
-            @Parameter(name = "pageIndex", description = "query string 페이지 번호, 무조건 값 줘야 함, 0 이런거 주면 에러 뱉음"),
-            @Parameter(name = "order", description = "query string 조회 방식. 인기순: likes, 팔로우순: follow, 최신순: latest로 넘겨주세요")
-    })
-    @GetMapping(value = "/test/members/recipes/categories/{categoryId}")
-    public ResponseDto<RecipeResponseDto.RecipePageListDto> testRecipeListByCategory(@ExistRecipeCategory @PathVariable Long categoryId, @CheckPage @RequestParam(name = "pageIndex") Integer pageIndex) {
-        if (pageIndex == null)
-            pageIndex = 1;
-
-        pageIndex -= 1;
-
-        Page<TestRecipe> recipes = recipeService.testRecipeListByCategory(categoryId, pageIndex, "latest");
-
-
-        log.info(recipes.toString());
-
-        if (recipes.getTotalElements() == 0)
-            throw new RecipeException(CommonStatus.RECIPE_NOT_FOUND);
-        if (pageIndex >= recipes.getTotalPages())
-            throw new RecipeException(CommonStatus.OVER_PAGE_INDEX_ERROR);
-
-        return ResponseDto.of(RecipeConverter.toPagingTestRecipeDtoList(recipes));
-    }
-
-    @Operation(summary = "테스트 레시피 삭제 API 🔑 ✔")
-    @ApiResponses({
-            @ApiResponse(responseCode = "2000", description = "OK, 삭제처리 되었습니다."),
-            @ApiResponse(responseCode = "4101", description = "BAD_REQUEST, 해당 recipeId를 가진 recipe가 없어요", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "5100", description = "SERVER ERROR, 레시피가 삭제되지 않았습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-    })
-
-    @DeleteMapping("/test/members/recipes")
-    public ResponseDto<String> deleteTestRecipe() {
-        Boolean recipeDeleteBoolean = recipeService.deleteTestRecipe();
-
-        if (recipeDeleteBoolean)
-            return ResponseDto.of(" 레시피 삭제 완료");
-        else
-            throw new RecipeException(CommonStatus.RECIPE_NOT_DELETED);
-    }
 }
